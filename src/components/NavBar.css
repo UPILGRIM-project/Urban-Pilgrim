@@ -61,17 +61,27 @@
   .nav-links {
     display: none;
     flex-direction: column;
-    background-color: #34495e;
+    background-color: #79534E;
     position: absolute;
     top: 60px;
     left: 0;
     right: 0;
     text-align: center;
     padding: 14px 0;
+  
+    
+    
+  }
+
+   .nav-links a {
+    color: #FFFFFF;
   }
 
   .nav-links.open {
     display: flex;
+    
+    
+    
   }
 
   .menu-icon {
