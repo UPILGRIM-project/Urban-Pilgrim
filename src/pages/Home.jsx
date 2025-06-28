@@ -1,10 +1,9 @@
 import React from "react";
-
+import homepage_img from "../assets/home_page_img.png";
 function Home() {
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Home</h1>
-      <p>Get in touch through our contact form.</p>
+    <div>
+     <img src={homepage_img} alt="Home img" />
     </div>
   );
 }

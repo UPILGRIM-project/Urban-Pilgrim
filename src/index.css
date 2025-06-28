@@ -8,10 +8,12 @@
 /* Set a global font and background color */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f4f4f4;
+  background-color: white;
   color: #333;
   line-height: 1.6;
+  font-family: 'Poppins', sans-serif;
 }
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
 /* Links default style */
 a {
