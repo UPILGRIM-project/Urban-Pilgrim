@@ -6,7 +6,7 @@
   padding: 8px 21px;
   color: white;
   position: relative;
-  height: 15vh;
+  height: 14vh;
   position: fixed;
   top: 0;                
   left: 0;
@@ -21,7 +21,8 @@
 }
 
 .navbar-brand img {
-  height: 90px;
+  padding-top: 10px;
+  height: 100px;
   width: auto; /* maintains aspect ratio */
   align-items: center;
   overflow: hidden;

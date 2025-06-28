@@ -1,0 +1,50 @@
+.hero-section {
+  position: relative;
+}
+
+.hero-section img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+.overlap-box {
+  position: absolute;
+  bottom: -40%;          /* overlaps downward */
+  left: 0;
+  width: 40%;            /* 40% of container width */
+  height: 50%;
+  background-color: #2F6288;
+  color: white;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* ✅ Responsive adjustments */
+@media (max-width: 1024px) {
+  .overlap-box {
+    width: 60%;
+    bottom: -35%;
+    padding: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .overlap-box {
+    width: 80%;
+    bottom: -30%;
+    height: auto;
+    padding: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .overlap-box {
+    width: 90%;
+    bottom: -25%;
+    left: 5%; /* add a little side margin for mobile */
+    height: auto;
+    padding: 12px;
+  }
+}
