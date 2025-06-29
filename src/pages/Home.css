@@ -19,7 +19,44 @@
   color: white;
   padding: 20px;
   box-sizing: border-box;
+  padding: 50px;
 }
+
+.overlap-box img{
+    
+    height: 200px;
+    width: auto;
+    display: block;
+    margin: 0 auto;
+    margin-bottom: 10px;
+}
+.overlap-box h3 {
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 100%;
+     overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.centered-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 90%;   /* or any limit you want */
+  margin: 0 auto;
+  text-align: center;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.overlap-box p {
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 100%;
+     overflow-wrap: break-word;
+    word-break: break-word;
+}
+
 
 /* ✅ Responsive adjustments */
 @media (max-width: 1024px) {
