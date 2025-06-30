@@ -18,7 +18,7 @@ function Home() {
               transition: { duration: 0.8 },
             }}
           >
-            <h2>A journey for the modern seeker</h2>
+            A journey for the modern seeker
           </motion.div>
 
           <motion.img
@@ -30,7 +30,7 @@ function Home() {
             }}
           />
 
-          <motion.p
+          <motion.p className="overlaypara"
             animate={{
               y: [200, 0],
               transition: { duration: 0.8 },
@@ -64,8 +64,18 @@ function Home() {
         </div>
       </motion.div>
 
-      <div className="content">
-        <h2>Explore, Heal, Transform</h2>
+
+
+
+
+
+
+
+
+
+
+      <div className="content2">
+        <h2>hello</h2>
       </div>
     </div>
   );
