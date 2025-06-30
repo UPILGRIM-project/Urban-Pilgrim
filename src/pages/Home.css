@@ -15,8 +15,8 @@
   bottom: 50px; /* overlaps downward */
   left: 0;
   width: 100%; /* 40% of container width */
-  height: 75%;
-  background-color: #ff000000;
+  height: auto;
+
   color: white;
   box-sizing: border-box;
   display: flex;
@@ -27,10 +27,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  max-width: 700px; /* or whatever max width you want for content */
+  /* or whatever max width you want for content */
   gap: 10px;
-  width: 60%;
-  height: auto;
+  width: 30%;
+  height: 80%;
   background-color: #2f6288;
   position: relative;
   top: 0;
@@ -38,6 +38,7 @@
   margin: 0;
   z-index: 2;
   padding: 50px 70px 10px 70px;
+  overflow: hidden;
 }
 .overlap-box img {
   height: auto;
@@ -45,9 +46,8 @@
   display: block;
   margin: 0 auto;
   border-radius: 18px;
-  
 }
- .textbox1 {
+.textbox1 {
   width: 400px;
   height: 90px;
   font-size: 30px;
@@ -58,11 +58,11 @@
   position: relative;
   left: 20px;
   font-family: sans-serif;
-
 }
 
 .centered-box {
   display: flex;
+  position: relative;
   justify-content: center;
   align-items: center;
   max-width: 90%; /* or any limit you want */
@@ -83,9 +83,8 @@
   height: 135px;
   font-weight: 500;
   line-height: normal;
-  color: #C8CDD8;
+  color: #c8cdd8;
 }
-
 
 .section {
   padding: 50px;
@@ -93,16 +92,23 @@
 }
 .rightbox {
   position: relative;
+  width: 70%;
+  height: 100%;
+  top: 39px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column; /* if you want items stacked vertically */
+  /* or any height you need */
   overflow: hidden;
-  width: 100%;
-
+  background-color: #f9f3ef;
 }
 
 .divheading {
   display: flex;
   justify-content: center;
   align-items: center;
-  position: absolute;
+  position: relative;
   margin-top: 50px;
   left: 0;
   width: auto;
@@ -110,52 +116,74 @@
   color: #c4b0ae;
   font-size: 60px;
   z-index: 2;
+  white-space: nowrap;
 }
 
 .about-container {
-  margin-top: 150px;
   height: auto;
   width: 400px;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
   color: black;
   z-index: 1;
   padding: 20px;
   display: flex;
   flex-direction: column;
-  
-  
 }
-.about-heading{
-  position:relative;
+.about-heading {
+  position: relative;
   top: 0;
   left: 0;
   margin-bottom: 10px;
 }
 
-.aboutme-text{
-  position:relative;
+.aboutme-text {
+  position: relative;
   left: 0;
   margin-bottom: 100px;
+  flex-shrink: 0;
 }
 
 .content2 {
   height: 100%;
   width: 100%;
-}
-.content2 h2 {
+  margin-top: 0px;
   display: flex;
-  width: 100%;
-  height: 600px;
-  background-color: rgb(16, 194, 152);
+}
+.position {
+  width: 30%;
+  
+}
+.position img {
+  display: flex;
+  height: 300px;
+  width: 300px;
+  justify-content: space-around;
+  opacity: 0.1;
+  
+
+}
+.golden_mandala{
+  display: flex;
+  align-items: center;
   justify-content: center;
-  align-items: flex-start;
-  gap: 59px;
-  flex-shrink: 0;
+  z-index: -999;
 }
 
-
-
-
-
+.position-content {
+  display: flex;
+  flex-direction: column;
+  width: 70%;
+  background-color: #f9f3ef;
+}
+.demo{
+  background-color: aquamarine;
+}
+.cardwrapper {
+  height: 90%;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background-color: aqua;
+  gap: 20px;
+  padding: 10px;
+  scroll-behavior: smooth;/
+}
