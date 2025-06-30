@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import "./NavBar.css";
 import logo from "../assets/urban_pilgrim_logo.png";
 
+
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -12,7 +13,9 @@ const NavBar = () => {
 
   return (
     <nav className="navbar">
-      <div className="navbar-brand"> <img src={logo} alt="Urban Pilgrim" /> </div>
+      <div className="navbar-brand">
+        <img src={logo} alt="Urban Pilgrim" />
+      </div>
 
       <div className={`nav-links ${isOpen ? "open" : ""}`}>
         <Link to="/" onClick={() => setIsOpen(false)}>Home</Link>
@@ -24,8 +27,10 @@ const NavBar = () => {
       </div>
 
       <div className="menu-icon" onClick={toggleMenu}>
-        &#9776;
+        {isOpen ? '✖' : '☰'}
       </div>
+
+      
     </nav>
   );
 };

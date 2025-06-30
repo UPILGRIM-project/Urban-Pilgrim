@@ -1,5 +1,6 @@
 .hero-section {
   position: relative;
+  box-sizing: border-box;
 }
 
 .hero-section img {
@@ -10,16 +11,138 @@
 }
 
 .overlap-box {
-  position: absolute;
-  bottom: -40%;          /* overlaps downward */
+  position: relative;
+  bottom: 50px; /* overlaps downward */
   left: 0;
-  width: 40%;            /* 40% of container width */
-  height: 50%;
-  background-color: #2F6288;
+  width: 100%; /* 40% of container width */
+  height: 75%;
+  background-color: #ff000000;
   color: white;
-  padding: 20px;
   box-sizing: border-box;
+  display: flex;
+  z-index: 0;
 }
+.overlap-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 700px; /* or whatever max width you want for content */
+  gap: 20px;
+  width: 40%;
+  background-color: #2f6288;
+  position: relative;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 30px;
+  z-index: 2;
+}
+.overlap-box img {
+  height: 200px;
+  width: 100%;
+  display: block;
+  margin: 0 auto;
+  margin-bottom: 10px;
+  border-radius: 18px;
+}
+.overlap-container textbox1 {
+  font-size: 60px;
+  font-weight: 700;
+  line-height: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.centered-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 90%; /* or any limit you want */
+  margin: 0 auto;
+  text-align: center;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.overlap-box p {
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.content {
+  height: 100%;
+  width: 60%;
+}
+.content h2 {
+  display: flex;
+  width: 50%;
+  height: 600px;
+  background-color: rgb(16, 194, 152);
+  justify-content: center;
+  align-items: flex-start;
+  gap: 59px;
+  flex-shrink: 0;
+}
+
+.section {
+  padding: 50px;
+  background: #867832;
+}
+.rightbox {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+
+}
+
+.divheading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  margin-top: 50px;
+  left: 0;
+  width: auto;
+  height: 100px;
+  color: #c4b0ae;
+  font-size: 60px;
+  
+  
+  z-index: 2;
+}
+
+.about-container {
+  margin-top: 150px;
+  height: auto;
+  width: 400px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  color: black;
+  z-index: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  
+  
+}
+.about-heading{
+  position:relative;
+  top: 0;
+  left: 0;
+  margin-bottom: 10px;
+}
+
+.aboutme-text{
+  position:relative;
+  left: 0;
+  margin-bottom: 100px;
+}
+
+
 
 /* ✅ Responsive adjustments */
 @media (max-width: 1024px) {
