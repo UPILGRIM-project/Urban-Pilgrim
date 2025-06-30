@@ -1,0 +1,79 @@
+.parrent {
+  flex: 0 0 auto; 
+  position: relative;
+  height: auto;
+  max-width: 250px;
+  border-radius: 12px;
+  overflow: hidden;
+  display: inline-block;
+  margin: 10px;
+  
+}
+.datacontainer {
+  position: absolute;
+  bottom: 10%;
+  left: 10%;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  
+  border-bottom-left-radius: 12px;
+  transition: all 0.4s ease-in-out;
+  white-space: nowrap; 
+  width: max-content;
+}
+
+
+
+.imgdiv{
+    overflow: hidden;
+    border-radius: 12px;
+}
+.image{
+    position: relative;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 12px;
+}
+.circlewitharrow {
+  position: relative;
+  display: inline-block;
+  height: 25px;
+  width: 25px;
+  display: inline-block;
+  opacity: 0.2;
+  
+}
+
+.parrent:hover .circlewitharrow {
+  display: flex;
+  transform: scale(1);
+  opacity: 1;
+
+ 
+}
+
+.circle {
+  width: 25px;
+  height: 25px;
+  background-color: #ffffff;
+  color: rgb(30, 29, 29);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 40px;
+  cursor: pointer;
+  padding: 10px;
+  
+}
+
+.imgcontent {
+  position: relative;
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+}
