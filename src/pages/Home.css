@@ -109,8 +109,6 @@
   height: 100px;
   color: #c4b0ae;
   font-size: 60px;
-  
-  
   z-index: 2;
 }
 
@@ -160,30 +158,4 @@
 
 
 
-/* ✅ Responsive adjustments */
-@media (max-width: 1024px) {
-  .overlap-box {
-    width: 60%;
-    bottom: -35%;
-    padding: 16px;
-  }
-}
 
-@media (max-width: 768px) {
-  .overlap-box {
-    width: 80%;
-    bottom: -30%;
-    height: auto;
-    padding: 14px;
-  }
-}
-
-@media (max-width: 480px) {
-  .overlap-box {
-    width: 90%;
-    bottom: -25%;
-    left: 5%; /* add a little side margin for mobile */
-    height: auto;
-    padding: 12px;
-  }
-}
