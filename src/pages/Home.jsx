@@ -40,7 +40,7 @@ function Home() {
             className="textbox1"
             initial={{ x: -200, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
             viewport={{ once: true }} // remove if you want it every time on scroll
           >
             A journey for the modern seeker
@@ -51,7 +51,7 @@ function Home() {
             alt="failed to load"
             initial={{ y: 200, opacity: 0 }}
       whileInView={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
       viewport={{ once: true }} // remove if you want it every time on scroly
           />
 
@@ -71,7 +71,7 @@ function Home() {
           <motion.div className="flow"
           initial={{ x: 700, opacity: 0 }}
       whileInView={{ x: 0, opacity: 1 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
       viewport={{ once: true }}
           >
              <motion.div
@@ -124,7 +124,7 @@ function Home() {
           className="c4top"
           initial={{ x: -200, opacity: 0 }}
           whileInView={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
           viewport={{ once: true }} // remove if you want it every time on scroll
         >
           <div className="c4title">
@@ -167,7 +167,7 @@ function Home() {
           className="c5top"
           initial={{ x: -200, opacity: 0 }}
           whileInView={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
           viewport={{ once: true }}
         >
           <div className="c5title">
@@ -223,7 +223,7 @@ function Home() {
             className="c6top"
             initial={{ x: -200, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
             viewport={{ once: true }} // remove if you want it every time on scroll
           >
             <div className="c6title">
