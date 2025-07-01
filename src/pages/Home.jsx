@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState,useEffect } from "react";
 import homepage_img from "../assets/home_page_img.png";
 import homepage_overlay_img from "../assets/overlay_img.png";
 import golden_mandala from "../assets/golden-mandala.png";
@@ -6,10 +6,30 @@ import "./Home.css";
 import Card from "../components/card.jsx";
 import cardimg1 from "../assets/card-img1.png";
 import cardimg2 from "../assets/onlinesession.png";
+import yogaday from "../assets/yogaday-img.png";
+import Footer from "../components/footer";
+import Appleimg from "../assets/appleimg.png";
+import yogapeople from "../assets/yogapeople.png";
+import Meditation from "../assets/meditationimg.jpg";
+import arati_prasad from "../assets/arati_prasad.png";
+import rohini_singh from "../assets/Rohini_singh.png";
+import Manish_kumar from "../assets/manish_kumar.png";
+import Anisha from "../assets/Anisha.png";
+import PersondetailsCard from "../components/persondetails_card";
 
 import { easeIn, motion } from "framer-motion";
 
 function Home() {
+  const wrapperRef = useRef(null);
+  const [lineHeight, setLineHeight] = useState(0);
+
+  const handleScroll = () => {
+    const el = wrapperRef.current;
+    const scrollRatio = el.scrollLeft / (el.scrollWidth - el.clientWidth);
+    setLineHeight(scrollRatio * 300); // adjust 300 to desired max height
+  };
+
+
   return (
     <div className="hero-section">
       <img src={homepage_img} alt="Banner" />
@@ -18,10 +38,10 @@ function Home() {
         <div className="overlap-container">
           <motion.div
             className="textbox1"
-            animate={{
-              x: [-200, 0],
-              transition: { duration: 0.8 },
-            }}
+            initial={{ x: -200, opacity: 0 }}
+            whileInView={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            viewport={{ once: true }} // remove if you want it every time on scroll
           >
             A journey for the modern seeker
           </motion.div>
@@ -29,17 +49,17 @@ function Home() {
           <motion.img
             src={homepage_overlay_img}
             alt="failed to load"
-            animate={{
-              y: [200, 0],
-              transition: { duration: 0.8 },
-            }}
+            initial={{ y: 200, opacity: 0 }}
+      whileInView={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      viewport={{ once: true }} // remove if you want it every time on scroly
           />
 
           <motion.p
             className="overlaypara"
             animate={{
               y: [200, 0],
-              transition: { duration: 0.8 },
+              transition: { duration: 0.5 },
             }}
           >
             We live in a world that celebrates hustle—but forgets healing. Every
@@ -48,9 +68,15 @@ function Home() {
           </motion.p>
         </div>
         <div className="rightbox">
-          <motion.div
+          <motion.div className="flow"
+          initial={{ x: 700, opacity: 0 }}
+      whileInView={{ x: 0, opacity: 1 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      viewport={{ once: true }}
+          >
+             <motion.div
             className="divheading"
-            initial={{ x: 1000 }}
+            initial={{ x: 0 }}
             animate={{ x: -700 }}
             transition={{ repeat: Infinity, duration: 10, ease: "linear" }}
           >
@@ -69,6 +95,8 @@ function Home() {
               <strong>guided path to holistic well-being.</strong>
             </div>
           </div>
+          </motion.div>
+         
         </div>
       </motion.div>
       <div className="content2">
@@ -83,16 +111,152 @@ function Home() {
           </div>
         </motion.div>
         <div className="position-content">
-          <div className="cardwrapper">
-            <Card image={cardimg1} content={"Curated experiences"}/>
-            <Card image={cardimg2} content={"Online sessions"}/>
+          <div
+            className="cardwrapper"
+            ref={wrapperRef}
+            onScroll={handleScroll}
+          ></div>
+        </div>
+      </div>
+
+      <div className="content4">
+        <motion.div
+          className="c4top"
+          initial={{ x: -200, opacity: 0 }}
+          whileInView={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          viewport={{ once: true }} // remove if you want it every time on scroll
+        >
+          <div className="c4title">
+            <strong>Book your Pilgrim Experience</strong>
+          </div>
+          <div className="c4description">
+            Step into a transformative journey with our curated Pilgrim
+            Experiences—designed to help you reconnect with your mind, body, and
+            spirit. These impactful retreats blend Indian wellness traditions
+            like yoga, meditation, and Ayurveda with modern practices, offering
+            rejuvenation through nature immersions, culinary explorations, and
+            spiritual experiences rooted in India’s rich heritage.
+          </div>
+        </motion.div>
+        <div className="c4bottom">
+          <div className="c4left">
+            <div className="carddiv">
+              <PersondetailsCard
+                className="details"
+                image={Appleimg}
+                title={"Reboot & Rejuvenate on the Ganges (4 day retreat)"}
+                price={"Rs.56,997.00"}
+              />
+            </div>
+          </div>
+          <div className="c4right">
+            <div className="carddiv">
+              <PersondetailsCard
+                className="details"
+                image={yogapeople}
+                title={"Reboot & Rejuvenate on the Ganges (4 day retreat)"}
+                price={"Rs.56,997.00"}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="content5">
+        <motion.div
+          className="c5top"
+          initial={{ x: -200, opacity: 0 }}
+          whileInView={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          viewport={{ once: true }}
+        >
+          <div className="c5title">
+            <strong>Find your Pilgrim Session</strong>
+          </div>
+          <div className="c5description">
+            Find clarity, balance, and strength with Pilgrim Sessions—guided
+            group experiences led by trusted Urban Pilgrim experts. Whether it’s
+            yoga, meditation, stress relief, nutrition, or spiritual rituals,
+            our handpicked guides offer sessions rooted in Indian wisdom and
+            tailored for modern living. Each one is a step toward holistic
+            well-being—accessible, enriching, and made for you.
+          </div>
+        </motion.div>
+        <div className="c5bottom">
+          <div className="details">
+            <PersondetailsCard
+              className="details"
+              image={rohini_singh}
+              title={
+                "Discover your true self - A 28 day program with Rohini Singh Sisodia"
+              }
+              price={"Rs.14,999.00"}
+            />
+          </div>
+          <div className="details">
+            <PersondetailsCard
+              className="details"
+              image={Anisha}
+              title={"Let's meditate for an hour - With Anisha"}
+              price={"Rs.199.00"}
+            />
+          </div>
+          <div className="details">
+            <PersondetailsCard
+              className="details"
+              image={arati_prasad}
+              title={
+                "Menopausal fitness - A 4 day regime curated by Aarti Prasad"
+              }
+              price={"Rs.4,000.00"}
+            />
           </div>
         </div>
       </div>
 
-      <div className="demo">
-        <h2>hehehe</h2>
+      <div className="content6">
+        <div className="meditateimg">
+          <img src={Meditation} alt="error" />
+        </div>
+        <div className="imgover-content">
+          <motion.div
+            className="c6top"
+            initial={{ x: -200, opacity: 0 }}
+            whileInView={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            viewport={{ once: true }} // remove if you want it every time on scroll
+          >
+            <div className="c6title">
+              <strong>Find your Guides</strong>
+            </div>
+            <div className="c6description" style={{ color: "#4F4F4F" }}>
+              Begin your wellness journey with trusted guides rooted in Indian
+              traditions and modern well-being. Discover, connect, and book
+              sessions with experts who truly align with your path.
+            </div>
+          </motion.div>
+          <div className="c6bottom">
+            <div className="details">
+              <PersondetailsCard
+                className="details"
+                image={yogaday}
+                title={"Yoga hour - by Manjunath"}
+                price={"Rs.1000.00"}
+              />
+            </div>
+            <div className="details">
+              <PersondetailsCard
+                className="details"
+                image={Manish_kumar}
+                title={"Yoga hour - by Manish Kumar (Bihar School of Yoga)"}
+                price={"Rs.800.00"}
+              />
+            </div>
+          </div>
+        </div>
       </div>
+
+      <Footer />
     </div>
   );
 }
