@@ -6,10 +6,13 @@
   background-color: transparent;
   box-shadow: -25px 25px 25.7px 0px rgba(16, 15, 15, 0.35);
   overflow: hidden;
+  max-height: auto;
+  width: auto;            /* let width be driven by image */
+  max-width: 100%;  
 }
 .imgdiv {
   height: auto;
-  width: 100%;
+  width: auto;
 }
 .data-container {
   position: absolute;
@@ -32,6 +35,8 @@
     position: absolute;
     left: 5%;
     top: 8%;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
 }
 .pricediv {
   position: absolute;

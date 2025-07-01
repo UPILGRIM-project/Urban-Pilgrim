@@ -9,7 +9,7 @@
 /* Set a global font and background color */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: white;
+
   color: #333;
   line-height: 1.6;
   font-family: 'Poppins', sans-serif;
@@ -36,9 +36,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Paragraph spacing */
-p {
-  margin-bottom: 12px;
-}
+
 
 /* Button basic styling (optional utility) */
 button {
