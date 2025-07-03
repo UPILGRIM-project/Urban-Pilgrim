@@ -1,4 +1,4 @@
-import React, { useRef, useState,useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import homepage_img from "../assets/home_page_img.png";
 import homepage_overlay_img from "../assets/overlay_img.png";
 import golden_mandala from "../assets/golden-mandala.png";
@@ -8,12 +8,18 @@ import cardimg1 from "../assets/card-img1.png";
 import cardimg2 from "../assets/onlinesession.png";
 import yogaday from "../assets/yogaday-img.png";
 import Footer from "../components/footer";
+import C3_container_data from "../components/c3_container_data.jsx";
 import Appleimg from "../assets/appleimg.png";
 import yogapeople from "../assets/yogapeople.png";
 import Meditation from "../assets/meditationimg.jpg";
 import arati_prasad from "../assets/arati_prasad.png";
 import rohini_singh from "../assets/Rohini_singh.png";
 import Manish_kumar from "../assets/manish_kumar.png";
+import lotus_icon from "../assets/lotos_icon.svg";
+import verification_icon from "../assets/verification_icon.svg";
+import security_icon from "../assets/security_icon.svg";
+import writting_icon from "../assets/writting_icon.svg";
+import people_runnimg from "../assets/people_running.svg";
 import Anisha from "../assets/Anisha.png";
 import PersondetailsCard from "../components/persondetails_card";
 
@@ -28,7 +34,6 @@ function Home() {
     const scrollRatio = el.scrollLeft / (el.scrollWidth - el.clientWidth);
     setLineHeight(scrollRatio * 300); // adjust 300 to desired max height
   };
-
 
   return (
     <div className="hero-section">
@@ -50,9 +55,9 @@ function Home() {
             src={homepage_overlay_img}
             alt="failed to load"
             initial={{ y: 200, opacity: 0 }}
-      whileInView={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      viewport={{ once: true }} // remove if you want it every time on scroly
+            whileInView={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            viewport={{ once: true }} // remove if you want it every time on scroly
           />
 
           <motion.p
@@ -68,35 +73,35 @@ function Home() {
           </motion.p>
         </div>
         <div className="rightbox">
-          <motion.div className="flow"
-          initial={{ x: 700, opacity: 0 }}
-      whileInView={{ x: 0, opacity: 1 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      viewport={{ once: true }}
+          <motion.div
+            className="flow"
+            initial={{ x: 700, opacity: 0 }}
+            whileInView={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            viewport={{ once: true }}
           >
-             <motion.div
-            className="divheading"
-            initial={{ x: 0 }}
-            animate={{ x: -700 }}
-            transition={{ repeat: Infinity, duration: 10, ease: "linear" }}
-          >
-            Explore, Heal, Transform
-          </motion.div>
+            <motion.div
+              className="divheading"
+              initial={{ x: 0 }}
+              animate={{ x: -700 }}
+              transition={{ repeat: Infinity, duration: 10, ease: "linear" }}
+            >
+              Explore, Heal, Transform
+            </motion.div>
 
-          <div className="about-container">
-            <div className="about-heading">
-              It asks: <strong>What about me ?</strong>
+            <div className="about-container">
+              <div className="about-heading">
+                It asks: <strong>What about me ?</strong>
+              </div>
+              <div className="aboutme-text">
+                <strong> Urban Pilgrim</strong> is a sanctuary built for that
+                voice. A platform where you don’t just find wellness—you find
+                yourself.<br></br>Rooted in India’s timeless wisdom and designed
+                for today’s overstimulated lives, we offer you a{" "}
+                <strong>guided path to holistic well-being.</strong>
+              </div>
             </div>
-            <div className="aboutme-text">
-              <strong> Urban Pilgrim</strong> is a sanctuary built for that
-              voice. A platform where you don’t just find wellness—you find
-              yourself.<br></br>Rooted in India’s timeless wisdom and designed
-              for today’s overstimulated lives, we offer you a{" "}
-              <strong>guided path to holistic well-being.</strong>
-            </div>
-          </div>
           </motion.div>
-         
         </div>
       </motion.div>
       <div className="content2">
@@ -116,6 +121,54 @@ function Home() {
             ref={wrapperRef}
             onScroll={handleScroll}
           ></div>
+        </div>
+      </div>
+
+        <div className="content3">
+        <motion.div className="c3img"
+         initial={{ x: -500, opacity: 0 }}
+          whileInView={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          viewport={{ once: true }}
+        >
+          <img src={people_runnimg} alt="" />
+        </motion.div>
+        <div className="c3text_container">
+          <motion.div id="datacontainer"
+            initial={{ x: 500, opacity: 0 }}
+          whileInView={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          viewport={{ once: true }}
+          >
+            <div>
+              <C3_container_data
+                img={lotus_icon}
+                heading={"Rooted in Indian Wisdom"}
+                content={"Authentic, not commercialized wellness."}
+              />
+            </div>
+             <div>
+              <C3_container_data
+                img={verification_icon}
+                heading={"Expert-verified Programs"}
+                content={"Only qualified, experienced professionals make it to our platform."}
+              />
+            </div>
+             <div>
+              <C3_container_data
+                img={security_icon}
+                heading={"Trusted, Global Community"}
+                content={"Your wellness, globally curated and locally rooted."}
+              />
+            </div>
+             <div>
+              <C3_container_data
+                img={writting_icon}
+                heading={"Transparent Listings & Reviews"}
+                content={"Read real reviews. Choose what resonates. No surprises."}
+              />
+            </div>
+          </motion.div>
         </div>
       </div>
 
@@ -255,6 +308,8 @@ function Home() {
           </div>
         </div>
       </div>
+
+    
 
       <Footer />
     </div>

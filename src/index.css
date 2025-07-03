@@ -43,8 +43,4 @@ button {
   cursor: pointer;
 }
 
-/* Responsive image */
-img {
-  max-width: 100%;
-  height: auto;
-}
+
