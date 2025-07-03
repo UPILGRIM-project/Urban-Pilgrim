@@ -7,11 +7,19 @@
   padding: 0;
 }
 
-.hero-section img {
+.topbannerimg {
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
+
+.hero-section img{
+  object-fit: contain;
+  height: 100%;
+  width: 100%;
+ 
+}
+
 
 .overlap-box {
   position: relative;
@@ -37,7 +45,7 @@
   background-color: #2f6288;
   position: relative;
   z-index: 2;
-  padding: 50px 70px 10px 30px;
+  padding: 50px 70px 50px 30px;
   overflow: hidden;
 
 }
@@ -228,7 +236,7 @@
 
 }
 
-#datacontainer{
+.datacontainer{
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -338,8 +346,28 @@
   flex-direction: column;
   position: relative;
   background-color: #c0b3b424;
+  max-height: fit-content;
+  position: relative;
 }
+.meditateimg{
+  position: relative;
+  height: 100%;
+  width: 100%;
 
+}
+.meditateimg::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(
+     rgba(255, 255, 255, 0.545),
+    rgba(255, 255, 255, 0.415)
+  );
+  pointer-events: none;
+}
 .imgover-content{
 
   display: flex;
@@ -368,14 +396,83 @@
   padding-left: 40px;
   
 }
-.details{
+.c6details{
   flex: 1 1 calc(25% - 20px); /* 4 cards per row, accounting for gap */
   max-width: 300px;           /* optional: max limit */
   min-width: 200px;           /* optional: min limit */
- 
+  font-size: 20px;
   padding: 20px;
   box-sizing: border-box;
   
   text-align: center;
 }
 
+.content8{
+  height: 80%;
+  width: 100%;
+ 
+}
+
+
+
+.content7 {
+
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  box-sizing: border-box;
+ 
+  background-color: #c0b3b424;
+  
+}
+
+.c7top {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  color: black;
+  box-sizing: border-box;
+  padding: 20px 20px 0 40px;
+}
+
+.c7bottom {
+  display: flex;
+  width: 100%;
+  height: fit-content;
+  justify-content: space-between;
+  align-items: center;
+  
+  box-sizing: border-box;
+  gap: 50px;
+}
+
+.c7left{
+  width: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  margin-left: 30px;
+  
+}
+.c7right{
+  
+  width: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  
+
+}
+
+.carddiv {
+  width: 70%;
+  height: 70%;
+  
+}

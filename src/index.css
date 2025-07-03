@@ -24,11 +24,7 @@ a {
 }
 
 /* Container utility class (optional) */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-}
+
 
 /* Heading spacing */
 h1, h2, h3, h4, h5, h6 {

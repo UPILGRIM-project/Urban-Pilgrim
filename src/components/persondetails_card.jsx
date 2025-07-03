@@ -21,9 +21,9 @@ function persondetails_card({ image, title, price }) {
       >
         <img src={image} alt="error" />
       </motion.div>
-      <div className="data-container">
-        <div className="data-details">
-          <div className="title">
+      <div className="data_container">
+        <div className="data_details">
+          <div className="ptitle">
             <strong>{title}</strong>
           </div>
           <div className="pricediv">

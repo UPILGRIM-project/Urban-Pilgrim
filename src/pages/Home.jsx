@@ -3,7 +3,7 @@ import homepage_img from "../assets/home_page_img.png";
 import homepage_overlay_img from "../assets/overlay_img.png";
 import golden_mandala from "../assets/golden-mandala.png";
 import "./Home.css";
-import Card from "../components/card.jsx";
+
 import cardimg1 from "../assets/card-img1.png";
 import cardimg2 from "../assets/onlinesession.png";
 import yogaday from "../assets/yogaday-img.png";
@@ -22,7 +22,8 @@ import writting_icon from "../assets/writting_icon.svg";
 import people_runnimg from "../assets/people_running.svg";
 import Anisha from "../assets/Anisha.png";
 import PersondetailsCard from "../components/persondetails_card";
-
+import C8_container_data from "../components/c8_container_data.jsx";
+import house from "../assets/house_img.png";
 import { easeIn, motion } from "framer-motion";
 
 function Home() {
@@ -37,7 +38,7 @@ function Home() {
 
   return (
     <div className="hero-section">
-      <img src={homepage_img} alt="Banner" />
+      <img className="topbannerimg" src={homepage_img} alt="Banner" />
 
       <motion.div className="overlap-box">
         <div className="overlap-container">
@@ -134,7 +135,7 @@ function Home() {
           <img src={people_runnimg} alt="" />
         </motion.div>
         <div className="c3text_container">
-          <motion.div id="datacontainer"
+          <motion.div className="datacontainer"
             initial={{ x: 500, opacity: 0 }}
           whileInView={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
@@ -289,17 +290,17 @@ function Home() {
             </div>
           </motion.div>
           <div className="c6bottom">
-            <div className="details">
+            <div className="c6details">
               <PersondetailsCard
-                className="details"
+                className="c6details"
                 image={yogaday}
                 title={"Yoga hour - by Manjunath"}
                 price={"Rs.1000.00"}
               />
             </div>
-            <div className="details">
+            <div className="c6details">
               <PersondetailsCard
-                className="details"
+                className="c6details"
                 image={Manish_kumar}
                 title={"Yoga hour - by Manish Kumar (Bihar School of Yoga)"}
                 price={"Rs.800.00"}
@@ -309,8 +310,49 @@ function Home() {
         </div>
       </div>
 
-    
+      <div className="content7">
+        <motion.div
+          className="c7top"
+          initial={{ x: -200, opacity: 0 }}
+          whileInView={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          viewport={{ once: true }} // remove if you want it every time on scroll
+        >
+          <div className="c7title">
+            <strong>Find your wellness program</strong>
+          </div>
+          <div className="c7description">
+           Discover transformative wellness retreats from around the world, curated in one place. From yoga and meditation to fitness and spiritual growth—all inspired by Indian wisdom—Urban Pilgrim helps you explore, compare, and book programs that align with your wellness goals. Trusted listings and favourable terms make your journey to rejuvenation easy and accessible.
+          </div>
+        </motion.div>
+        <div className="c7bottom">
+          <div className="c7left">
+            <div className="carddiv">
+              <PersondetailsCard
+                className="details"
+                image={house}
+                title={"Reboot & Rejuvenate on the Ganges (4 day retreat)"}
+                price={"Rs.50,000.00"}
+              />
+            </div>
+          </div>
+          <div className="c7right">
+            <div className="carddiv">
+              <PersondetailsCard
+                className="details"
+                image={yogapeople}
+                title={"Reboot & Rejuvenate on the Ganges (4 day retreat)"}
+                price={"Rs.56,997.00"}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="content8">
+        <C8_container_data/>
+      </div>
 
+    
       <Footer />
     </div>
   );

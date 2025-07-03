@@ -9,12 +9,13 @@
   max-height: auto;
   width: auto;            /* let width be driven by image */
   max-width: 100%;  
+  
 }
 .imgdiv {
   height: auto;
   width: auto;
 }
-.data-container {
+.data_container {
   position: absolute;
   bottom: 0;
   right: 0;
@@ -24,19 +25,21 @@
   width: 90%;
   gap: 20px;
 }
-.data-details{
+.data_details{
     height: 100%;
     width: 100%;
     position: absolute;
     display: flex;
     flex-direction: column;
+    line-height: 100%;
+    
 }
-.title{
+.ptitle{
     position: absolute;
     left: 5%;
-    top: 8%;
+    top: 10%;
     font-family: 'Poppins', sans-serif;
-    font-size: 13px;
+    font-size: 15px;
 }
 .pricediv {
   position: absolute;

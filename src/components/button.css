@@ -1,0 +1,27 @@
+.btn_parent {
+  background-color: #C5703F;
+  display: inline-flex;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  border-radius: 15px;
+  padding: 12px 28px;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn_parent:hover {
+  background-color: #a85628;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+}
+
+.btn_name {
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  user-select: none;
+}
