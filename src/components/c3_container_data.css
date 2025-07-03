@@ -1,0 +1,29 @@
+#parent{
+    max-height: 20%;
+    max-width: auto;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 30px;
+    padding: 10px 10px 10px 10px;
+
+}
+#parent img{
+    max-height: 50px;
+    max-width: 40px;
+}
+#text{
+   display: flex;
+   flex-direction: column;
+
+   flex-wrap: nowrap;
+   color: white;
+   
+}
+#content{
+    font-size: 13px;
+    line-height: 100%;
+    
+}
+
+
