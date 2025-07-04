@@ -4,6 +4,9 @@ import homepage_overlay_img from "../assets/overlay_img.png";
 import golden_mandala from "../assets/golden-mandala.png";
 import "./Home.css";
 
+import { useInView } from "react-intersection-observer";
+
+
 import cardimg1 from "../assets/card-img1.png";
 import cardimg2 from "../assets/onlinesession.png";
 import cardimg3 from "../assets/Wellness_Programs.svg";
@@ -73,6 +76,19 @@ function Home() {
     setLineHeight(scrollRatio * 300);
   };
 
+  const c3Controls = useAnimation();
+const [c3Ref, c3InView] = useInView({
+  threshold: 0.3, // Adjust sensitivity if needed
+  triggerOnce: true, // fire only once
+});
+
+useEffect(() => {
+  if (c3InView) {
+    c3Controls.start({ x: 0, opacity: 1 });
+  }
+}, [c3InView, c3Controls]);
+
+
   return (
     <div className="hero-section">
       <img className="topbannerimg" src={homepage_img} alt="Banner" />
@@ -83,7 +99,7 @@ function Home() {
             className="textbox1"
             initial={{ x: -200, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            transition={{ duration: 1, ease: "easeOut" }}
             viewport={{ once: true }} // remove if you want it every time on scroll
           >
             A journey for the modern seeker
@@ -94,7 +110,7 @@ function Home() {
             alt="failed to load"
             initial={{ y: 200, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            transition={{ duration: 1, ease: "easeOut" }}
             viewport={{ once: true }} // remove if you want it every time on scroly
           />
 
@@ -102,7 +118,7 @@ function Home() {
             className="overlaypara"
             animate={{
               y: [200, 0],
-              transition: { duration: 0.5 },
+              transition: { duration: 1 },
             }}
           >
             We live in a world that celebrates hustle—but forgets healing. Every
@@ -115,7 +131,7 @@ function Home() {
             className="flow"
             initial={{ x: 700, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            transition={{ duration: 1, ease: "easeOut" }}
             viewport={{ once: true }}
           >
             <motion.div
@@ -152,7 +168,6 @@ function Home() {
               alt="noimg"
             />
           </div>
-         
         </motion.div>
         <div className="c2right">
           <motion.div
@@ -199,65 +214,73 @@ function Home() {
         </div>
       </div>
 
+     
       <div className="content3">
-        <motion.div
-          className="c3img"
-          initial={{ x: -500, opacity: 0 }}
-          whileInView={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          viewport={{ once: true }}
-        >
-          <img src={people_runnimg} alt="" />
-        </motion.div>
-        <div className="c3text_container">
+        <div className="c3container">
           <motion.div
-            className="datacontainer"
-            initial={{ x: 500, opacity: 0 }}
+            className="c3img"
+            initial={{ x: -500, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            transition={{ duration: 1, ease: "easeOut" }}
             viewport={{ once: true }}
           >
-            <div>
-              <C3_container_data
-                img={lotus_icon}
-                heading={"Rooted in Indian Wisdom"}
-                content={"Authentic, not commercialized wellness."}
-              />
-            </div>
-            <div>
-              <C3_container_data
-                img={verification_icon}
-                heading={"Expert-verified Programs"}
-                content={
-                  "Only qualified, experienced professionals make it to our platform."
-                }
-              />
-            </div>
-            <div>
-              <C3_container_data
-                img={security_icon}
-                heading={"Trusted, Global Community"}
-                content={"Your wellness, globally curated and locally rooted."}
-              />
-            </div>
-            <div>
-              <C3_container_data
-                img={writting_icon}
-                heading={"Transparent Listings & Reviews"}
-                content={
-                  "Read real reviews. Choose what resonates. No surprises."
-                }
-              />
-            </div>
+            <img src={people_runnimg} alt="" />
+          </motion.div>
+          <motion.div className="c3text_container"
+          initial={{ x: 500, opacity: 0 }}
+              whileInView={{ x: 0, opacity: 1 }}
+              transition={{ duration: 1, ease: "easeOut" }}
+              viewport={{ once: true }}
+          >
+            <motion.div
+              className="datacontainer"
+              
+            >
+              <div>
+                <C3_container_data
+                  img={lotus_icon}
+                  heading={"Rooted in Indian Wisdom"}
+                  content={"Authentic, not commercialized wellness."}
+                />
+              </div>
+              <div>
+                <C3_container_data
+                  img={verification_icon}
+                  heading={"Expert-verified Programs"}
+                  content={
+                    "Only qualified, experienced professionals make it to our platform."
+                  }
+                />
+              </div>
+              <div>
+                <C3_container_data
+                  img={security_icon}
+                  heading={"Trusted, Global Community"}
+                  content={
+                    "Your wellness, globally curated and locally rooted."
+                  }
+                />
+              </div>
+              <div>
+                <C3_container_data
+                  img={writting_icon}
+                  heading={"Transparent Listings & Reviews"}
+                  content={
+                    "Read real reviews. Choose what resonates. No surprises."
+                  }
+                />
+              </div>
+            </motion.div>
           </motion.div>
         </div>
-      </div>
+      </div>  
 
       <div className="content4">
         <motion.div
           className="c4top"
           initial={{ x: -200, opacity: 0 }}
           whileInView={{ x: 0, opacity: 1 }}
+            
           transition={{ duration: 0.5, ease: "easeOut" }}
           viewport={{ once: true }} // remove if you want it every time on scroll
         >
@@ -301,6 +324,7 @@ function Home() {
           className="c5top"
           initial={{ x: -200, opacity: 0 }}
           whileInView={{ x: 0, opacity: 1 }}
+              
           transition={{ duration: 0.5, ease: "easeOut" }}
           viewport={{ once: true }}
         >
@@ -358,7 +382,7 @@ function Home() {
             initial={{ x: -200, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            viewport={{ once: true }} // remove if you want it every time on scroll
+            viewport={{ once: true , amount:0.05}} // remove if you want it every time on scroll
           >
             <div className="c6title">
               <strong>Find your Guides</strong>

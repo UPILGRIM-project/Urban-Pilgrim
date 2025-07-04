@@ -11,9 +11,11 @@
   max-width: 100%;  
   
 }
-.imgdiv {
+.imgdiv img {
   height: auto;
   width: auto;
+   object-fit: cover;
+  object-position: center;
 }
 .data_container {
   position: absolute;
@@ -24,6 +26,7 @@
   height: 33%;
   width: 90%;
   gap: 20px;
+  
 }
 .data_details{
     height: 100%;
@@ -31,12 +34,14 @@
     position: absolute;
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
     line-height: 100%;
     
 }
 .ptitle{
     position: absolute;
-    left: 5%;
+  
     top: 10%;
     font-family: 'Poppins', sans-serif;
     font-size: 15px;

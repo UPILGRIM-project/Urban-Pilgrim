@@ -8,8 +8,9 @@
 }
 
 .topbannerimg {
-  width: 100%;
-  height: 100%;
+
+  width: 100vw;
+  height: 100vh;
   object-fit: contain;
 }
 
@@ -17,17 +18,18 @@
   object-fit: contain;
   height: 100%;
   width: 100%;
- 
+  object-fit: cover;
+  object-position: center;
 }
 
 
 .overlap-box {
   position: relative;
-  bottom: 50px; /* overlaps downward */
+ /* overlaps downward */
   left: 0;
   width: 100%; /* 40% of container width */
-  height: auto;
- 
+  height: 80vh;
+
   color: white;
   box-sizing: border-box;
   display: flex;
@@ -38,14 +40,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   /* or whatever max width you want for content */
   gap: 10px;
   width: 40%;
-  height: 80%;
+  bottom: 10vh;
+  height: 80vh;
   background-color: #2f6288;
   position: relative;
   z-index: 2;
-  padding: 50px 70px 50px 30px;
+  padding: 20px 0px 20px 0px ;
   overflow: hidden;
 
 }
@@ -57,6 +61,9 @@
   margin: 0 auto;
   border-radius: 18px;
   flex-shrink: 0;
+  object-fit: cover;
+  object-position: center;
+
 }
 .textbox1 {
   max-width: 100%;
@@ -72,18 +79,7 @@
   font-family: sans-serif;
 }
 
-.centered-box {
-  display: flex;
-  position: relative;
-  justify-content: center;
-  align-items: center;
-  max-width: 90%; /* or any limit you want */
-  margin: 0 auto;
-  text-align: center;
-  overflow-wrap: break-word;
-  word-break: break-word;
-  line-height: normal;
-}
+
 
 .overlaypara {
   max-width: 100%;
@@ -105,8 +101,7 @@
   background: #867832;
 }
 .rightbox {
-  position: relative;
-  margin-top: 8vh;
+  position: absolute;
   bottom: 0;
   right: 0;
   width: 60%;
@@ -129,7 +124,7 @@
   height: 100px;
   color: #c4b0ae;
   font-size: 60px;
-  z-index: 2;
+  z-index: 0;
   white-space: nowrap;
 }
 
@@ -161,7 +156,7 @@
   display: flex;
   width: 100%;
   min-height: 50vh;
-
+  margin-bottom: 20vh;
   flex-wrap: wrap;
 }
 
@@ -190,7 +185,7 @@
   display: flex;
   flex-direction: column;
   padding: 20px;
-  background-color: #f9f9f9;
+  background-color: #f9f3ef;
   overflow: hidden;
 }
 .c2Cards {
@@ -349,19 +344,28 @@
 }
 
 
-
 .content3{
   display: flex;
 
+ justify-content: center;
+  margin-bottom: 20vh;
   position: relative;
-  height: 100vh;
+  height: 80vh;
   
 }
-.c3img{
+
+.c3container{
+  display: flex;
+ 
+  position: relative;
+  
+}
+.c3img img {
     position: relative;
-    max-width: 70%;
+    max-width: 90vw;
     max-height: 100%;
     top: 0;
+   
     margin-bottom: 50px;
 }
 .c3text_container{
@@ -372,13 +376,13 @@
     align-items: center;
     padding: 30px;
    position: absolute;
-   min-height: 80%;
+   min-height: 80vh;
 
    min-width: 40%;
-   
+  right: 0;
    z-index: 2;
-   right: 0;
-   top: 20%;
+ 
+   top:  10%;
 
 }
 
@@ -391,6 +395,8 @@
 }
 
 
+
+
 .content4 {
 
   width: 100%;
@@ -400,8 +406,9 @@
   gap: 20px;
   padding: 20px;
   box-sizing: border-box;
- 
+  position: relative;
   background-color: #c0b3b424;
+  margin-bottom:20vh;
   
 }
 
@@ -457,7 +464,9 @@
   display: flex;
   flex-direction: column;
   position: relative;
-  background-color: #c0b3b424;
+  background-color: #ffffff;
+  margin-bottom: 10vh;
+ 
 }
 .c5top{
   display: flex;
@@ -474,6 +483,7 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
+  
 }
 .details{
   flex: 1 1 calc(25% - 20px); /* 4 cards per row, accounting for gap */
@@ -491,15 +501,17 @@
   display: flex;
   flex-direction: column;
   position: relative;
-  background-color: #c0b3b424;
-  max-height: fit-content;
+  background-color: #b4b3c024;
+  max-height: 100vh;
   position: relative;
 }
-.meditateimg{
+.meditateimg img {
   position: relative;
-  height: 100%;
+  height: 100vh;
   width: 100%;
-
+   object-fit: cover;
+  object-position: center;
+  
 }
 .meditateimg::after {
   content: "";
