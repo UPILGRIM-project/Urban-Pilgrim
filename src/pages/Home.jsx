@@ -6,9 +6,13 @@ import "./Home.css";
 
 import cardimg1 from "../assets/card-img1.png";
 import cardimg2 from "../assets/onlinesession.png";
+import cardimg3 from "../assets/Wellness_Programs.svg";
+import cardimg4 from "../assets/Wellness_Guides.svg";
 import yogaday from "../assets/yogaday-img.png";
 import Footer from "../components/footer";
 import C3_container_data from "../components/c3_container_data.jsx";
+import Animated_card from "../components/Animated_card.jsx";
+
 import Appleimg from "../assets/appleimg.png";
 import yogapeople from "../assets/yogapeople.png";
 import Meditation from "../assets/meditationimg.jpg";
@@ -24,16 +28,49 @@ import Anisha from "../assets/Anisha.png";
 import PersondetailsCard from "../components/persondetails_card";
 import C8_container_data from "../components/c8_container_data.jsx";
 import house from "../assets/house_img.png";
-import { easeIn, motion } from "framer-motion";
-
+import { easeIn, motion, useAnimation } from "framer-motion";
 function Home() {
   const wrapperRef = useRef(null);
   const [lineHeight, setLineHeight] = useState(0);
 
+  const cardContainerRef = useRef(null);
+  const [progress, setProgress] = useState(0);
+  const controls = useAnimation();
+  const scrollAmount = 300;
+
+  const handleCardScroll = (dir) => {
+    if (cardContainerRef.current) {
+      const container = cardContainerRef.current;
+      const newScroll =
+        dir === "left"
+          ? container.scrollLeft - scrollAmount
+          : container.scrollLeft + scrollAmount;
+      container.scrollTo({ left: newScroll, behavior: "smooth" });
+
+      const maxScroll = container.scrollWidth - container.clientWidth;
+      const newProgress = (newScroll / maxScroll) * 100;
+      setProgress(newProgress);
+    }
+  };
+
+  useEffect(() => {
+    const container = cardContainerRef.current;
+    if (!container) return;
+
+    const updateProgress = () => {
+      const maxScroll = container.scrollWidth - container.clientWidth;
+      const newProgress = (container.scrollLeft / maxScroll) * 100;
+      setProgress(newProgress);
+    };
+
+    container.addEventListener("scroll", updateProgress);
+    return () => container.removeEventListener("scroll", updateProgress);
+  }, []);
+
   const handleScroll = () => {
     const el = wrapperRef.current;
     const scrollRatio = el.scrollLeft / (el.scrollWidth - el.clientWidth);
-    setLineHeight(scrollRatio * 300); // adjust 300 to desired max height
+    setLineHeight(scrollRatio * 300);
   };
 
   return (
@@ -106,7 +143,7 @@ function Home() {
         </div>
       </motion.div>
       <div className="content2">
-        <motion.div className="position">
+        <motion.div className="c2left">
           <div className="golden_mandala">
             <motion.img
               animate={{ rotate: 360 }}
@@ -115,19 +152,57 @@ function Home() {
               alt="noimg"
             />
           </div>
+         
         </motion.div>
-        <div className="position-content">
-          <div
-            className="cardwrapper"
-            ref={wrapperRef}
-            onScroll={handleScroll}
-          ></div>
+        <div className="c2right">
+          <motion.div
+            className="c2Cards"
+            ref={cardContainerRef}
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
+            {/* cards */}
+            <Animated_card image={cardimg1} card_title="Curated experiences" />
+            <Animated_card image={cardimg2} card_title="Online sessions" />
+            <Animated_card image={cardimg3} card_title="Wellness Programs" />
+            <Animated_card image={cardimg4} card_title="Wellness Guides" />
+          </motion.div>
+
+          <div className="c2Navigation">
+            <motion.button
+              className="nav-btn"
+              whileTap={{ scale: 0.9 }}
+              whileHover={{ scale: 1.05 }}
+              onClick={() => handleCardScroll("left")}
+            >
+              ‹
+            </motion.button>
+
+            <div className="progress-bar">
+              <motion.div
+                className="progress"
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+              />
+            </div>
+
+            <motion.button
+              className="nav-btn"
+              whileTap={{ scale: 0.9 }}
+              whileHover={{ scale: 1.05 }}
+              onClick={() => handleCardScroll("right")}
+            >
+              ›
+            </motion.button>
+          </div>
         </div>
       </div>
 
-        <div className="content3">
-        <motion.div className="c3img"
-         initial={{ x: -500, opacity: 0 }}
+      <div className="content3">
+        <motion.div
+          className="c3img"
+          initial={{ x: -500, opacity: 0 }}
           whileInView={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
           viewport={{ once: true }}
@@ -135,11 +210,12 @@ function Home() {
           <img src={people_runnimg} alt="" />
         </motion.div>
         <div className="c3text_container">
-          <motion.div className="datacontainer"
+          <motion.div
+            className="datacontainer"
             initial={{ x: 500, opacity: 0 }}
-          whileInView={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          viewport={{ once: true }}
+            whileInView={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            viewport={{ once: true }}
           >
             <div>
               <C3_container_data
@@ -148,25 +224,29 @@ function Home() {
                 content={"Authentic, not commercialized wellness."}
               />
             </div>
-             <div>
+            <div>
               <C3_container_data
                 img={verification_icon}
                 heading={"Expert-verified Programs"}
-                content={"Only qualified, experienced professionals make it to our platform."}
+                content={
+                  "Only qualified, experienced professionals make it to our platform."
+                }
               />
             </div>
-             <div>
+            <div>
               <C3_container_data
                 img={security_icon}
                 heading={"Trusted, Global Community"}
                 content={"Your wellness, globally curated and locally rooted."}
               />
             </div>
-             <div>
+            <div>
               <C3_container_data
                 img={writting_icon}
                 heading={"Transparent Listings & Reviews"}
-                content={"Read real reviews. Choose what resonates. No surprises."}
+                content={
+                  "Read real reviews. Choose what resonates. No surprises."
+                }
               />
             </div>
           </motion.div>
@@ -322,7 +402,12 @@ function Home() {
             <strong>Find your wellness program</strong>
           </div>
           <div className="c7description">
-           Discover transformative wellness retreats from around the world, curated in one place. From yoga and meditation to fitness and spiritual growth—all inspired by Indian wisdom—Urban Pilgrim helps you explore, compare, and book programs that align with your wellness goals. Trusted listings and favourable terms make your journey to rejuvenation easy and accessible.
+            Discover transformative wellness retreats from around the world,
+            curated in one place. From yoga and meditation to fitness and
+            spiritual growth—all inspired by Indian wisdom—Urban Pilgrim helps
+            you explore, compare, and book programs that align with your
+            wellness goals. Trusted listings and favourable terms make your
+            journey to rejuvenation easy and accessible.
           </div>
         </motion.div>
         <div className="c7bottom">
@@ -349,10 +434,8 @@ function Home() {
         </div>
       </div>
       <div className="content8">
-        <C8_container_data/>
+        <C8_container_data />
       </div>
-
-    
       <Footer />
     </div>
   );

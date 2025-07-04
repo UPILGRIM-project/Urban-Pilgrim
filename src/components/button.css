@@ -4,10 +4,12 @@
   cursor: pointer;
   align-items: center;
   justify-content: center;
-  border-radius: 15px;
+  border-radius: 29px;
   padding: 12px 28px;
   border: none;
   transition: all 0.3s ease;
+  max-height: 45px;
+  width: auto;
 }
 
 .btn_parent:hover {
@@ -24,4 +26,32 @@
   letter-spacing: 0.5px;
   text-decoration: none;
   user-select: none;
+}
+
+/* --- Responsive tweaks --- */
+
+@media screen and (max-width: 768px) {
+  .btn_parent {
+    padding: 10px 22px;
+    max-height: 40px;
+    border-radius: 25px;
+  }
+
+  .btn_name {
+    font-size: 16px;
+    letter-spacing: 0.4px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .btn_parent {
+    padding: 8px 18px;
+    max-height: 38px;
+    border-radius: 22px;
+  }
+
+  .btn_name {
+    font-size: 14px;
+    letter-spacing: 0.3px;
+  }
 }

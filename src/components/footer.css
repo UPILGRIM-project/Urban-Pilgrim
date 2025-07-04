@@ -1,48 +1,94 @@
 .site-footer {
-  background-color:#2f6288;
+  background-color: #2f6288;
   color: #fff;
-  padding: 30px 20px 170px;
-  font-family: "Poppins", sans-serif;
+  padding: 30px 20px;
+  text-align: center;
 }
 
 .footer-container {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
+ justify-content: space-between;
   align-items: center;
-  max-width: 1200px;
-  margin: auto;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #ffffff50;
-}
-
-.footer-logo {
-  font-size: 28px;
-  font-weight: bold;
-}
-
-.footer-links,
-.footer-social {
-  display: flex;
+  text-align: justify;
   gap: 20px;
-  flex-wrap: wrap;
+  margin: 0 20px 0 20px;
 }
 
-.footer-links a,
-.footer-social a {
+
+.footer-tagline {
+  font-size: 18px;
+  max-width: 500px;
+  color: #C9C8D8;
+   font-family: 'Poppins', sans-serif;
+font-size: 20px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+}
+
+.footer-subscribe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+/* Quick Links section */
+.footer-links {
+  margin-top: 40px;
+  text-align: center;
+
+}
+
+.footer-links h3 {
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.footer-links a{
+    color: #C9C8D8!important;
+   font-family: 'Poppins', sans-serif !important;
+font-size: 20px;
+font-style: normal;
+font-weight: 400;
+line-height: normal ;
+}
+
+.links-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 40px;
+}
+
+.links-grid div {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.links-grid a {
   color: #fff;
   text-decoration: none;
-  transition: color 0.3s;
+  font-size: 16px;
 }
 
-.footer-links a:hover,
-.footer-social a:hover {
-  color: #ffcc70;
+.links-grid a:hover {
+  text-decoration: underline;
 }
 
+/* Copyright text */
 .footer-bottom {
-  text-align: center;
-  margin-top: 20px;
+  margin-top: 30px;
   font-size: 14px;
-  color: #ddd;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Responsive breakpoints */
+@media screen and (max-width: 768px) {
+  .links-grid {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
 }
