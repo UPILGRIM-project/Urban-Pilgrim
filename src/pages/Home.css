@@ -5,6 +5,7 @@
   flex-direction: column;
   margin: 0;
   padding: 0;
+  
 }
 
 .topbannerimg {
@@ -29,7 +30,7 @@
   left: 0;
   width: 100%; /* 40% of container width */
   height: 80vh;
-
+background-color: #f9f3ef;
   color: white;
   box-sizing: border-box;
   display: flex;
@@ -158,6 +159,7 @@
   min-height: 50vh;
   margin-bottom: 20vh;
   flex-wrap: wrap;
+  
 }
 
 .c2left {
@@ -346,12 +348,12 @@
 
 .content3{
   display: flex;
-
+background: linear-gradient(90deg, rgba(95, 54, 30, 0.00) 0%, rgba(197, 112, 63, 0.08) 96.87%);
  justify-content: center;
   margin-bottom: 20vh;
   position: relative;
   height: 80vh;
-  
+ 
 }
 
 .c3container{
@@ -404,12 +406,17 @@
   flex-direction: column;
   align-items: center;
   gap: 20px;
-  padding: 20px;
+  
   box-sizing: border-box;
   position: relative;
-  background-color: #c0b3b424;
-  margin-bottom:20vh;
+ background: linear-gradient(90deg, rgba(95, 54, 30, 0.00) 0%, rgba(197, 112, 63, 0.08) 96.87%);
+
   
+  
+}
+
+.c4container{
+  margin: 5%;
 }
 
 .c4top {
@@ -449,13 +456,13 @@
   align-items: center;
   justify-content: flex-start;
   box-sizing: border-box;
-  
+ 
 
 }
 
 .carddiv {
-  width: 70%;
-  height: 70%;
+  width: 60%;
+  height: 60%;
   
 }
 
@@ -466,7 +473,11 @@
   position: relative;
   background-color: #ffffff;
   margin-bottom: 10vh;
- 
+ background: linear-gradient(90deg, rgba(95, 54, 30, 0.00) 0%, rgba(197, 112, 63, 0.08) 96.87%);
+}
+
+.c5container{
+  margin: 5%;
 }
 .c5top{
   display: flex;

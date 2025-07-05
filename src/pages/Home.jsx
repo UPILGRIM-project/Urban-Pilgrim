@@ -6,7 +6,6 @@ import "./Home.css";
 
 import { useInView } from "react-intersection-observer";
 
-
 import cardimg1 from "../assets/card-img1.png";
 import cardimg2 from "../assets/onlinesession.png";
 import cardimg3 from "../assets/Wellness_Programs.svg";
@@ -76,18 +75,17 @@ function Home() {
     setLineHeight(scrollRatio * 300);
   };
 
-  const c3Controls = useAnimation();
-const [c3Ref, c3InView] = useInView({
-  threshold: 0.3, // Adjust sensitivity if needed
-  triggerOnce: true, // fire only once
-});
+  const Controls = useAnimation();
+  const [Ref, InView] = useInView({
+    threshold: 0.3, // Adjust sensitivity if needed
+    triggerOnce: true, // fire only once
+  });
 
-useEffect(() => {
-  if (c3InView) {
-    c3Controls.start({ x: 0, opacity: 1 });
-  }
-}, [c3InView, c3Controls]);
-
+  useEffect(() => {
+    if (InView) {
+      Controls.start("visible");
+    }
+  }, [InView, Controls]);
 
   return (
     <div className="hero-section">
@@ -214,7 +212,6 @@ useEffect(() => {
         </div>
       </div>
 
-     
       <div className="content3">
         <div className="c3container">
           <motion.div
@@ -226,16 +223,14 @@ useEffect(() => {
           >
             <img src={people_runnimg} alt="" />
           </motion.div>
-          <motion.div className="c3text_container"
-          initial={{ x: 500, opacity: 0 }}
-              whileInView={{ x: 0, opacity: 1 }}
-              transition={{ duration: 1, ease: "easeOut" }}
-              viewport={{ once: true }}
+          <motion.div
+            className="c3text_container"
+            initial={{ x: 500, opacity: 0 }}
+            whileInView={{ x: 0, opacity: 1 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            viewport={{ once: true }}
           >
-            <motion.div
-              className="datacontainer"
-              
-            >
+            <motion.div className="datacontainer">
               <div>
                 <C3_container_data
                   img={lotus_icon}
@@ -273,101 +268,104 @@ useEffect(() => {
             </motion.div>
           </motion.div>
         </div>
-      </div>  
+      </div>
 
       <div className="content4">
-        <motion.div
-          className="c4top"
-          initial={{ x: -200, opacity: 0 }}
-          whileInView={{ x: 0, opacity: 1 }}
-            
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          viewport={{ once: true }} // remove if you want it every time on scroll
-        >
-          <div className="c4title">
-            <strong>Book your Pilgrim Experience</strong>
-          </div>
-          <div className="c4description">
-            Step into a transformative journey with our curated Pilgrim
-            Experiences—designed to help you reconnect with your mind, body, and
-            spirit. These impactful retreats blend Indian wellness traditions
-            like yoga, meditation, and Ayurveda with modern practices, offering
-            rejuvenation through nature immersions, culinary explorations, and
-            spiritual experiences rooted in India’s rich heritage.
-          </div>
-        </motion.div>
-        <div className="c4bottom">
-          <div className="c4left">
-            <div className="carddiv">
-              <PersondetailsCard
-                className="details"
-                image={Appleimg}
-                title={"Reboot & Rejuvenate on the Ganges (4 day retreat)"}
-                price={"Rs.56,997.00"}
-              />
+        <div className="c4container">
+          <motion.div
+            className="c4top"
+            initial={{ x: -200, opacity: 0 }}
+            whileInView={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            viewport={{ once: true }} // remove if you want it every time on scroll
+          >
+            <div className="c4title">
+              <strong>Book your Pilgrim Experience</strong>
             </div>
-          </div>
-          <div className="c4right">
-            <div className="carddiv">
-              <PersondetailsCard
-                className="details"
-                image={yogapeople}
-                title={"Reboot & Rejuvenate on the Ganges (4 day retreat)"}
-                price={"Rs.56,997.00"}
-              />
+            <div className="c4description">
+              Step into a transformative journey with our curated Pilgrim
+              Experiences—designed to help you reconnect with your mind, body,
+              and spirit. These impactful retreats blend Indian wellness
+              traditions like yoga, meditation, and Ayurveda with modern
+              practices, offering rejuvenation through nature immersions,
+              culinary explorations, and spiritual experiences rooted in India’s
+              rich heritage.
+            </div>
+          </motion.div>
+          <div className="c4bottom">
+            <div className="c4left">
+              <div className="carddiv">
+                <PersondetailsCard
+                  className="details"
+                  image={Appleimg}
+                  title={"Reboot & Rejuvenate on the Ganges (4 day retreat)"}
+                  price={"Rs.56,997.00"}
+                />
+              </div>
+            </div>
+            <div className="c4right">
+              <div className="carddiv">
+                <PersondetailsCard
+                  className="details"
+                  image={yogapeople}
+                  title={"Reboot & Rejuvenate on the Ganges (4 day retreat)"}
+                  price={"Rs.56,997.00"}
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div className="content5">
-        <motion.div
-          className="c5top"
-          initial={{ x: -200, opacity: 0 }}
-          whileInView={{ x: 0, opacity: 1 }}
-              
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          viewport={{ once: true }}
-        >
-          <div className="c5title">
-            <strong>Find your Pilgrim Session</strong>
-          </div>
-          <div className="c5description">
-            Find clarity, balance, and strength with Pilgrim Sessions—guided
-            group experiences led by trusted Urban Pilgrim experts. Whether it’s
-            yoga, meditation, stress relief, nutrition, or spiritual rituals,
-            our handpicked guides offer sessions rooted in Indian wisdom and
-            tailored for modern living. Each one is a step toward holistic
-            well-being—accessible, enriching, and made for you.
-          </div>
-        </motion.div>
-        <div className="c5bottom">
-          <div className="details">
-            <PersondetailsCard
-              className="details"
-              image={rohini_singh}
-              title={
-                "Discover your true self - A 28 day program with Rohini Singh Sisodia"
-              }
-              price={"Rs.14,999.00"}
-            />
-          </div>
-          <div className="details">
-            <PersondetailsCard
-              className="details"
-              image={Anisha}
-              title={"Let's meditate for an hour - With Anisha"}
-              price={"Rs.199.00"}
-            />
-          </div>
-          <div className="details">
-            <PersondetailsCard
-              className="details"
-              image={arati_prasad}
-              title={
-                "Menopausal fitness - A 4 day regime curated by Aarti Prasad"
-              }
-              price={"Rs.4,000.00"}
-            />
+        <div className="content5">
+          <div className="c5container">
+            <motion.div
+              className="c5top"
+              initial={{ x: -200, opacity: 0 }}
+              whileInView={{ x: 0, opacity: 1 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              viewport={{ once: true }}
+            >
+              <div className="c5title">
+                <strong>Find your Pilgrim Session</strong>
+              </div>
+              <div className="c5description">
+                Find clarity, balance, and strength with Pilgrim Sessions—guided
+                group experiences led by trusted Urban Pilgrim experts. Whether
+                it’s yoga, meditation, stress relief, nutrition, or spiritual
+                rituals, our handpicked guides offer sessions rooted in Indian
+                wisdom and tailored for modern living. Each one is a step toward
+                holistic well-being—accessible, enriching, and made for you.
+              </div>
+            </motion.div>
+            <div className="c5bottom">
+              <div className="details">
+                <PersondetailsCard
+                  className="details"
+                  image={rohini_singh}
+                  title={
+                    "Discover your true self - A 28 day program with Rohini Singh Sisodia"
+                  }
+                  price={"Rs.14,999.00"}
+                />
+              </div>
+              <div className="details">
+                <PersondetailsCard
+                  className="details"
+                  image={Anisha}
+                  title={"Let's meditate for an hour - With Anisha"}
+                  price={"Rs.199.00"}
+                />
+              </div>
+              <div className="details">
+                <PersondetailsCard
+                  className="details"
+                  image={arati_prasad}
+                  title={
+                    "Menopausal fitness - A 4 day regime curated by Aarti Prasad"
+                  }
+                  price={"Rs.4,000.00"}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -382,7 +380,7 @@ useEffect(() => {
             initial={{ x: -200, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            viewport={{ once: true , amount:0.05}} // remove if you want it every time on scroll
+            viewport={{ once: true, amount: 0.05 }} // remove if you want it every time on scroll
           >
             <div className="c6title">
               <strong>Find your Guides</strong>
