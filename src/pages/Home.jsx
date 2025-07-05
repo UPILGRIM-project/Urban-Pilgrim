@@ -108,7 +108,7 @@ function Home() {
             alt="failed to load"
             initial={{ y: 200, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
-            transition={{ duration: 1, ease: "easeOut" }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
             viewport={{ once: true }} // remove if you want it every time on scroly
           />
 
@@ -129,14 +129,14 @@ function Home() {
             className="flow"
             initial={{ x: 700, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
-            transition={{ duration: 1, ease: "easeOut" }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
             viewport={{ once: true }}
           >
             <motion.div
               className="divheading"
               initial={{ x: 0 }}
               animate={{ x: -700 }}
-              transition={{ repeat: Infinity, duration: 10, ease: "linear" }}
+              transition={{ repeat: Infinity, duration: 10, ease: "easeOut"}}
             >
               Explore, Heal, Transform
             </motion.div>
@@ -157,7 +157,12 @@ function Home() {
         </div>
       </motion.div>
       <div className="content2">
-        <motion.div className="c2left">
+        <motion.div className="c2left"
+           initial={{ x: -500, opacity: 0 }}
+            whileInView={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            viewport={{ once: true }}
+        >
           <div className="golden_mandala">
             <motion.img
               animate={{ rotate: 360 }}
@@ -167,7 +172,13 @@ function Home() {
             />
           </div>
         </motion.div>
-        <div className="c2right">
+        <motion.div className="c2right"
+           initial={{ x: -1000, opacity: 0 }}
+            whileInView={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            viewport={{ once: true }}
+        
+        >
           <motion.div
             className="c2Cards"
             ref={cardContainerRef}
@@ -209,7 +220,7 @@ function Home() {
               ›
             </motion.button>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       <div className="content3">
@@ -218,7 +229,7 @@ function Home() {
             className="c3img"
             initial={{ x: -500, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
-            transition={{ duration: 1, ease: "easeOut" }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
             viewport={{ once: true }}
           >
             <img src={people_runnimg} alt="" />
@@ -227,7 +238,7 @@ function Home() {
             className="c3text_container"
             initial={{ x: 500, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
-            transition={{ duration: 1, ease: "easeOut" }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
             viewport={{ once: true }}
           >
             <motion.div className="datacontainer">
@@ -292,9 +303,12 @@ function Home() {
               rich heritage.
             </div>
           </motion.div>
-          <div className="c4bottom">
+          <motion.div className="c4bottom"
+          >
             <div className="c4left">
-              <div className="carddiv">
+              <div className="carddiv"
+    
+              >
                 <PersondetailsCard
                   className="details"
                   image={Appleimg}
@@ -313,7 +327,7 @@ function Home() {
                 />
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
         <div className="content5">
           <div className="c5container">

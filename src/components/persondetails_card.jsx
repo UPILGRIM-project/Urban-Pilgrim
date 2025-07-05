@@ -6,10 +6,11 @@ import { easeIn, motion } from "framer-motion";
 function persondetails_card({ image, title, price }) {
   return (
     <motion.div className="parrent"
+   // remove if you want it every time on scroll
     initial={{ y: 400, opacity: 0 }}
       whileInView={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      viewport={{ once: true,amount: 0.2 }} // remove if you want it every time on scroll
+      viewport={{ once: true,amount: 0.1 }} 
     >
       <motion.div
         className="imgdiv"
