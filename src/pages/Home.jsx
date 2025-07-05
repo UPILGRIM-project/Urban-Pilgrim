@@ -14,6 +14,7 @@ import yogaday from "../assets/yogaday-img.png";
 import Footer from "../components/footer";
 import C3_container_data from "../components/c3_container_data.jsx";
 import Animated_card from "../components/Animated_card.jsx";
+import Program from "../components/ProgramExplorer.jsx";
 
 import Appleimg from "../assets/appleimg.png";
 import yogapeople from "../assets/yogapeople.png";
@@ -31,6 +32,7 @@ import PersondetailsCard from "../components/persondetails_card";
 import C8_container_data from "../components/c8_container_data.jsx";
 import house from "../assets/house_img.png";
 import { easeIn, motion, useAnimation } from "framer-motion";
+import StepWizard from "../components/StepWizard.jsx";
 function Home() {
   const wrapperRef = useRef(null);
   const [lineHeight, setLineHeight] = useState(0);
@@ -89,7 +91,10 @@ function Home() {
 
   return (
     <div className="hero-section">
-      <img className="topbannerimg" src={homepage_img} alt="Banner" />
+      <div className="topbannerimg">
+         <img src={homepage_img} alt="Banner" />
+      </div>
+     
 
       <motion.div className="overlap-box">
         <div className="overlap-container">
@@ -136,7 +141,7 @@ function Home() {
               className="divheading"
               initial={{ x: 0 }}
               animate={{ x: -700 }}
-              transition={{ repeat: Infinity, duration: 10, ease: "easeOut"}}
+              transition={{ repeat: Infinity, duration: 10, ease: "easeOut" }}
             >
               Explore, Heal, Transform
             </motion.div>
@@ -157,71 +162,9 @@ function Home() {
         </div>
       </motion.div>
       <div className="content2">
-        <motion.div className="c2left"
-           initial={{ x: -500, opacity: 0 }}
-            whileInView={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            viewport={{ once: true }}
-        >
-          <div className="golden_mandala">
-            <motion.img
-              animate={{ rotate: 360 }}
-              transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-              src={golden_mandala}
-              alt="noimg"
-            />
-          </div>
-        </motion.div>
-        <motion.div className="c2right"
-           initial={{ x: -1000, opacity: 0 }}
-            whileInView={{ x: 0, opacity: 1 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            viewport={{ once: true }}
-        
-        >
-          <motion.div
-            className="c2Cards"
-            ref={cardContainerRef}
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-          >
-            {/* cards */}
-            <Animated_card image={cardimg1} card_title="Curated experiences" />
-            <Animated_card image={cardimg2} card_title="Online sessions" />
-            <Animated_card image={cardimg3} card_title="Wellness Programs" />
-            <Animated_card image={cardimg4} card_title="Wellness Guides" />
-          </motion.div>
-
-          <div className="c2Navigation">
-            <motion.button
-              className="nav-btn"
-              whileTap={{ scale: 0.9 }}
-              whileHover={{ scale: 1.05 }}
-              onClick={() => handleCardScroll("left")}
-            >
-              ‹
-            </motion.button>
-
-            <div className="progress-bar">
-              <motion.div
-                className="progress"
-                animate={{ width: `${progress}%` }}
-                transition={{ duration: 0.4, ease: "easeInOut" }}
-              />
-            </div>
-
-            <motion.button
-              className="nav-btn"
-              whileTap={{ scale: 0.9 }}
-              whileHover={{ scale: 1.05 }}
-              onClick={() => handleCardScroll("right")}
-            >
-              ›
-            </motion.button>
-          </div>
-        </motion.div>
+ <div className="div"><Program/></div>
       </div>
+     
 
       <div className="content3">
         <div className="c3container">
@@ -303,11 +246,14 @@ function Home() {
               rich heritage.
             </div>
           </motion.div>
-          <motion.div className="c4bottom"
-          >
+          <motion.div className="c4bottom">
             <div className="c4left">
-              <div className="carddiv"
-    
+              <motion.div className="carddiv"
+               initial={{ x: -400, opacity: 0 }}
+                    whileInView={{ x: 0, opacity: 1 }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                    viewport={{ once: true,amount: 0.1 }} 
+              
               >
                 <PersondetailsCard
                   className="details"
@@ -315,17 +261,23 @@ function Home() {
                   title={"Reboot & Rejuvenate on the Ganges (4 day retreat)"}
                   price={"Rs.56,997.00"}
                 />
-              </div>
+              </motion.div>
             </div>
             <div className="c4right">
-              <div className="carddiv">
+              <motion.div className="carddiv"
+              
+               initial={{ x: 400, opacity: 0 }}
+                    whileInView={{ x: 0, opacity: 1 }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                    viewport={{ once: true,amount: 0.1 }}
+              >
                 <PersondetailsCard
                   className="details"
                   image={yogapeople}
                   title={"Reboot & Rejuvenate on the Ganges (4 day retreat)"}
                   price={"Rs.56,997.00"}
                 />
-              </div>
+              </motion.div>
             </div>
           </motion.div>
         </div>
@@ -350,7 +302,13 @@ function Home() {
                 holistic well-being—accessible, enriching, and made for you.
               </div>
             </motion.div>
-            <div className="c5bottom">
+            <motion.div
+              className="c5bottom"
+              initial={{ y: 400, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              viewport={{ once: true }}
+            >
               <div className="details">
                 <PersondetailsCard
                   className="details"
@@ -379,7 +337,7 @@ function Home() {
                   price={"Rs.4,000.00"}
                 />
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>
@@ -406,28 +364,40 @@ function Home() {
             </div>
           </motion.div>
           <div className="c6bottom">
-            <div className="c6details">
+            <motion.div className="c6details"
+             initial={{ y: 400, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              viewport={{ once: true }}
+            >
               <PersondetailsCard
                 className="c6details"
                 image={yogaday}
                 title={"Yoga hour - by Manjunath"}
                 price={"Rs.1000.00"}
+                
               />
-            </div>
-            <div className="c6details">
+            </motion.div>
+            <motion.div className="c6details"
+             initial={{ y: 400, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              viewport={{ once: true }}
+            >
               <PersondetailsCard
                 className="c6details"
                 image={Manish_kumar}
                 title={"Yoga hour - by Manish Kumar (Bihar School of Yoga)"}
                 price={"Rs.800.00"}
               />
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>
 
       <div className="content7">
-        <motion.div
+        <div className="c7container">
+                <motion.div
           className="c7top"
           initial={{ x: -200, opacity: 0 }}
           whileInView={{ x: 0, opacity: 1 }}
@@ -459,19 +429,18 @@ function Home() {
           </div>
           <div className="c7right">
             <div className="carddiv">
-              <PersondetailsCard
-                className="details"
-                image={yogapeople}
-                title={"Reboot & Rejuvenate on the Ganges (4 day retreat)"}
-                price={"Rs.56,997.00"}
-              />
+             <StepWizard/>
             </div>
           </div>
         </div>
+        </div>
+       
       </div>
       <div className="content8">
         <C8_container_data />
       </div>
+
+       
       <Footer />
     </div>
   );
