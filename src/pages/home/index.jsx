@@ -105,7 +105,7 @@ function Home() {
             <div className="content5">
                 <div className="c5container">
                     <motion.div className="c5top" initial={{ x: -200, opacity: 0 }} whileInView={{ x: 0, opacity: 1 }} transition={{ duration: 0.5, ease: "easeOut" }} viewport={{ once: true, amount: 0.1 }}>
-                        <div className="c5title"><strong>Book your Pilgrim Experience</strong></div>
+                        <div className="text-2xl md:text-3xl font-bold text-left text-black"><strong>Book your Pilgrim Experience</strong></div>
                         <div className="c5description">Step into a transformative journey with our curated Pilgrim Experiences...</div>
                     </motion.div>
                     <ViewAll link="/pilgrim_retreats" />
@@ -120,7 +120,7 @@ function Home() {
             <div className="content5 ">
                 <div className="c5container">
                     <motion.div className="c5top" initial={{ x: -200, opacity: 0 }} whileInView={{ x: 0, opacity: 1 }} transition={{ duration: 0.5, ease: "easeOut" }} viewport={{ once: true, amount: 0.1 }}>
-                        <div className="c5title"><strong>Find your Pilgrim Session</strong></div>
+                        <div className="text-2xl md:text-3xl font-bold text-left text-black"><strong>Find your Pilgrim Session</strong></div>
                         <div className="c5description">Find clarity, balance, and strength with Pilgrim Sessions...</div>
                     </motion.div>
                     <ViewAll link="/pilgrim_sessions" />
@@ -140,7 +140,7 @@ function Home() {
                 <div className="c6container">
                     <div className="imgover-content">
                         <motion.div className="c6top" initial={{ x: -200, opacity: 0 }} whileInView={{ x: 0, opacity: 1 }} transition={{ duration: 0.5, ease: "easeOut" }} viewport={{ once: true, amount: 0.05 }}>
-                            <div className="c6title"><strong>Find your Guides</strong></div>
+                            <div className="text-2xl md:text-3xl font-bold text-left text-black"><strong>Find your Guides</strong></div>
                             <div className="c6description" style={{ color: "#4F4F4F" }}>Begin your wellness journey with trusted guides...</div>
                         </motion.div>
                         <ViewAll link="/pilgrim_guides" />

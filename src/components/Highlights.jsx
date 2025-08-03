@@ -11,7 +11,7 @@ function Highlights() {
                     transition={{ duration: 0.5, ease: "easeOut" }}
                     viewport={{ once: true, amount: 0.1 }}
                 >
-                    <div className="c5title">
+                    <div className="text-2xl md:text-3xl font-bold text-left text-black">
                         <strong>Highlights</strong>
                     </div>
                 </motion.div>

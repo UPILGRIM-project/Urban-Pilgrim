@@ -49,7 +49,7 @@ export default function ProgramExplorer() {
                 <motion.img
                     src="/assets/golden-mandala.svg"
                     alt="Mandala"
-                    className="absolute top-1/2 left-1/2 w-[400px] max-w-[85%]  -translate-x-1/2 -translate-y-1/2"
+                    className="absolute top-1/2 left-1/2 w-[400px] max-w-[85%] -translate-x-1/2 -translate-y-1/2"
                     animate={{ rotate: 360 }}
                     transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
                 />
