@@ -19,11 +19,12 @@ import GuideClassDetails from "./components/pilgrim_guides/GuideClassDetails";
 import Retreatdescription from "./components/pilgrim_retreats/Retreatdescription";
 import Admin from "./pages/admin/Admin";
 import ProgramDetails from "./pages/program_details/ProgramDetails";
+import UserDashboard from "./components/UserDashboard";
 
 function App() {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
-  const isAdminRoute = location.pathname === "/admin";
+  const isAdminRoute = location.pathname === "/admin" || location.pathname === "/userdashboard";
 
   return (
     <div className="relative">
@@ -53,6 +54,7 @@ function App() {
             <Route path="/pilgrim_retreats/:retreatName" element={<Retreatdescription />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="*" element={<Home replace={'/'} />} />
+             <Route path="/userdashboard" element={<UserDashboard />} />
           </Routes>
           {!isAdminRoute && <Footer className="mt-10" />}
         </>
