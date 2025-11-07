@@ -5,7 +5,7 @@ import { MdDragIndicator } from "react-icons/md";
 import { FaEdit, FaTrash, FaPlus, FaTimes } from "react-icons/fa";
 import { useDrag, useDrop } from "react-dnd";
 import { useDropzone } from "react-dropzone";
-import { Plus } from "lucide-react";
+import { Plus, Edit2, X } from "lucide-react";
 import {
     deleteRetreatItem,
     fetchRetreatData,
@@ -23,6 +23,8 @@ import {
 import { storage } from "../../../services/firebase";
 import { showError, showSuccess } from "../../../utils/toast";
 import RichTextEditor from "../../common/RichTextEditor";
+import ImageEditor from "../../common/ImageEditor";
+import { v4 as uuidv4 } from "uuid";
 
 const ItemType = "RETREAT";
 
@@ -146,6 +148,13 @@ export default function RetreatsForm() {
     const [items, setItems] = useState([]);
     const [editingIndex, setEditingIndex] = useState(null);
     // const [dragActive, setDragActive] = useState(false);
+
+    // Image Editor States
+    const [isImageEditorOpen, setIsImageEditorOpen] = useState(false);
+    const [editingImage, setEditingImage] = useState(null);
+    const [editingImageType, setEditingImageType] = useState(null); // 'card', 'meetGuide', 'oneTime', 'feature'
+    const [editingImageIndex, setEditingImageIndex] = useState(null); // for arrays
+    const [isSavingEditedImage, setIsSavingEditedImage] = useState(false);
 
     const handleFieldChange = (section, field, value) => {
         setFormData((prev) => ({
@@ -723,6 +732,102 @@ export default function RetreatsForm() {
         );
     };
 
+    // Image Editor Functions
+    const openImageEditor = (imageUrl, type, index = null) => {
+        setEditingImage(imageUrl);
+        setEditingImageType(type);
+        setEditingImageIndex(index);
+        setIsImageEditorOpen(true);
+    };
+
+    const handleImageEditorCancel = () => {
+        setIsImageEditorOpen(false);
+        setEditingImage(null);
+        setEditingImageType(null);
+        setEditingImageIndex(null);
+    };
+
+    const handleImageEditorSave = async (editedFile) => {
+        try {
+            setIsSavingEditedImage(true);
+            setIsImageEditorOpen(false);
+
+            const filePath = `retreat_images/${uuidv4()}_${editedFile.name}`;
+            const storageRef = ref(storage, filePath);
+            const uploadTask = uploadBytesResumable(storageRef, editedFile);
+
+            uploadTask.on(
+                "state_changed",
+                (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    console.log(`Upload progress: ${Math.round(progress)}%`);
+                },
+                (error) => {
+                    console.error("Upload failed:", error);
+                    setIsSavingEditedImage(false);
+                    showError("Failed to upload edited image");
+                },
+                async () => {
+                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+
+                    // Delete old image
+                    if (editingImage) {
+                        try {
+                            const oldImageRef = ref(storage, editingImage);
+                            await deleteObject(oldImageRef);
+                        } catch (err) {
+                            console.log("Old image cleanup error:", err);
+                        }
+                    }
+
+                    // Update based on type
+                    if (editingImageType === 'card') {
+                        handleFieldChange("pilgrimRetreatCard", "image", downloadURL);
+                        handleFieldChange("pilgrimRetreatCard", "thumbnailType", editedFile.type);
+                    } else if (editingImageType === 'meetGuide') {
+                        handleFieldChange("meetGuide", "image", downloadURL);
+                    } else if (editingImageType === 'oneTime' && editingImageIndex !== null) {
+                        setFormData((prev) => {
+                            const updatedImages = [...prev.oneTimePurchase.images];
+                            updatedImages[editingImageIndex] = downloadURL;
+                            return {
+                                ...prev,
+                                oneTimePurchase: {
+                                    ...prev.oneTimePurchase,
+                                    images: updatedImages,
+                                },
+                            };
+                        });
+                    } else if (editingImageType === 'feature' && editingImageIndex !== null) {
+                        setFormData((prev) => {
+                            const updatedFeatures = [...prev.features];
+                            updatedFeatures[editingImageIndex] = {
+                                ...updatedFeatures[editingImageIndex],
+                                image: downloadURL,
+                            };
+                            return {
+                                ...prev,
+                                features: updatedFeatures,
+                            };
+                        });
+                    }
+
+                    setIsSavingEditedImage(false);
+                    showSuccess("Image updated successfully");
+
+                    // Reset editor state
+                    setEditingImage(null);
+                    setEditingImageType(null);
+                    setEditingImageIndex(null);
+                }
+            );
+        } catch (error) {
+            console.error("Error saving edited image:", error);
+            setIsSavingEditedImage(false);
+            showError("Failed to save edited image");
+        }
+    };
+
     // List Functions
     const addItem = (form) => {
         const formArray = Array.isArray(form) ? form : [form];
@@ -1052,20 +1157,62 @@ export default function RetreatsForm() {
                                     formData?.pilgrimRetreatCard?.thumbnailType.startsWith(
                                         "video/",
                                     ) ? (
-                                    <video
-                                        src={formData?.pilgrimRetreatCard?.image}
-                                        className="h-full object-contain rounded-md"
-                                        autoPlay
-                                        muted
-                                        loop
-                                        playsInline
-                                    />
+                                    // Video thumbnail
+                                    <>
+                                        <video
+                                            src={formData?.pilgrimRetreatCard?.image}
+                                            className="h-full object-contain rounded-md"
+                                            controls
+                                            muted
+                                            loop
+                                            playsInline
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleFieldChange("pilgrimRetreatCard", "image", null);
+                                                handleFieldChange("pilgrimRetreatCard", "thumbnailType", null);
+                                            }}
+                                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600"
+                                            title="Remove Video"
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </button>
+                                    </>
                                 ) : (
-                                    <img
-                                        src={formData.pilgrimRetreatCard.image}
-                                        alt="Uploaded"
-                                        className="h-full object-contain rounded-md"
-                                    />
+                                    // Image thumbnail
+                                    <>
+                                        <img
+                                            src={formData.pilgrimRetreatCard.image}
+                                            alt="Uploaded"
+                                            className="h-full object-contain rounded-md"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                openImageEditor(formData.pilgrimRetreatCard.image, 'card');
+                                            }}
+                                            className="absolute top-2 left-2 bg-blue-500 text-white border border-blue-600 rounded-md px-3 py-2 hover:bg-blue-600 transition-colors shadow-lg flex items-center gap-2"
+                                            title="Edit Image - Resize, Crop, Rotate"
+                                        >
+                                            <Edit2 size={16} />
+                                            <span className="text-xs font-semibold">Edit Size</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleFieldChange("pilgrimRetreatCard", "image", null);
+                                                handleFieldChange("pilgrimRetreatCard", "thumbnailType", null);
+                                            }}
+                                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600"
+                                            title="Remove Image"
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </button>
+                                    </>
                                 )}
                             </div>
                         ) : (
@@ -1544,6 +1691,15 @@ export default function RetreatsForm() {
                                     />
                                     <button
                                         type="button"
+                                        onClick={() => openImageEditor(img, 'oneTime', idx)}
+                                        className="absolute top-1 left-1 bg-blue-500 text-white border border-blue-600 rounded-md px-2 py-1 hover:bg-blue-600 transition-colors shadow-lg flex items-center gap-1"
+                                        title="Edit Image - Resize, Crop, Rotate"
+                                    >
+                                        <Edit2 size={12} />
+                                        <span className="text-xs font-semibold">Edit</span>
+                                    </button>
+                                    <button
+                                        type="button"
                                         onClick={() => removeImage(idx)}
                                         className="absolute top-1 right-1 bg-white border border-gray-300 rounded-full p-1 hover:bg-gray-200"
                                         title="Remove"
@@ -1671,6 +1827,16 @@ export default function RetreatsForm() {
                                                 className="w-32 h-32 object-contain rounded"
                                             />
                                             <button
+                                                type="button"
+                                                onClick={() => openImageEditor(feature.image, 'feature', index)}
+                                                className="absolute top-1 left-1 bg-blue-500 text-white border border-blue-600 rounded-md px-2 py-1 hover:bg-blue-600 transition-colors shadow-lg flex items-center gap-1"
+                                                title="Edit Image - Resize, Crop, Rotate"
+                                            >
+                                                <Edit2 size={12} />
+                                                <span className="text-xs font-semibold">Edit</span>
+                                            </button>
+                                            <button
+                                                type="button"
                                                 onClick={() =>
                                                     handleFeatureChange(index, "image", null)
                                                 }
@@ -2097,11 +2263,22 @@ export default function RetreatsForm() {
                                 className="w-64 h-auto object-contain rounded shadow"
                             />
                             <button
-                                onClick={() => handleFieldChange("meetGuide", "image", null)}
-                                className="absolute top-0 right-0 bg-white border border-gray-300 rounded-full
-                                p-1 transform translate-x-1/2 -translate-y-1/2 hover:bg-gray-200"
+                                type="button"
+                                onClick={() => openImageEditor(formData.meetGuide.image, 'meetGuide')}
+                                className="absolute top-2 left-2 bg-blue-500 text-white border border-blue-600 rounded-md px-3 py-2 hover:bg-blue-600 transition-colors shadow-lg flex items-center gap-2"
+                                title="Edit Image - Resize, Crop, Rotate"
                             >
-                                <FaTimes size={14} />
+                                <Edit2 size={16} />
+                                <span className="text-xs font-semibold">Edit Size</span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => handleFieldChange("meetGuide", "image", null)}
+                                className="absolute top-2 right-2 bg-white border border-gray-300 rounded-full
+                                p-2 hover:bg-gray-200"
+                                title="Remove Image"
+                            >
+                                <X size={16} />
                             </button>
                         </div>
                     ) : formData.isGuideUploading ? (
@@ -2243,6 +2420,28 @@ export default function RetreatsForm() {
                         ))}
                 </DndProvider>
             </div>
+
+            {/* Image Editor Modal */}
+            {isImageEditorOpen && editingImage && (
+                <ImageEditor
+                    imageUrl={editingImage}
+                    onSave={handleImageEditorSave}
+                    onCancel={handleImageEditorCancel}
+                />
+            )}
+
+            {/* Loading Overlay - Shows while saving edited image */}
+            {isSavingEditedImage && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-8 flex flex-col items-center gap-4 shadow-xl">
+                        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        <div className="text-center">
+                            <p className="text-lg font-semibold text-gray-800">Saving Image...</p>
+                            <p className="text-sm text-gray-600 mt-2">Please wait while we upload your changes</p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }

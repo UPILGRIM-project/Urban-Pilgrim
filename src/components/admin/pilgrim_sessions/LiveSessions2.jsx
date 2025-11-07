@@ -22,6 +22,7 @@ import {
 } from "../../../services/pilgrim_session/liveSessionService";
 import { setLiveSessions } from "../../../features/pilgrim_session/liveSessionsSlice";
 import RichTextEditor from "../../common/RichTextEditor";
+import ImageEditor from "../../common/ImageEditor";
 
 const ItemType = "SLIDE";
 
@@ -80,6 +81,7 @@ export default function LiveSession2() {
       price: "",
       gst: "",
       thumbnail: null,
+      thumbnailType: null,
       days: "",
       videos: "",
       totalprice: "",
@@ -143,6 +145,13 @@ export default function LiveSession2() {
   const [isVideoUploading, setIsVideoUploading] = useState({});
   const [guideUploadProgress, setGuideUploadProgress] = useState(0);
   const [isGuideUploading, setIsGuideUploading] = useState(false);
+
+  // Image Editor States
+  const [isImageEditorOpen, setIsImageEditorOpen] = useState(false);
+  const [editingImage, setEditingImage] = useState(null);
+  const [editingImageType, setEditingImageType] = useState(null); // 'thumbnail', 'guide', 'oneTime', 'feature'
+  const [editingImageIndex, setEditingImageIndex] = useState(null);
+  const [isSavingEditedImage, setIsSavingEditedImage] = useState(false);
 
   // Weekday labels
   const dayLabels = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
@@ -388,8 +397,9 @@ export default function LiveSession2() {
     if (!file) return;
 
     try {
-      if (!file.type.startsWith("image/")) {
-        alert("Please upload an image file");
+      // Accept both images and videos
+      if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
+        alert("Please upload an image or video file");
         return;
       }
 
@@ -415,6 +425,7 @@ export default function LiveSession2() {
         async () => {
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
           handleFieldChange("liveSessionCard", "thumbnail", downloadURL);
+          handleFieldChange("liveSessionCard", "thumbnailType", file.type);
           setIsUploading(false);
           setUploadProgress(0);
         },
@@ -903,6 +914,7 @@ export default function LiveSession2() {
         price: "",
         gst: "",
         thumbnail: null,
+        thumbnailType: null,
         days: "",
         videos: "",
         totalprice: "",
@@ -1269,6 +1281,101 @@ export default function LiveSession2() {
     }
   };
 
+  // Image Editor Functions
+  const openImageEditor = (imageUrl, type, index = null) => {
+    setEditingImage(imageUrl);
+    setEditingImageType(type);
+    setEditingImageIndex(index);
+    setIsImageEditorOpen(true);
+  };
+
+  const handleImageEditorCancel = () => {
+    setIsImageEditorOpen(false);
+    setEditingImage(null);
+    setEditingImageType(null);
+    setEditingImageIndex(null);
+  };
+
+  const handleImageEditorSave = async (editedFile) => {
+    try {
+      setIsSavingEditedImage(true);
+      setIsImageEditorOpen(false);
+
+      const filePath = `session_images/${uuidv4()}_${editedFile.name}`;
+      const storageRef = ref(storage, filePath);
+      const uploadTask = uploadBytesResumable(storageRef, editedFile);
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log(`Upload progress: ${Math.round(progress)}%`);
+        },
+        (error) => {
+          console.error("Upload failed:", error);
+          setIsSavingEditedImage(false);
+          showError("Failed to upload edited image");
+        },
+        async () => {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+
+          // Delete old image
+          if (editingImage) {
+            try {
+              const oldImageRef = ref(storage, editingImage);
+              await deleteObject(oldImageRef);
+            } catch (err) {
+              console.log("Old image cleanup error:", err);
+            }
+          }
+
+          // Update based on type
+          if (editingImageType === 'thumbnail') {
+            handleFieldChange("liveSessionCard", "thumbnail", downloadURL);
+          } else if (editingImageType === 'guide') {
+            handleGuideChange("image", downloadURL);
+          } else if (editingImageType === 'oneTime' && editingImageIndex !== null) {
+            setFormData((prev) => {
+              const updatedImages = [...prev.oneTimeSubscription.images];
+              updatedImages[editingImageIndex] = downloadURL;
+              return {
+                ...prev,
+                oneTimeSubscription: {
+                  ...prev.oneTimeSubscription,
+                  images: updatedImages,
+                },
+              };
+            });
+          } else if (editingImageType === 'feature' && editingImageIndex !== null) {
+            setFormData((prev) => {
+              const updatedFeatures = [...prev.features];
+              updatedFeatures[editingImageIndex] = {
+                ...updatedFeatures[editingImageIndex],
+                image: downloadURL,
+              };
+              return {
+                ...prev,
+                features: updatedFeatures,
+              };
+            });
+          }
+
+          setIsSavingEditedImage(false);
+          showSuccess("Image updated successfully");
+
+          // Reset editor state
+          setEditingImage(null);
+          setEditingImageType(null);
+          setEditingImageIndex(null);
+        }
+      );
+    } catch (error) {
+      console.error("Error saving edited image:", error);
+      setIsSavingEditedImage(false);
+      showError("Failed to save edited image");
+    }
+  };
+
   const handleSlotChange = (index, field, value) => {
     const updated = [...formData.liveSlots];
     updated[index][field] = value;
@@ -1325,20 +1432,65 @@ export default function LiveSession2() {
             >
               {formData.liveSessionCard.thumbnail ? (
                 <div className="relative h-full flex items-center">
-                  <img
-                    src={formData.liveSessionCard.thumbnail}
-                    alt="Thumbnail"
-                    className="h-full object-contain rounded"
-                  />
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleFieldChange("liveSessionCard", "thumbnail", null);
-                    }}
-                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+                  {formData.liveSessionCard.thumbnailType && 
+                   formData.liveSessionCard.thumbnailType.startsWith("video/") ? (
+                    // Video thumbnail
+                    <>
+                      <video
+                        src={formData.liveSessionCard.thumbnail}
+                        className="h-full object-contain rounded"
+                        controls
+                        muted
+                        loop
+                        playsInline
+                      />
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleFieldChange("liveSessionCard", "thumbnail", null);
+                          handleFieldChange("liveSessionCard", "thumbnailType", null);
+                        }}
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600"
+                        title="Remove Video"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </>
+                  ) : (
+                    // Image thumbnail
+                    <>
+                      <img
+                        src={formData.liveSessionCard.thumbnail}
+                        alt="Thumbnail"
+                        className="h-full object-contain rounded"
+                      />
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openImageEditor(formData.liveSessionCard.thumbnail, 'thumbnail');
+                        }}
+                        className="absolute top-2 left-2 bg-blue-500 text-white border border-blue-600 rounded-md px-3 py-2 hover:bg-blue-600 transition-colors shadow-lg flex items-center gap-2"
+                        title="Edit Image - Resize, Crop, Rotate"
+                      >
+                        <Edit2 size={16} />
+                        <span className="text-xs font-semibold">Edit Size</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleFieldChange("liveSessionCard", "thumbnail", null);
+                          handleFieldChange("liveSessionCard", "thumbnailType", null);
+                        }}
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600"
+                        title="Remove Image"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </>
+                  )}
                 </div>
               ) : isUploading ? (
                 <div className="text-center flex flex-col items-center">
@@ -1378,12 +1530,13 @@ export default function LiveSession2() {
                       ? "Drop here..."
                       : "Click to upload or drag and drop"}
                   </p>
+                  <p className="text-sm text-gray-400">Image or Video</p>
                   <p className="text-sm text-gray-400">Size: (487×387)px</p>
                 </div>
               )}
               <input
                 type="file"
-                accept="image/*"
+                accept="image/*,video/*"
                 onChange={(e) => handleFileUpload(e.target.files[0])}
                 className="hidden"
                 id="thumbnail-recorded2-upload"
@@ -2358,9 +2511,20 @@ export default function LiveSession2() {
                         className="w-full h-full object-cover rounded shadow"
                       />
                       <button
+                        type="button"
+                        onClick={() => openImageEditor(img, 'oneTime', index)}
+                        className="absolute top-1 left-1 bg-blue-500 text-white border border-blue-600 rounded-md px-2 py-1 hover:bg-blue-600 transition-colors shadow-lg flex items-center gap-1"
+                        title="Edit Image - Resize, Crop, Rotate"
+                      >
+                        <Edit2 size={12} />
+                        <span className="text-xs font-semibold">Edit</span>
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => removeImage(index)}
                         className="absolute top-1 right-1 bg-white border border-gray-300 rounded-full p-1
                                         hover:bg-gray-200"
+                        title="Remove"
                       >
                         <FaTimes size={12} />
                       </button>
@@ -2863,10 +3027,21 @@ export default function LiveSession2() {
                             className="w-32 h-32 object-contain rounded"
                           />
                           <button
+                            type="button"
+                            onClick={() => openImageEditor(feature.image, 'feature', index)}
+                            className="absolute top-1 left-1 bg-blue-500 text-white border border-blue-600 rounded-md px-2 py-1 hover:bg-blue-600 transition-colors shadow-lg flex items-center gap-1"
+                            title="Edit Image - Resize, Crop, Rotate"
+                          >
+                            <Edit2 size={12} />
+                            <span className="text-xs font-semibold">Edit</span>
+                          </button>
+                          <button
+                            type="button"
                             onClick={() =>
                               handleFeatureChange(index, "image", null)
                             }
                             className="absolute top-1 right-1 bg-white border border-gray-300 rounded-full p-1 hover:bg-gray-200"
+                            title="Remove"
                           >
                             <FaTimes size={12} />
                           </button>
@@ -3030,10 +3205,21 @@ export default function LiveSession2() {
                     className="w-64 h-auto object-contain rounded shadow"
                   />
                   <button
-                    onClick={handleGuideImageRemove}
-                    className="absolute top-0 right-0 bg-white border border-gray-300 rounded-full p-1 transform translate-x-1/2 -translate-y-1/2 hover:bg-gray-200"
+                    type="button"
+                    onClick={() => openImageEditor(formData.guide[0].image, 'guide')}
+                    className="absolute top-2 left-2 bg-blue-500 text-white border border-blue-600 rounded-md px-3 py-2 hover:bg-blue-600 transition-colors shadow-lg flex items-center gap-2"
+                    title="Edit Image - Resize, Crop, Rotate"
                   >
-                    <X size={14} />
+                    <Edit2 size={16} />
+                    <span className="text-xs font-semibold">Edit Size</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleGuideImageRemove}
+                    className="absolute top-2 right-2 bg-white border border-gray-300 rounded-full p-2 hover:bg-gray-200"
+                    title="Remove Image"
+                  >
+                    <X size={16} />
                   </button>
                 </div>
               ) : isGuideUploading ? (
@@ -3159,6 +3345,28 @@ export default function LiveSession2() {
           )}
         </div>
       </div>
+
+      {/* Image Editor Modal */}
+      {isImageEditorOpen && editingImage && (
+        <ImageEditor
+          imageUrl={editingImage}
+          onSave={handleImageEditorSave}
+          onCancel={handleImageEditorCancel}
+        />
+      )}
+
+      {/* Loading Overlay - Shows while saving edited image */}
+      {isSavingEditedImage && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 flex flex-col items-center gap-4 shadow-xl">
+            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <div className="text-center">
+              <p className="text-lg font-semibold text-gray-800">Saving Image...</p>
+              <p className="text-sm text-gray-600 mt-2">Please wait while we upload your changes</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

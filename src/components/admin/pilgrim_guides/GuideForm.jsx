@@ -22,6 +22,7 @@ import { setGuides } from "../../../features/pilgrim_guide/pilgrimGuideSlice";
 import { showSuccess, showError } from "../../../utils/toast";
 import toast from "react-hot-toast";
 import RichTextEditor from "../../common/RichTextEditor";
+import ImageEditor from "../../common/ImageEditor";
 
 const ItemType = "SLIDE";
 
@@ -223,6 +224,14 @@ export default function GuideForm() {
         useState(false);
     const [guideUploadProgress, setGuideUploadProgress] = useState(0);
     const [isGuideUploading, setIsGuideUploading] = useState(false);
+    
+    // Image Editor States
+    const [isImageEditorOpen, setIsImageEditorOpen] = useState(false);
+    const [editingImage, setEditingImage] = useState(null);
+    const [editingImageType, setEditingImageType] = useState(null); // 'guide', 'thumbnail', 'session'
+    const [editingImageIndex, setEditingImageIndex] = useState(null); // for session images
+    const [isSavingEditedImage, setIsSavingEditedImage] = useState(false); // Loading state for image editor save
+    
     // One-Time multi-date selection (Online/Offline)
     const [otOnlineSelectedDates, setOtOnlineSelectedDates] = useState([]);
     const [otOnlineMulti, setOtOnlineMulti] = useState(false);
@@ -416,6 +425,183 @@ export default function GuideForm() {
         } catch (error) {
             console.error("Error removing image:", error);
         }
+    };
+
+    // Image Editor Handlers
+    const openImageEditor = (imageUrl, type, index = null) => {
+        setEditingImage(imageUrl);
+        setEditingImageType(type);
+        setEditingImageIndex(index);
+        setIsImageEditorOpen(true);
+    };
+
+    const handleImageEditorSave = async (editedFile) => {
+        try {
+            setIsSavingEditedImage(true);
+            setIsImageEditorOpen(false);
+            
+            // Determine which upload process to use based on type
+            if (editingImageType === 'guide') {
+                // Upload edited guide image
+                setIsGuideUploading(true);
+                setGuideUploadProgress(0);
+                
+                const filePath = `pilgrim_guides/meet_guides/${uuidv4()}_${editedFile.name}`;
+                const storageRef = ref(storage, filePath);
+                const uploadTask = uploadBytesResumable(storageRef, editedFile);
+
+                uploadTask.on(
+                    "state_changed",
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        setGuideUploadProgress(Math.round(progress));
+                    },
+                    (error) => {
+                        console.error("Upload failed:", error);
+                        setIsGuideUploading(false);
+                        setGuideUploadProgress(0);
+                        setIsSavingEditedImage(false);
+                        showError("Failed to upload edited image");
+                    },
+                    async () => {
+                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                        
+                        // Delete old image
+                        if (editingImage) {
+                            try {
+                                const oldImageRef = ref(storage, editingImage);
+                                await deleteObject(oldImageRef);
+                            } catch (err) {
+                                console.log("Old image cleanup error:", err);
+                            }
+                        }
+                        
+                        handleGuideChange("image", downloadURL);
+                        setIsGuideUploading(false);
+                        setGuideUploadProgress(0);
+                        setIsSavingEditedImage(false);
+                        showSuccess("Image updated successfully");
+                    }
+                );
+            } else if (editingImageType === 'thumbnail') {
+                // Upload edited thumbnail
+                setIsThumbnailUploading(true);
+                setThumbnailUploadProgress(0);
+
+                const filePath = `pilgrim_guides/thumbnails/${uuidv4()}_${editedFile.name}`;
+                const storageRef = ref(storage, filePath);
+                const uploadTask = uploadBytesResumable(storageRef, editedFile);
+
+                uploadTask.on(
+                    "state_changed",
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        setThumbnailUploadProgress(Math.round(progress));
+                    },
+                    (error) => {
+                        console.error("Upload failed:", error);
+                        setIsThumbnailUploading(false);
+                        setThumbnailUploadProgress(0);
+                        setIsSavingEditedImage(false);
+                        showError("Failed to upload edited image");
+                    },
+                    async () => {
+                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                        
+                        // Delete old image
+                        if (editingImage) {
+                            try {
+                                const oldImageRef = ref(storage, editingImage);
+                                await deleteObject(oldImageRef);
+                            } catch (err) {
+                                console.log("Old image cleanup error:", err);
+                            }
+                        }
+                        
+                        handleFieldChange("guideCard", "thumbnail", downloadURL);
+                        handleFieldChange("guideCard", "thumbnailType", editedFile.type);
+                        setIsThumbnailUploading(false);
+                        setThumbnailUploadProgress(0);
+                        setIsSavingEditedImage(false);
+                        showSuccess("Image updated successfully");
+                    }
+                );
+            } else if (editingImageType === 'session' && editingImageIndex !== null) {
+                // Upload edited session image
+                const uploadId = uuidv4();
+                setIsSessionImageUploading((prev) => ({ ...prev, [uploadId]: true }));
+                setSessionImageUploadProgress((prev) => ({ ...prev, [uploadId]: 0 }));
+
+                const filePath = `pilgrim_guides/session_images/${uuidv4()}_${editedFile.name}`;
+                const storageRef = ref(storage, filePath);
+                const uploadTask = uploadBytesResumable(storageRef, editedFile);
+
+                uploadTask.on(
+                    "state_changed",
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        setSessionImageUploadProgress((prev) => ({
+                            ...prev,
+                            [uploadId]: Math.round(progress),
+                        }));
+                    },
+                    (error) => {
+                        console.error("Upload failed:", error);
+                        setIsSessionImageUploading((prev) => ({ ...prev, [uploadId]: false }));
+                        setSessionImageUploadProgress((prev) => ({ ...prev, [uploadId]: 0 }));
+                        setIsSavingEditedImage(false);
+                        showError("Failed to upload edited image");
+                    },
+                    async () => {
+                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                        
+                        // Delete old image
+                        if (editingImage) {
+                            try {
+                                const oldImageRef = ref(storage, editingImage);
+                                await deleteObject(oldImageRef);
+                            } catch (err) {
+                                console.log("Old image cleanup error:", err);
+                            }
+                        }
+                        
+                        // Update the specific image in the array
+                        setFormData((prev) => {
+                            const updatedImages = [...prev.session.images];
+                            updatedImages[editingImageIndex] = downloadURL;
+                            return {
+                                ...prev,
+                                session: {
+                                    ...prev.session,
+                                    images: updatedImages,
+                                },
+                            };
+                        });
+                        
+                        setIsSessionImageUploading((prev) => ({ ...prev, [uploadId]: false }));
+                        setSessionImageUploadProgress((prev) => ({ ...prev, [uploadId]: 0 }));
+                        setIsSavingEditedImage(false);
+                        showSuccess("Image updated successfully");
+                    }
+                );
+            }
+            
+            // Reset editor state
+            setEditingImage(null);
+            setEditingImageType(null);
+            setEditingImageIndex(null);
+        } catch (error) {
+            console.error("Error saving edited image:", error);
+            setIsSavingEditedImage(false);
+            showError("Failed to save edited image");
+        }
+    };
+
+    const handleImageEditorCancel = () => {
+        setIsImageEditorOpen(false);
+        setEditingImage(null);
+        setEditingImageType(null);
+        setEditingImageIndex(null);
     };
 
     const handleDrop = (e) => {
@@ -2139,30 +2325,63 @@ export default function GuideForm() {
                                 <div className="relative h-full flex items-center">
                                     {formData?.guideCard?.thumbnailType &&
                                         formData?.guideCard?.thumbnailType.startsWith("video/") ? (
-                                        <video
-                                            src={formData?.guideCard?.thumbnail}
-                                            className="h-full object-contain rounded"
-                                            autoPlay
-                                            muted
-                                            loop
-                                            playsInline
-                                        />
+                                        // Video thumbnail
+                                        <>
+                                            <video
+                                                src={formData?.guideCard?.thumbnail}
+                                                className="h-full object-contain rounded"
+                                                controls
+                                                muted
+                                                loop
+                                                playsInline
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleFieldChange("guideCard", "thumbnail", null);
+                                                    handleFieldChange("guideCard", "thumbnailType", null);
+                                                }}
+                                                className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600"
+                                                title="Remove Video"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        </>
                                     ) : (
-                                        <img
-                                            src={formData?.guideCard?.thumbnail}
-                                            alt="Thumbnail"
-                                            className="h-full object-contain rounded"
-                                        />
+                                        // Image thumbnail
+                                        <>
+                                            <img
+                                                src={formData?.guideCard?.thumbnail}
+                                                alt="Thumbnail"
+                                                className="h-full object-contain rounded"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    openImageEditor(formData.guideCard.thumbnail, 'thumbnail');
+                                                }}
+                                                className="absolute top-2 left-2 bg-blue-500 text-white border border-blue-600 rounded-md px-3 py-2 hover:bg-blue-600 transition-colors shadow-lg flex items-center gap-2"
+                                                title="Edit Image - Resize, Crop, Rotate"
+                                            >
+                                                <Edit2 size={16} />
+                                                <span className="text-xs font-semibold">Edit Size</span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleFieldChange("guideCard", "thumbnail", null);
+                                                    handleFieldChange("guideCard", "thumbnailType", null);
+                                                }}
+                                                className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600"
+                                                title="Remove Image"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        </>
                                     )}
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleFieldChange("guideCard", "thumbnail", null);
-                                        }}
-                                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                                    >
-                                        <X className="w-4 h-4" />
-                                    </button>
                                 </div>
                             ) : isThumbnailUploading ? (
                                 <div className="text-center flex flex-col items-center">
@@ -2203,6 +2422,7 @@ export default function GuideForm() {
                                             : "Click to upload or drag and drop"}
                                     </p>
                                     <p className="text-gray-400">Size: (487×387)px</p>
+                                    <p className="text-xs text-gray-400 mt-1">Image or Video</p>
                                 </div>
                             )}
                             <input
@@ -5384,7 +5604,7 @@ export default function GuideForm() {
                                         className="w-10 h-10 mb-2"
                                     />
                                     <span>Click to upload image</span>
-                                    <p className="text-gray-400">Size: (550×300)px</p>
+                                    <p className="text-gray-400">Size: (700×400)px</p>
                                     <input
                                         type="file"
                                         accept="image/*"
@@ -5448,8 +5668,16 @@ export default function GuideForm() {
                                             className="w-full h-full object-cover rounded shadow"
                                         />
                                         <button
+                                            onClick={() => openImageEditor(img, 'session', index)}
+                                            className="absolute top-1 left-1 bg-blue-500 text-white border border-blue-600 rounded-full p-1 hover:bg-blue-600 transition-colors"
+                                            title="Edit Image"
+                                        >
+                                            <Edit2 size={12} />
+                                        </button>
+                                        <button
                                             onClick={() => removeImage(index)}
                                             className="absolute top-1 right-1 bg-white border border-gray-300 rounded-full p-1 hover:bg-gray-200"
+                                            title="Remove Image"
                                         >
                                             <X size={12} />
                                         </button>
@@ -5694,10 +5922,19 @@ export default function GuideForm() {
                                         className="w-64 h-auto object-contain rounded shadow"
                                     />
                                     <button
-                                        onClick={handleGuideImageRemove}
-                                        className="absolute top-0 right-0 bg-white border border-gray-300 rounded-full p-1 transform translate-x-1/2 -translate-y-1/2 hover:bg-gray-200"
+                                        onClick={() => openImageEditor(formData.guide[0].image, 'guide')}
+                                        className="absolute top-2 left-2 bg-blue-500 text-white border border-blue-600 rounded-md px-3 py-2 hover:bg-blue-600 transition-colors shadow-lg flex items-center gap-2"
+                                        title="Edit Image - Resize, Crop, Rotate"
                                     >
-                                        <X size={14} />
+                                        <Edit2 size={16} />
+                                        <span className="text-xs font-semibold">Edit Size</span>
+                                    </button>
+                                    <button
+                                        onClick={handleGuideImageRemove}
+                                        className="absolute top-2 right-2 bg-white border border-gray-300 rounded-full p-2 hover:bg-gray-200"
+                                        title="Remove Image"
+                                    >
+                                        <X size={16} />
                                     </button>
                                 </div>
                             ) : isGuideUploading ? (
@@ -5823,6 +6060,28 @@ export default function GuideForm() {
                     </div>
                 )}
             </div>
+
+            {/* Image Editor Modal */}
+            {isImageEditorOpen && editingImage && (
+                <ImageEditor
+                    imageUrl={editingImage}
+                    onSave={handleImageEditorSave}
+                    onCancel={handleImageEditorCancel}
+                />
+            )}
+
+            {/* Loading Overlay - Shows while saving edited image */}
+            {isSavingEditedImage && (
+                <div className="fixed inset-0 bg-black/30 backdrop-blur-xs flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-8 flex flex-col items-center gap-4 shadow-xl">
+                        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        <div className="text-center">
+                            <p className="text-lg font-semibold text-gray-800">Saving Image...</p>
+                            <p className="text-sm text-gray-600 mt-2">Please wait while we upload your changes</p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

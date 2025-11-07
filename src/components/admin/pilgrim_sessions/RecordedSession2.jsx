@@ -4,23 +4,14 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { X, Trash2, GripVertical, Edit2 } from "lucide-react";
 import { FaPlus, FaTimes } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  deleteObject,
-  getDownloadURL,
-  ref,
-  uploadBytes,
-  uploadBytesResumable,
-} from "firebase/storage";
+import { deleteObject, getDownloadURL, ref, uploadBytes, uploadBytesResumable, } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
 import { storage } from "../../../services/firebase";
 import { setRecordedSessions } from "../../../features/pilgrim_session/recordedSessionSlice";
-import {
-  deleteRecordedSessionByIndex,
-  fetchRecordedSessionData,
-  saveOrUpdateRecordedSessionData,
-} from "../../../services/pilgrim_session/recordedSessionService";
+import { deleteRecordedSessionByIndex, fetchRecordedSessionData, saveOrUpdateRecordedSessionData, } from "../../../services/pilgrim_session/recordedSessionService";
 import { showSuccess } from "../../../utils/toast";
 import RichTextEditor from "../../common/RichTextEditor";
+import ImageEditor from "../../common/ImageEditor";
 
 const ItemType = "SLIDE";
 
@@ -79,6 +70,7 @@ export default function RecordedSession2() {
       price: "",
       gst: "",
       thumbnail: null,
+      thumbnailType: null,
       days: "",
       videos: "",
       totalprice: "",
@@ -140,6 +132,13 @@ export default function RecordedSession2() {
   const [guideImageUploadProgress, setGuideImageUploadProgress] = useState(0);
   const [isGuideImageUploading, setIsGuideImageUploading] = useState(false);
 
+  // Image Editor States
+  const [isImageEditorOpen, setIsImageEditorOpen] = useState(false);
+  const [editingImage, setEditingImage] = useState(null);
+  const [editingImageType, setEditingImageType] = useState(null); // 'thumbnail', 'guide', 'oneTime', 'feature'
+  const [editingImageIndex, setEditingImageIndex] = useState(null); // for arrays
+  const [isSavingEditedImage, setIsSavingEditedImage] = useState(false);
+
   // Refs for hidden file inputs
   const thumbnailInputRef = useRef(null);
   const featureInputRefs = useRef({});
@@ -159,8 +158,8 @@ export default function RecordedSession2() {
     if (!file) return;
 
     try {
-      if (!file.type.startsWith("image/")) {
-        alert("Please upload an image file");
+      if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
+        alert("Please upload an image or video file");
         return;
       }
 
@@ -186,6 +185,7 @@ export default function RecordedSession2() {
         async () => {
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
           handleFieldChange("recordedProgramCard", "thumbnail", downloadURL);
+          handleFieldChange("recordedProgramCard", "thumbnailType", file.type);
           setIsUploading(false);
           setUploadProgress(0);
         },
@@ -650,6 +650,7 @@ export default function RecordedSession2() {
         price: "",
         gst: "",
         thumbnail: null,
+        thumbnailType: null,
         days: "",
         videos: "",
         totalprice: "",
@@ -925,6 +926,81 @@ export default function RecordedSession2() {
     }
   };
 
+  // Image Editor Handlers
+  const openImageEditor = (imageUrl, type, index = null) => {
+    setEditingImage(imageUrl);
+    setEditingImageType(type);
+    setEditingImageIndex(index);
+    setIsImageEditorOpen(true);
+  };
+
+  const handleImageEditorCancel = () => {
+    setIsImageEditorOpen(false);
+    setEditingImage(null);
+    setEditingImageType(null);
+    setEditingImageIndex(null);
+  };
+
+  const handleImageEditorSave = async (editedFile) => {
+    try {
+      setIsSavingEditedImage(true);
+      setIsImageEditorOpen(false);
+
+      // Upload the edited image to Firebase
+      const filePath = `session_images/${uuidv4()}_${editedFile.name}`;
+      const storageRef = ref(storage, filePath);
+      const uploadTask = uploadBytesResumable(storageRef, editedFile);
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log(`Upload is ${progress}% done`);
+        },
+        (error) => {
+          console.error("Error uploading edited image:", error);
+          setIsSavingEditedImage(false);
+          alert("Error uploading edited image. Please try again.");
+        },
+        async () => {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+
+          // Delete old image if exists
+          if (editingImage) {
+            try {
+              const oldImageRef = ref(storage, editingImage);
+              await deleteObject(oldImageRef);
+            } catch (error) {
+              console.warn("Could not delete old image:", error);
+            }
+          }
+
+          // Update the appropriate field based on type
+          if (editingImageType === "thumbnail") {
+            handleFieldChange("recordedProgramCard", "thumbnail", downloadURL);
+            handleFieldChange("recordedProgramCard", "thumbnailType", editedFile.type);
+          } else if (editingImageType === "guide") {
+            handleGuideChange("image", downloadURL);
+          } else if (editingImageType === "oneTime") {
+            const updated = [...formData.oneTimeSubscription.images];
+            updated[editingImageIndex] = downloadURL;
+            handleFieldChange("oneTimeSubscription", "images", updated);
+          } else if (editingImageType === "feature") {
+            handleFeatureChange(editingImageIndex, "image", downloadURL);
+          }
+
+          setIsSavingEditedImage(false);
+          handleImageEditorCancel();
+          showSuccess("Image updated successfully!");
+        }
+      );
+    } catch (error) {
+      console.error("Error in handleImageEditorSave:", error);
+      setIsSavingEditedImage(false);
+      alert("Error saving edited image. Please try again.");
+    }
+  };
+
   // Recorded Video Handlers
   const addRecordedVideo = () => {
     setFormData((prev) => ({
@@ -1067,24 +1143,65 @@ export default function RecordedSession2() {
             >
               {formData.recordedProgramCard.thumbnail ? (
                 <div className="relative h-full flex items-center">
-                  <img
-                    src={formData.recordedProgramCard.thumbnail}
-                    alt="Thumbnail"
-                    className="h-full object-contain rounded"
-                  />
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleFieldChange(
-                        "recordedProgramCard",
-                        "thumbnail",
-                        null,
-                      );
-                    }}
-                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+                  {formData?.recordedProgramCard?.thumbnailType &&
+                    formData?.recordedProgramCard?.thumbnailType.startsWith("video/") ? (
+                    // Video thumbnail
+                    <>
+                      <video
+                        src={formData.recordedProgramCard.thumbnail}
+                        className="h-full object-contain rounded"
+                        controls
+                        muted
+                        loop
+                        playsInline
+                      />
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleFieldChange("recordedProgramCard", "thumbnail", null);
+                          handleFieldChange("recordedProgramCard", "thumbnailType", null);
+                        }}
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600"
+                        title="Remove Video"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </>
+                  ) : (
+                    // Image thumbnail
+                    <>
+                      <img
+                        src={formData.recordedProgramCard.thumbnail}
+                        alt="Thumbnail"
+                        className="h-full object-contain rounded"
+                      />
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openImageEditor(formData.recordedProgramCard.thumbnail, 'thumbnail');
+                        }}
+                        className="absolute top-2 left-2 bg-blue-500 text-white border border-blue-600 rounded-md px-3 py-2 hover:bg-blue-600 transition-colors shadow-lg flex items-center gap-2"
+                        title="Edit Image - Resize, Crop, Rotate"
+                      >
+                        <Edit2 size={16} />
+                        <span className="text-xs font-semibold">Edit Size</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleFieldChange("recordedProgramCard", "thumbnail", null);
+                          handleFieldChange("recordedProgramCard", "thumbnailType", null);
+                        }}
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600"
+                        title="Remove Image"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </>
+                  )}
                 </div>
               ) : isUploading ? (
                 <div className="text-center flex flex-col items-center">
@@ -1125,11 +1242,12 @@ export default function RecordedSession2() {
                       : "Click to upload or drag and drop"}
                   </p>
                   <p className="text-sm text-gray-400">Size: (487×387)px</p>
+                  <p className="text-xs text-gray-400 mt-1">Image or Video</p>
                 </div>
               )}
               <input
                 type="file"
-                accept="image/*"
+                accept="image/*,video/*"
                 onChange={(e) => handleFileUpload(e.target.files[0])}
                 className="hidden"
                 ref={thumbnailInputRef}
@@ -1484,6 +1602,17 @@ export default function RecordedSession2() {
                       alt={`img-${index}`}
                       className="w-full h-full object-cover rounded shadow"
                     />
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openImageEditor(img, 'oneTime', index);
+                      }}
+                      className="absolute top-1 left-1 bg-blue-500 text-white rounded px-2 py-1 hover:bg-blue-600 text-xs"
+                      title="Edit Image"
+                    >
+                      Edit
+                    </button>
                     <button
                       onClick={() => removeImage(index)}
                       className="absolute top-1 right-1 bg-white border border-gray-300 rounded-full p-1
@@ -2138,6 +2267,17 @@ export default function RecordedSession2() {
                           className="w-32 h-32 object-contain rounded"
                         />
                         <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openImageEditor(feature.image, 'feature', index);
+                          }}
+                          className="absolute top-1 left-1 bg-blue-500 text-white rounded px-2 py-1 hover:bg-blue-600 text-xs"
+                          title="Edit Image"
+                        >
+                          Edit
+                        </button>
+                        <button
                           onClick={() =>
                             handleFeatureChange(index, "image", null)
                           }
@@ -2309,6 +2449,18 @@ export default function RecordedSession2() {
                   className="w-64 h-auto object-contain rounded shadow"
                 />
                 <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openImageEditor(formData.guide[0].image, 'guide');
+                  }}
+                  className="absolute top-2 left-2 bg-blue-500 text-white border border-blue-600 rounded-md px-3 py-2 hover:bg-blue-600 transition-colors shadow-lg flex items-center gap-2"
+                  title="Edit Image - Resize, Crop, Rotate"
+                >
+                  <Edit2 size={16} />
+                  <span className="text-xs font-semibold">Edit Size</span>
+                </button>
+                <button
                   onClick={handleGuideImageRemove}
                   className="absolute top-0 right-0 bg-white border border-gray-300 rounded-full p-1 transform translate-x-1/2 -translate-y-1/2 hover:bg-gray-200"
                 >
@@ -2443,6 +2595,28 @@ export default function RecordedSession2() {
           </div>
         )}
       </div>
+
+      {/* Image Editor Modal */}
+      {isImageEditorOpen && editingImage && (
+        <ImageEditor
+          imageUrl={editingImage}
+          onSave={handleImageEditorSave}
+          onCancel={handleImageEditorCancel}
+        />
+      )}
+
+      {/* Loading Overlay */}
+      {isSavingEditedImage && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 flex flex-col items-center">
+            <div className="relative w-16 h-16 mb-4">
+              <div className="absolute inset-0 border-4 border-gray-200 rounded-full"></div>
+              <div className="absolute inset-0 border-4 border-[#2F6288] rounded-full border-t-transparent animate-spin"></div>
+            </div>
+            <p className="text-lg font-semibold text-gray-700">Saving edited image...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { X, Plus } from "lucide-react";
+import { X, Plus, Edit2 } from "lucide-react";
 import { FaTimes } from "react-icons/fa";
 import { showSuccess, showError } from "../../../utils/toast";
 import {
@@ -26,11 +26,13 @@ import {
   saveWorkshopOrganizerData,
 } from "../../../services/workshopService";
 import RichTextEditor from "../../common/RichTextEditor";
+import ImageEditor from "../../common/ImageEditor";
 
 export default function WorkshopForm() {
   const [formData, setFormData] = useState({
     // Workshop Card Details
     thumbnail: "",
+    thumbnailType: null,
     title: "",
     description: "",
     price: "",
@@ -68,6 +70,13 @@ export default function WorkshopForm() {
   );
 
   const [isEditing, setIsEditing] = useState(false);
+
+  // Image Editor States
+  const [isImageEditorOpen, setIsImageEditorOpen] = useState(false);
+  const [editingImage, setEditingImage] = useState(null);
+  const [editingImageType, setEditingImageType] = useState(null); // 'thumbnail', 'guide', 'image'
+  const [editingImageIndex, setEditingImageIndex] = useState(null); // for image arrays
+  const [isSavingEditedImage, setIsSavingEditedImage] = useState(false);
 
   // Initialize form with current workshop data if editing
   useEffect(() => {
@@ -162,6 +171,11 @@ export default function WorkshopForm() {
   const handleThumbnailChange = async (file) => {
     if (!file) return;
 
+    if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
+      showError("Please upload an image or video file");
+      return;
+    }
+
     dispatch(setThumbnailUploading(true));
     dispatch(setThumbnailUploadProgress(0));
 
@@ -174,6 +188,7 @@ export default function WorkshopForm() {
       });
 
       handleFieldChange("thumbnail", downloadURL);
+      handleFieldChange("thumbnailType", file.type);
       showSuccess("Thumbnail uploaded successfully!");
     } catch (error) {
       console.error("Thumbnail upload error:", error);
@@ -324,6 +339,56 @@ export default function WorkshopForm() {
     handleGuideChange("image", "");
   };
 
+  // Image Editor Handlers
+  const openImageEditor = (imageUrl, type, index = null) => {
+    setEditingImage(imageUrl);
+    setEditingImageType(type);
+    setEditingImageIndex(index);
+    setIsImageEditorOpen(true);
+  };
+
+  const handleImageEditorCancel = () => {
+    setIsImageEditorOpen(false);
+    setEditingImage(null);
+    setEditingImageType(null);
+    setEditingImageIndex(null);
+  };
+
+  const handleImageEditorSave = async (editedFile) => {
+    try {
+      setIsSavingEditedImage(true);
+      setIsImageEditorOpen(false);
+
+      // Upload the edited image to Firebase
+      const timestamp = Date.now();
+      const path = `workshops/edited/${timestamp}_${editedFile.name}`;
+
+      const downloadURL = await uploadFile(editedFile, path, (progress) => {
+        console.log(`Upload is ${progress}% done`);
+      });
+
+      // Update the appropriate field based on type
+      if (editingImageType === "thumbnail") {
+        handleFieldChange("thumbnail", downloadURL);
+        handleFieldChange("thumbnailType", editedFile.type);
+      } else if (editingImageType === "guide") {
+        handleGuideChange("image", downloadURL);
+      } else if (editingImageType === "image") {
+        const updatedImages = [...formData.images];
+        updatedImages[editingImageIndex] = downloadURL;
+        handleFieldChange("images", updatedImages);
+      }
+
+      setIsSavingEditedImage(false);
+      handleImageEditorCancel();
+      showSuccess("Image updated successfully!");
+    } catch (error) {
+      console.error("Error in handleImageEditorSave:", error);
+      setIsSavingEditedImage(false);
+      showError("Error saving edited image. Please try again.");
+    }
+  };
+
   // Save workshop to Firestore
   const onSaveWorkshop = async () => {
     if (!formData.title.trim()) {
@@ -423,6 +488,7 @@ export default function WorkshopForm() {
   const resetForm = () => {
     setFormData({
       thumbnail: "",
+      thumbnailType: null,
       title: "",
       description: "",
       price: "",
@@ -468,28 +534,58 @@ export default function WorkshopForm() {
           </label>
           {formData.thumbnail ? (
             <div className="relative inline-block mb-4">
-              {formData.thumbnail.includes(".mp4") ||
-              formData.thumbnail.includes(".mov") ||
-              formData.thumbnail.includes(".avi") ||
-              formData.thumbnail.includes(".webm") ? (
-                <video
-                  src={formData.thumbnail}
-                  controls
-                  className="w-64 h-auto object-contain rounded shadow"
-                />
+              {formData?.thumbnailType &&
+              formData?.thumbnailType.startsWith("video/") ? (
+                // Video thumbnail
+                <>
+                  <video
+                    src={formData.thumbnail}
+                    controls
+                    className="w-64 h-auto object-contain rounded shadow"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleFieldChange("thumbnail", "");
+                      handleFieldChange("thumbnailType", null);
+                    }}
+                    className="absolute top-0 right-0 bg-white border border-gray-300 rounded-full p-1 transform translate-x-1/2 -translate-y-1/2 hover:bg-gray-200"
+                  >
+                    <X size={14} />
+                  </button>
+                </>
               ) : (
-                <img
-                  src={formData.thumbnail}
-                  alt="Thumbnail Preview"
-                  className="w-64 h-auto object-contain rounded shadow"
-                />
+                // Image thumbnail
+                <>
+                  <img
+                    src={formData.thumbnail}
+                    alt="Thumbnail Preview"
+                    className="w-64 h-auto object-contain rounded shadow"
+                  />
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openImageEditor(formData.thumbnail, "thumbnail");
+                    }}
+                    className="absolute top-2 left-2 bg-blue-500 text-white border border-blue-600 rounded-md px-3 py-2 hover:bg-blue-600 transition-colors shadow-lg flex items-center gap-2"
+                    title="Edit Image - Resize, Crop, Rotate"
+                  >
+                    <Edit2 size={16} />
+                    <span className="text-xs font-semibold">Edit Size</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleFieldChange("thumbnail", "");
+                      handleFieldChange("thumbnailType", null);
+                    }}
+                    className="absolute top-0 right-0 bg-white border border-gray-300 rounded-full p-1 transform translate-x-1/2 -translate-y-1/2 hover:bg-gray-200"
+                  >
+                    <X size={14} />
+                  </button>
+                </>
               )}
-              <button
-                onClick={() => handleFieldChange("thumbnail", "")}
-                className="absolute top-0 right-0 bg-white border border-gray-300 rounded-full p-1 transform translate-x-1/2 -translate-y-1/2 hover:bg-gray-200"
-              >
-                <X size={14} />
-              </button>
             </div>
           ) : uploading.thumbnail ? (
             <div className="w-full h-40 border-2 border-dashed border-gray-300 rounded flex flex-col items-center justify-center mb-4">
@@ -920,6 +1016,17 @@ export default function WorkshopForm() {
                       className="w-full h-full object-cover rounded shadow"
                     />
                     <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openImageEditor(img, "image", index);
+                      }}
+                      className="absolute top-1 left-1 bg-blue-500 text-white rounded px-2 py-1 hover:bg-blue-600 text-xs"
+                      title="Edit Image"
+                    >
+                      Edit
+                    </button>
+                    <button
                       onClick={() => {
                         const updatedImages = formData.images.filter(
                           (_, i) => i !== index,
@@ -1050,6 +1157,18 @@ export default function WorkshopForm() {
                 alt="Preview"
                 className="w-64 h-auto object-contain rounded shadow"
               />
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openImageEditor(formData.guide[0].image, "guide");
+                }}
+                className="absolute top-2 left-2 bg-blue-500 text-white border border-blue-600 rounded-md px-3 py-2 hover:bg-blue-600 transition-colors shadow-lg flex items-center gap-2"
+                title="Edit Image - Resize, Crop, Rotate"
+              >
+                <Edit2 size={16} />
+                <span className="text-xs font-semibold">Edit Size</span>
+              </button>
               <button
                 onClick={handleGuideImageRemove}
                 className="absolute top-0 right-0 bg-white border border-gray-300 rounded-full p-1 transform translate-x-1/2 -translate-y-1/2 hover:bg-gray-200"
@@ -1206,6 +1325,30 @@ export default function WorkshopForm() {
           </button>
         )}
       </div>
+
+      {/* Image Editor Modal */}
+      {isImageEditorOpen && editingImage && (
+        <ImageEditor
+          imageUrl={editingImage}
+          onSave={handleImageEditorSave}
+          onCancel={handleImageEditorCancel}
+        />
+      )}
+
+      {/* Loading Overlay */}
+      {isSavingEditedImage && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 flex flex-col items-center">
+            <div className="relative w-16 h-16 mb-4">
+              <div className="absolute inset-0 border-4 border-gray-200 rounded-full"></div>
+              <div className="absolute inset-0 border-4 border-[#2F6288] rounded-full border-t-transparent animate-spin"></div>
+            </div>
+            <p className="text-lg font-semibold text-gray-700">
+              Saving edited image...
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
