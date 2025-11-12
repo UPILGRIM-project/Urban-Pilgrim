@@ -75,46 +75,49 @@ export default function Sidebar({ activeSection, setActiveSection }) {
             )}
 
             <div
-                className={`md:w-64 w-full  h-screen bg-[#fff] p-5 border-r border-black/20 fixed z-40 transition-transform duration-300 ease-in-out
+                className={`md:w-64 w-full h-screen bg-[#fff] border-r border-black/20 fixed z-40 transition-transform duration-300 ease-in-out flex flex-col
                 ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
             >
-                {/* Admin Info */}
-                <div className="mt-[40px] md:mt-[20px] mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-[rgb(47,98,136)] rounded-full flex items-center justify-center">
-                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 truncate">
-                                {admin?.email || 'Admin'}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                                {admin?.role || 'Administrator'}
-                            </p>
+                {/* Scrollable Content Container */}
+                <div className="flex-1 overflow-y-auto p-5">
+                    {/* Admin Info */}
+                    <div className="mt-[40px] md:mt-[20px] mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-[rgb(47,98,136)] rounded-full flex items-center justify-center">
+                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900 truncate">
+                                    {admin?.email || 'Admin'}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                    {admin?.role || 'Administrator'}
+                                </p>
+                            </div>
                         </div>
                     </div>
-                </div>
-                
-                {/* Menu */}
-                <div className="space-y-2">
-                    {menu.map(({ name, key }) => (
-                        <button
-                            key={key}
-                            onClick={() => handleMenuClick(key)}
-                            className={`flex items-center gap-3 p-3 rounded-full w-full text-left
-                            ${activeSection === key ? "bg-[#fceee3] text-[#0c3c60]" : "text-gray-600"}
-                            hover:bg-[#fceee3]`}
-                        >
-                            <img src={`/assets/admin/${key}.svg`} alt={`${name} icon`} className="w-6 h-6" />
-                            {name}
-                        </button>
-                    ))}
+                    
+                    {/* Menu */}
+                    <div className="space-y-2 pb-4">
+                        {menu.map(({ name, key }) => (
+                            <button
+                                key={key}
+                                onClick={() => handleMenuClick(key)}
+                                className={`flex items-center gap-3 p-3 rounded-full w-full text-left transition-colors
+                                ${activeSection === key ? "bg-[#fceee3] text-[#0c3c60]" : "text-gray-600"}
+                                hover:bg-[#fceee3]`}
+                            >
+                                <img src={`/assets/admin/${key}.svg`} alt={`${name} icon`} className="w-6 h-6" />
+                                {name}
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
-                {/* Logout Button */}
-                <div className="absolute bottom-6 left-5 right-5">
+                {/* Logout Button - Fixed at Bottom */}
+                <div className="border-t border-gray-200 p-5 bg-white">
                     <button
                         onClick={handleLogout}
                         className="flex items-center gap-3 p-3 rounded-full w-full text-left text-red-600 hover:bg-red-50 transition-colors"

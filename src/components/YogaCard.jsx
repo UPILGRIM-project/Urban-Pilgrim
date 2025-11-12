@@ -8,39 +8,6 @@ import { useDispatch } from "react-redux";
 import { setHighlight } from "../features/home_slices/highlightSlice";
 import { useNavigate } from "react-router-dom";
 
-const data = [
-    {
-        title: "How Yoga’s Ancient Science Rewires Your Brain for Peace",
-        description:
-            "Clinical studies now prove what yogis knew—specific pranayama techniques can lower cortisol by 37% in 21 days.",
-        linkText: "Learn more",
-    },
-    {
-        title: "The Power of Breath in Daily Stress Reduction",
-        description:
-            "Explore how daily breathwork transforms your nervous system and cultivates calm.",
-        linkText: "Discover more",
-    },
-    {
-        title: "Rebuild Focus with Yogic Discipline",
-        description:
-            "Unlock ancient yogic routines to train your brain to resist distractions naturally.",
-        linkText: "Explore",
-    },
-    {
-        title: "Align Body and Mind with Morning Yoga",
-        description:
-            "Simple morning sequences can improve your mood and focus throughout the day.",
-        linkText: "Start Now",
-    },
-    {
-        title: "Boost Sleep Quality Through Evening Practices",
-        description:
-            "Wind down your system with nightly flows proven to help your body recover deeper.",
-        linkText: "Read more",
-    },
-];
-
 export default function YogaCard() {
     const [current, setCurrent] = useState(0);
     const [highlightCard, setHighlightCard] = useState([]);
@@ -86,10 +53,9 @@ export default function YogaCard() {
     const slugify = (text) =>
         text
             .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-") // replace spaces/special chars with `-`
-            .replace(/^-+|-+$/g, "");   // trim starting/ending `-`
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "");
 
-    // Show loading or empty state if no highlights
     if (isLoading) {
         return (
             <div className="max-w-[1200px] mx-auto p-4 flex justify-center items-center h-[480px]">
@@ -123,7 +89,7 @@ export default function YogaCard() {
                         currentHighlight?.image?.includes('.mkv')) ? (
                         <video
                             src={currentHighlight?.image}
-                            className="w-full md:h-full h-50 object-cover rounded-t-lg md:rounded-l-lg md:rounded-tr-none"
+                            className="w-full md:h-full h-[51%] object-cover rounded-t-lg md:rounded-l-lg md:rounded-tr-none"
                             autoPlay
                             loop
                             muted
@@ -133,7 +99,7 @@ export default function YogaCard() {
                         <img
                             src={currentHighlight?.image || "/assets/yoga.svg"}
                             alt="Yoga"
-                            className="w-full md:h-full h-50 object-cover rounded-t-lg md:rounded-l-lg md:rounded-tr-none"
+                            className="w-full md:h-full h-[51%] object-cover rounded-t-lg md:rounded-l-lg md:rounded-tr-none"
                         />
                     )}
                 </div>
@@ -144,13 +110,15 @@ export default function YogaCard() {
                         <h2 className="text-sm sm:text-xl md:text-2xl line-clamp-2 font-semibold mb-4">{currentHighlight?.title}</h2>
                         <p className="text-xs text-gray-600 mb-6 line-clamp-2">{currentHighlight?.description}</p>
                         <p
-                            onClick={() => navigate(`/yoga/${slugify(currentHighlight?.title)}`, {
-                                state: {
-                                    image: currentHighlight?.image,
-                                    title: currentHighlight?.title,
-                                    description: currentHighlight?.description
-                                }
-                            })}
+                            onClick={() =>
+                                navigate(`/yoga/${slugify(currentHighlight?.title)}`, {
+                                    state: {
+                                        image: currentHighlight?.image,
+                                        title: currentHighlight?.title,
+                                        description: currentHighlight?.description
+                                    }
+                                })
+                            }
                             className="text-[#79534E] md:text-sm text-xs cursor-pointer font-semibold flex items-center gap-2"
                         >
                             {currentHighlight?.linkText || "Learn more"}
