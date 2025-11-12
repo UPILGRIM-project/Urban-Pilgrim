@@ -20,7 +20,6 @@ export default function Workshops({ filters = {}, bestSellingActive = false }) {
                     ...doc.data()
                 }));
                 setWorkshopsData(workshopsList);
-                console.log('Workshops fetched from database:', workshopsList);
             } catch (error) {
                 console.error('Error fetching workshops:', error);
                 setWorkshopsData([]);

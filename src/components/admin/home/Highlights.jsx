@@ -127,7 +127,6 @@ export default function Highlights() {
                     setImage(downloadURL);
                     setIsUploading(false);
                     setUploadProgress(0);
-                    console.log("Uploaded file URL:", downloadURL);
                 }
             );
         } catch (error) {
@@ -150,7 +149,6 @@ export default function Highlights() {
         const loadData = async () => {
             dispatch(setLoading(true));
             const data = await fetchHighlights(uid);
-            console.log("data from highlights: ", data);
             setHighlights(data?.highlight || []);
             dispatch(setHighlight(data?.highlight));
             dispatch(setLoading(false));
@@ -173,14 +171,12 @@ export default function Highlights() {
             setEditingIndex(null);
             dispatch(setHighlight(updated));
             add_Or_Update_Highlight(uid, updated);
-            console.log("Highlight updated:", newHighlight);
         } else {
             const updated = [...highlights];
             updated.splice(parseInt(displayOrder) - 1, 0, newHighlight);
             setHighlights(updated);
             dispatch(setHighlight(updated));
             add_Or_Update_Highlight(uid, updated);
-            console.log("Highlight added:", newHighlight);
         }
         setImage(null);
         setTitle("");
@@ -214,7 +210,6 @@ export default function Highlights() {
                         const fileRef = ref(storage, filePath);
                         
                         await deleteObject(fileRef);
-                        console.log("Media file deleted from storage:", filePath);
                     }
                 } catch (storageError) {
                     console.warn("Could not delete media file from storage:", storageError);
@@ -228,8 +223,6 @@ export default function Highlights() {
             setHighlights(updated);
             dispatch(setHighlight(updated));
             await deleteHighlightFromFirestore(uid, index);
-            
-            console.log("Highlight deleted at index:", index);
         } catch (error) {
             console.error("Error deleting highlight:", error);
         }
@@ -253,7 +246,6 @@ export default function Highlights() {
         try {
             // persist updated order in Firestore
             await add_Or_Update_Highlight(uid, updated);
-            console.log("Highlight order updated successfully!");
         } catch (error) {
             console.error("Error updating highlight order:", error);
         }

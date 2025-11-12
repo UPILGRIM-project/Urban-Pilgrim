@@ -6,9 +6,6 @@ import { addToCart } from "../../features/cartSlice.js";
 import { showSuccess } from "../../utils/toast.js";
 
 export default function LiveCalendarModal({ isOpen, onClose, sessionData, selectedPlan, mode,availableSlots = [],personsPerBooking = 1,occupancyType = '',capacityMax = 0}) {
-    console.log("sessionData", sessionData);
-    console.log("selectedPlan", selectedPlan);
-    console.log("availableSlots", availableSlots);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedSlot, setSelectedSlot] = useState(null);
@@ -29,7 +26,6 @@ export default function LiveCalendarModal({ isOpen, onClose, sessionData, select
     const fetchAvailableSlots = async () => {
         // Use slots passed from parent component instead of fetching
         if (availableSlots.length > 0) {
-            console.log("Using slots from parent:", availableSlots);
             // Process parent slots to ensure they have the available property
             const processedParentSlots = availableSlots.map((slot, index) => ({
                 id: slot.id || `parent-${slot.date}-${slot.time || slot.startTime}-${index}`,
@@ -51,7 +47,6 @@ export default function LiveCalendarModal({ isOpen, onClose, sessionData, select
             // Fallback: Get slots from session data if no slots passed from parent
             const modeKey = mode === 'Online' ? 'onlineSlots' : 'offlineSlots';
             const slots = sessionData?.session?.[modeKey] || [];
-            console.log("slots from session:", slots);
                 
             // Process slots into the expected format
             const processedSlots = slots.map((slot, index) => ({
@@ -65,7 +60,6 @@ export default function LiveCalendarModal({ isOpen, onClose, sessionData, select
                 ...slot
             }));
             
-            console.log("Processed slots:", processedSlots);
             setLocalSlots(processedSlots);
         } catch (error) {
             console.error('Error fetching slots:', error);
@@ -345,7 +339,6 @@ export default function LiveCalendarModal({ isOpen, onClose, sessionData, select
 
     const handleAddToCart = () => {
         if (!sessionData || !selectedSlot) {
-            console.log("Missing session data or selected slot");
             return;
         }
 
@@ -371,7 +364,6 @@ export default function LiveCalendarModal({ isOpen, onClose, sessionData, select
             timestamp: new Date().toISOString()
         };
 
-        console.log("Adding to cart:", cartItem);
         dispatch(addToCart(cartItem));
         showSuccess("Added to cart!");
         

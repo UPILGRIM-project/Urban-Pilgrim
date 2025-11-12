@@ -135,7 +135,6 @@ export default function OrganizerList() {
         );
     }
 
-    console.log("Organizers:", organizers);
 
     return (
         <>

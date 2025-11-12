@@ -78,7 +78,7 @@ export default function LiveDetails() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+  }, [sessionId]);
 
   const Data = useSelector((state) => state.pilgrimLiveSession.LiveSession);
   const cartItems = useSelector((state) => state.cart.items || []);
@@ -125,8 +125,6 @@ export default function LiveDetails() {
 
     loadEvents();
   }, [dispatch, allEvents]);
-
-  console.log("programData: ", programData);
 
   const increment = () => setPersons((prev) => prev + 1);
   const decrement = () => setPersons((prev) => (prev > 1 ? prev - 1 : 1));

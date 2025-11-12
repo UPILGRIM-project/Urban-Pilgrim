@@ -35,15 +35,12 @@ export const processGroupWaitingPeriods = async () => {
                     actualStartDate: today
                 });
                 
-                console.log(`Group booking ${bookingId} activated - minimum persons reached`);
-                
                 // Send activation email
                 await sendGroupActivationEmail(booking);
                 
             } else {
                 // Minimum not reached - process refund
                 await processGroupRefund(booking, bookingId);
-                console.log(`Group booking ${bookingId} refunded - minimum persons not reached`);
             }
         }
         
@@ -80,8 +77,6 @@ export const cleanupExpiredBookings = async () => {
             
             // Free up the slots for new bookings
             await freeUpSlots(booking);
-            
-            console.log(`Booking ${bookingId} completed and slots freed up`);
         }
         
     } catch (error) {

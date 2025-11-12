@@ -24,7 +24,6 @@ export const deleteTestimonial = async (uid, index) => {
 
     if (snap.exists()) {
         const data = snap.data();
-        console.log("data from service: ",data?.testimonial);
         const updatedTestimonials = data?.testimonial.filter((_, i) => i !== index);
         await updateDoc(docRef, { testimonial: updatedTestimonials });
     }

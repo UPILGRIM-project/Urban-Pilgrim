@@ -22,7 +22,6 @@ export default function AdminSignIn() {
             setLoading(true);
             const sendOtpFn = httpsCallable(functions, "sendAdminOtp");
             const result = await sendOtpFn({ email });
-            console.log("Admin OTP function result:", result.data);
             setStep(2);
             showSuccess("OTP sent to your admin email!");
         } catch (err) {
@@ -39,12 +38,10 @@ export default function AdminSignIn() {
             setLoading(true);
             const verifyOtpFn = httpsCallable(functions, "verifyAdminOtp");
             const res = await verifyOtpFn({ email, otp });
-            console.log("Admin OTP verification result:", res.data);
 
             // Sign in using custom token (admin data is already validated in backend)
             const result = await signInWithCustomToken(auth, res.data.token);
             const user = result.user;
-            console.log("Admin sign in result:", user);
 
             // Set admin data from the backend response (no need to check Firestore again)
             dispatch(setAdmin({

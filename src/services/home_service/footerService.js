@@ -24,7 +24,6 @@ export const deleteFooterLink = async (uid, index) => {
 
     if (snap.exists()) {
         const data = snap.data();
-        console.log("data from service: ",data?.footer?.links);
         const updatedLinks = data?.footer?.links.filter((_, i) => i !== index);
         await updateDoc(docRef, { footer: { heading: data?.footer?.heading, description: data?.footer?.description, links: updatedLinks } });
     }

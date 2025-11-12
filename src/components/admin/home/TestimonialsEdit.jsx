@@ -19,7 +19,6 @@ function TestimonialsEdit() {
         const loadData = async () => {
             dispatch(setLoading(true));
             const data = await fetchTestimonials(uid);
-            console.log("data from testimonials: ", data);
             setTestimonial(data?.testimonial || []);
             dispatch(setLoading(false));
         };
@@ -108,7 +107,6 @@ function TestimonialsEdit() {
                         const fileRef = ref(storage, filePath);
                         
                         await deleteObject(fileRef);
-                        console.log("Media file deleted from storage:", filePath);
                     }
                 } catch (storageError) {
                     console.warn("Could not delete media file from storage:", storageError);
@@ -129,17 +127,12 @@ function TestimonialsEdit() {
         setTestimonial([]);
         dispatch(setTestimonials([]));
         await saveTestimonials(uid, []);
-        console.log("Testimonials discarded successfully");
     };
 
     const handleSave = async () => {
-        console.log({
-            testimonial,
-        });
         setTestimonial(testimonial);
         dispatch(setTestimonials(testimonial));
         await saveTestimonials(uid, testimonial);
-        console.log("Testimonials saved successfully", testimonial);
         showSuccess("Testimonials saved successfully");
     };
 
@@ -159,7 +152,6 @@ function TestimonialsEdit() {
                         const fileRef = ref(storage, filePath);
                         
                         await deleteObject(fileRef);
-                        console.log("Media file deleted from storage:", filePath);
                     }
                 } catch (storageError) {
                     console.warn("Could not delete media file from storage:", storageError);
@@ -174,7 +166,6 @@ function TestimonialsEdit() {
             dispatch(setTestimonials(updated));
             await deleteTestimonial(uid, index);
             
-            console.log("Testimonials deleted successfully", index);
         } catch (error) {
             console.error("Error deleting testimonial:", error);
         }

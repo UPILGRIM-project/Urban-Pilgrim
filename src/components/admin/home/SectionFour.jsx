@@ -24,7 +24,6 @@ function SectionFour() {
         const loadData = async () => {
             dispatch(setLoading(true));
             const data = await fetchSectionFour(uid);
-            console.log("data from section 4: ", data);
             dispatch(setSectionFour(data?.sectionFour));
             setFeatures(data?.sectionFour?.features || []);
             setImage(data?.sectionFour?.image || null);
@@ -61,7 +60,6 @@ function SectionFour() {
 
                 // Delete from Firebase Storage
                 await deleteObject(storageRef);
-                console.log("Feature image deleted from storage:", imageUrl);
             }
 
             // Remove from local state
@@ -109,8 +107,6 @@ function SectionFour() {
                     // Reset upload states
                     setIsUploading(prev => ({ ...prev, [index]: false }));
                     setUploadProgress(prev => ({ ...prev, [index]: 0 }));
-                    
-                    console.log("Feature image uploaded:", downloadURL);
                 }
             );
         } catch (error) {
@@ -128,10 +124,6 @@ function SectionFour() {
     };
 
     const handleSave = async () => {
-        console.log({
-            image,
-            features,
-        });
         dispatch(setSectionFour({ image, features })); // update store
         await saveSectionFour(uid, { image, features }); // update Firestore
         showSuccess("Section data saved successfully", { image, features });
@@ -143,7 +135,6 @@ function SectionFour() {
         dispatch(setSectionFour({ image, features: updated })); // update store
         await saveSectionFour(uid, { image, features: updated }); // update Firestore
         setFeatures(updated);
-        console.log("Feature deleted successfully", { features: updated });
     };
 
     const onDrop = async (acceptedFiles) => {
@@ -178,7 +169,6 @@ function SectionFour() {
                     setImage(downloadURL);
                     setIsMainImageUploading(false);
                     setMainImageProgress(0);
-                    console.log("Uploaded file URL:", downloadURL);
                 }
             );
         } catch (error) {

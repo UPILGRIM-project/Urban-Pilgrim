@@ -113,7 +113,7 @@ export default function YogaCard() {
             transition={{ duration: 0.6 }}
             className="max-w-[1200px] mx-auto p-4"
         >
-            <div className="bg-white rounded-lg overflow-visible flex flex-col md:flex-row shadow-xl filter drop-shadow-[-46px_46px_27.5px_rgba(0,0,0,0.25)] md:max-w-full max-w-[300px] md:max-h-[480px]">
+            <div className="bg-white rounded-lg overflow-visible flex flex-col md:flex-row shadow-xl filter drop-shadow-[-46px_46px_27.5px_rgba(0,0,0,0.25)] md:max-w-full max-w-[300px] md:max-h-[570px]">
                 {/* Image or Video */}
                 <div className="md:w-1/2 w-full">
                     {(currentHighlight?.image?.includes('.mp4') || 

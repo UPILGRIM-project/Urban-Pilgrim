@@ -82,7 +82,6 @@ export default function RetreatList({ filters = {}, bestSellingActive = false })
             // Price filter
             if (filters.price && retreat?.pilgrimRetreatCard?.price) {
                 const price = parseFloat(retreat.pilgrimRetreatCard.price);
-                console.log("price",price);
                 
                 switch (filters.price) {
                     case 'Under ₹10,000':

@@ -53,8 +53,6 @@ export default function ContactForm() {
         setIsSubmitting(true);
         setSubmitStatus(null);
 
-        console.log("Submitting contact form with data:", formData);
-
         try {
             // Call the Firebase Function
             const sendContactEmail = httpsCallable(functions, 'sendContactEmail');

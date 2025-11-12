@@ -21,7 +21,6 @@ function SectionThree() {
         const loadData = async () => {
             dispatch(setLoading(true));
             const data = await fetchSectionThree(uid);
-            console.log("data from section 3: ", data);
             dispatch(setSectionThree(data.sectionThree));
             setPrograms(data.sectionThree.programs || []);
             dispatch(setLoading(false));
@@ -83,7 +82,6 @@ function SectionThree() {
                     setIsUploading(prev => ({ ...prev, [index]: false }));
                     setUploadProgress(prev => ({ ...prev, [index]: 0 }));
                     
-                    console.log("Image uploaded successfully:", downloadURL);
                 }
             );
         } catch (error) {
@@ -109,12 +107,10 @@ function SectionThree() {
                         const filePath = decodeURIComponent(pathMatch[1]);
                         const storageRef = ref(storage, filePath);
                         await deleteObject(storageRef);
-                        console.log("Image deleted from storage:", filePath);
                     } else {
                         // Fallback: try using the URL directly (for older implementations)
                         const storageRef = ref(storage, imageUrl);
                         await deleteObject(storageRef);
-                        console.log("Image deleted from storage using direct URL:", imageUrl);
                     }
                 } catch (deleteError) {
                     console.warn("Could not delete image from storage:", deleteError);
@@ -125,7 +121,6 @@ function SectionThree() {
                 updated[index].image = null;
                 setPrograms(updated);
 
-                console.log("Image removed from program at index:", index);
                 showSuccess("Image removed successfully");
             } else {
                 console.log("No image to delete for this program");
@@ -164,7 +159,6 @@ function SectionThree() {
     const handleSave = async () => {
         dispatch(setSectionThree({ title, programs })); // update store
         await saveSectionThree(uid, { title, programs }); // update Firestore
-        console.log("Section data saved successfully", { title, programs });
         showSuccess("Data saved successfully");
     };
 

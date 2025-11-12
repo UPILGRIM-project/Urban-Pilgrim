@@ -3,7 +3,6 @@ import { db } from "../firebase";
 
 export const saveOrUpdateRecordedSessionData = async (uid, arrayName, newArray) => {
     if (!uid) throw new Error("User ID is required");
-    console.log("Saving recorded session array:", JSON.stringify(newArray, null, 2));
 
     // Preserve arrays as arrays. Only add createdAt if it's an object payload.
     const valueToSave = Array.isArray(newArray)
@@ -68,7 +67,6 @@ export const deleteRecordedSessionByIndex = async (uid, index) => {
         // Update Firestore
         await updateDoc(sessionRef, { slides: updatedSession });
 
-        console.log(`recorded session at index ${index} deleted successfully`);
         return "deleted";
     } catch (error) {
         console.error("Error deleting recorded session by index:", error);

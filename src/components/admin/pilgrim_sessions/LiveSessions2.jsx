@@ -894,7 +894,6 @@ export default function LiveSession2() {
         slides: prev.slides?.filter((_, i) => i !== index) || [],
       }));
       setSlideData((prev) => prev.filter((_, i) => i !== index));
-      console.log("Slide removed locally and from Firestore");
     } catch (err) {
       console.error("Error removing slide:", err);
     }
@@ -1138,10 +1137,8 @@ export default function LiveSession2() {
       if (isEditing && editIndex !== null) {
         updatedPrograms = [...allData];
         updatedPrograms[editIndex] = newCard;
-        console.log("Live Session Updated Successfully");
       } else {
         updatedPrograms = [...allData, newCard];
-        console.log("Live Session Added Successfully");
       }
 
       dispatch(setLiveSessions(updatedPrograms));
@@ -1152,7 +1149,6 @@ export default function LiveSession2() {
         "slides",
         updatedPrograms,
       );
-      console.log(`Firestore ${status} successfully`);
       showSuccess("Live Session saved successfully!");
 
       setFormData({
@@ -1261,7 +1257,6 @@ export default function LiveSession2() {
       if (currentImage) {
         const imageRef = ref(storage, currentImage);
         await deleteObject(imageRef);
-        console.log("Image deleted from storage:", currentImage);
       }
       handleGuideChange("image", null);
       dispatch(

@@ -18,7 +18,6 @@ import { validateCoupon } from "../../utils/couponUtils.js";
 
 export default function CartPage() {
 	const cartData = useSelector((state) => state.cart.items);
-	console.log("cartData", cartData);
 	const user = useSelector((state) => state.auth.user);
 	const dispatch = useDispatch();
 	const [showCheckout, setShowCheckout] = useState(false);
@@ -83,8 +82,6 @@ export default function CartPage() {
 			(item.persons ?? 1) *
 			(item.quantity ?? 1) *
 			(item.duration ?? 1);
-		
-		console.log("iiiii",item);
 		
 		// Get GST rate from item (default to 0 if not set)
 		const gstRate = Number(item.gst || 0);
@@ -188,7 +185,6 @@ export default function CartPage() {
 			if (appliedCoupon) {
 				checkoutData.coupon = appliedCoupon;
 			}
-			console.log("Checkout data with expanded bundles:", checkoutData);
 
 			// 1️⃣ Create Razorpay order
 			const createOrder = httpsCallable(functions, "createOrder");
@@ -223,7 +219,6 @@ export default function CartPage() {
 							cartData: checkoutData.expandedCartData, // Individual items for processing
 							originalCartData: checkoutData.originalCartData // Original bundles for reference
 						});
-						console.log("data from confirmPayment: ", dataContent);
 
 						if(dataContent?.data?.status === "error"){
 							toast.error("Payment failed !");
@@ -305,7 +300,6 @@ export default function CartPage() {
 		setCouponLoading(true);
 		try {
 			const result = await validateCoupon(couponCode, cartData);
-			console.log("Coupon validation result:", result);
 
 			if (result.valid) {
 				setAppliedCoupon({

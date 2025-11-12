@@ -91,8 +91,6 @@ export default function GuideBookingsTable() {
         setShowViewModal(true);
     };
 
-    console.log(bookings)
-
     const filtered = bookings.filter((b) => {
         const matchesSearch = b.email.toLowerCase().includes(search.toLowerCase()) ||
             b.guideName.toLowerCase().includes(search.toLowerCase());

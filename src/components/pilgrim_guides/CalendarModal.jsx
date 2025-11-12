@@ -29,20 +29,8 @@ export default function CalendarModal({
   // Dynamic occupancy type with default fallback
   const dynamicOccupancyType = (occupancyType || "individual").toLowerCase();
 
-  // Debug logging
-  console.log("=== CalendarModal Props ===");
-  console.log("occupancyType:", occupancyType);
-  console.log("dynamicOccupancyType:", dynamicOccupancyType);
-  console.log("mode:", mode);
-  console.log("selectedPlan:", selectedPlan);
-  console.log("sessionData:", sessionData);
   if (sessionData && mode && selectedPlan) {
     const plan = sessionData[mode.toLowerCase()]?.[selectedPlan];
-    console.log("Plan data:", plan);
-    console.log("individualPrice:", plan?.individualPrice);
-    console.log("couplesPrice:", plan?.couplesPrice);
-    console.log("groupPrice:", plan?.groupPrice);
-    console.log("generic price:", plan?.price);
   }
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
@@ -64,7 +52,6 @@ export default function CalendarModal({
   const fetchAvailableSlots = async () => {
     // Use slots passed from parent component instead of fetching
     if (availableSlots.length > 0) {
-      console.log("Using slots from parent:", availableSlots);
       // Process parent slots to ensure they have the available property
       const processedParentSlots = availableSlots.map((slot, index) => ({
         id:
@@ -88,15 +75,7 @@ export default function CalendarModal({
       // Fallback: Get slots from session data if no slots passed from parent
       const modeKey =
         dynamicMode.toLowerCase() === "online" ? "onlineSlots" : "offlineSlots";
-      console.log("Mode conversion debug:", {
-        originalMode: mode,
-        dynamicMode: dynamicMode,
-        dynamicModeLowerCase: dynamicMode.toLowerCase(),
-        isOnline: dynamicMode.toLowerCase() === "online",
-        selectedModeKey: modeKey,
-      });
       const slots = sessionData?.session?.[modeKey] || [];
-      console.log("slots from session:", slots);
 
       // Process slots into the expected format
       const processedSlots = slots.map((slot, index) => ({
@@ -110,7 +89,6 @@ export default function CalendarModal({
         ...slot,
       }));
 
-      console.log("Processed slots:", processedSlots);
       setLocalSlots(processedSlots);
     } catch (error) {
       console.error("Error fetching slots:", error);
@@ -406,7 +384,6 @@ export default function CalendarModal({
 
   const handleAddToCart = () => {
     if (!sessionData || !selectedSlot) {
-      console.log("Missing session data or selected slot");
       return;
     }
 
@@ -453,7 +430,6 @@ export default function CalendarModal({
       timestamp: new Date().toISOString(),
     };
 
-    console.log("Adding to cart:", cartItem);
     dispatch(addToCart(cartItem));
     showSuccess("Added to cart!");
 
@@ -751,19 +727,6 @@ export default function CalendarModal({
                                     const plan =
                                       sessionData[modeKey]?.[subscriptionKey];
 
-                                    console.log(
-                                      "=== PRICE SELECTION DEBUG ===",
-                                    );
-                                    console.log(
-                                      "dynamicOccupancyType:",
-                                      dynamicOccupancyType,
-                                    );
-                                    console.log(
-                                      "plan?.occupancies:",
-                                      plan?.occupancies,
-                                    );
-                                    console.log("plan?.price:", plan?.price);
-
                                     // Get price based on occupancy type from occupancies array
                                     let price;
                                     if (
@@ -778,19 +741,8 @@ export default function CalendarModal({
                                       price = occupancy
                                         ? Number(occupancy.price)
                                         : plan?.price || 0;
-                                      console.log(
-                                        "Found occupancy:",
-                                        occupancy,
-                                      );
-                                      console.log(
-                                        "Selected price from occupancies:",
-                                        price,
-                                      );
                                     } else {
                                       // Fallback to old structure if occupancies array doesn't exist
-                                      console.log(
-                                        "Using fallback pricing structure",
-                                      );
                                       if (
                                         dynamicOccupancyType === "couple" ||
                                         dynamicOccupancyType === "couples"
@@ -799,28 +751,16 @@ export default function CalendarModal({
                                           plan?.couplesPrice ||
                                           plan?.price ||
                                           0;
-                                        console.log(
-                                          "Selected COUPLE price:",
-                                          price,
-                                        );
                                       } else if (
                                         dynamicOccupancyType === "group"
                                       ) {
                                         price =
                                           plan?.groupPrice || plan?.price || 0;
-                                        console.log(
-                                          "Selected GROUP price:",
-                                          price,
-                                        );
                                       } else {
                                         price =
                                           plan?.individualPrice ||
                                           plan?.price ||
                                           0;
-                                        console.log(
-                                          "Selected INDIVIDUAL price:",
-                                          price,
-                                        );
                                       }
                                     }
                                     price = Number(price || 0);

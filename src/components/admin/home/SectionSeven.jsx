@@ -17,7 +17,6 @@ function SectionSeven() {
         const loadData = async () => {
             dispatch(setLoading(true));
             const data = await fetchSectionSeven(uid);
-            console.log("data from section 7: ", data);
             setTitle(data?.sectionSeven?.title || "");
             setDescription(data?.sectionSeven?.description || "");
             dispatch(setSectionSeven(data.sectionSeven));

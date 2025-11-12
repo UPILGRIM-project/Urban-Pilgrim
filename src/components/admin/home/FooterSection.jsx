@@ -17,7 +17,6 @@ function FooterSection() {
             dispatch(setLoading(true));
             const response = await fetchFooter(uid);
             if (response) {
-                console.log("Fetched footer data:", response);
                 setFooter(response?.footer?.links);
                 setHeading(response?.footer?.heading);
                 setShortText(response?.footer?.description);

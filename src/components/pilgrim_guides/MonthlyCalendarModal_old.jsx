@@ -37,13 +37,6 @@ export default function MonthlyCalendarModal({
     const groupMin = Number(plan.groupMin || 0);
     const groupMax = Number(plan.groupMax || 0);
 
-    // Debug: Log available slots
-    console.log("=== MONTHLY CALENDAR MODAL DEBUG ===");
-    console.log("Available slots received:", availableSlots);
-    console.log("Available slots count:", availableSlots.length);
-    console.log("Plan data:", plan);
-    console.log("Sessions per month:", sessionsPerMonth);
-
     // Get calendar days for current month
     const getCalendarDays = () => {
         const year = currentDate.getFullYear();
@@ -68,10 +61,6 @@ export default function MonthlyCalendarModal({
     const getSlotsForDate = (date) => {
         const dateStr = date.toISOString().slice(0, 10);
         const slots = availableSlots.filter(slot => slot.date === dateStr);
-        
-        if (slots.length > 0) {
-            console.log(`Slots found for ${dateStr}:`, slots);
-        }
         
         return slots;
     };
@@ -119,8 +108,6 @@ export default function MonthlyCalendarModal({
                         showError('You already have a booking on this date');
                         return;
                     }
-                    
-                    console.log(`Date selected: ${dateStr}`, slotsForDate);
                     setSelectedDate(date);
                     setShowSlotSelection(true);
                 };
@@ -143,8 +130,7 @@ export default function MonthlyCalendarModal({
                         showError(`You can only book ${sessionsPerMonth} sessions per month`);
                         return;
                     }
-                    
-                    console.log('Slot selected:', slot);
+
                     setSelectedSlots(prev => [...prev, slot]);
                     setShowSlotSelection(false);
                     setSelectedDate(null);

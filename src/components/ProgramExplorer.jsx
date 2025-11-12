@@ -25,7 +25,6 @@ export default function ProgramExplorer() {
 
                 if (snapshot.exists()) {
                     const data = snapshot.data();
-                    console.log("data: ", data)
                     setProgramItems(data.sectionThree || []);
                 } else {
                     console.log("No slides found in Firestore");
@@ -92,8 +91,6 @@ export default function ProgramExplorer() {
             });
         }
     };
-
-    // console.log("programItems: ", programItems);
 
     return (
         <motion.div

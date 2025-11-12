@@ -33,7 +33,6 @@ const Analysis = () => {
                         }
                     });
                     setAllPurchases(purchases);
-                    console.log('Loaded purchases count:', purchases.length);
                 } catch (pErr) {
                     console.error('Failed to load user purchases:', pErr);
                     setAllPurchases([]);
@@ -88,47 +87,32 @@ const Analysis = () => {
             const od = event?.originalData || {};
             const pu = od?.purchasedUsers || event?.purchasedUsers || {};
             
-            console.log(`Analyzing event ${event.id || 'unknown'}:`, {
-                originalData: od,
-                purchasedUsers: pu,
-                eventPurchasedUsers: event?.purchasedUsers,
-                buyers: event?.buyers
-            });
-            
             // Handle different data structures
             if (Array.isArray(pu)) {
-                console.log(`Found array with ${pu.length} users`);
                 return pu.length; // If it's an array, return the length
             } else if (typeof pu === 'object' && pu !== null) {
                 // If it's an object, try different properties
                 if (typeof pu.count === 'number') {
-                    console.log(`Found count: ${pu.count}`);
                     return pu.count;
                 }
                 if (typeof pu.totalUsers === 'number') {
-                    console.log(`Found totalUsers: ${pu.totalUsers}`);
                     return pu.totalUsers;
                 }
                 if (Array.isArray(pu.users)) {
-                    console.log(`Found users array with ${pu.users.length} users`);
                     return pu.users.length;
                 }
             } else if (typeof pu === 'number') {
-                console.log(`Found direct number: ${pu}`);
                 return pu; // If it's already a number
             }
             
             // Fallback: check if there are any buyers/purchasers arrays
             if (Array.isArray(event?.buyers)) {
-                console.log(`Found buyers array with ${event.buyers.length} buyers`);
                 return event.buyers.length;
             }
             if (Array.isArray(event?.purchasedUsers)) {
-                console.log(`Found direct purchasedUsers array with ${event.purchasedUsers.length} users`);
                 return event.purchasedUsers.length;
             }
             
-            console.log(`No purchases found for event ${event.id || 'unknown'}`);
             return 0; // No purchases found
         };
 
@@ -208,25 +192,8 @@ const Analysis = () => {
                     const eventMonth = eventDate.getMonth();
                     const eventYear = eventDate.getFullYear();
                     
-                    // Debug date parsing
-                    if (event.type === 'retreat') {
-                        console.log(`Retreat event date check:`, {
-                            eventId: event.id,
-                            createdAt: event.createdAt,
-                            parsedDate: eventDate.toLocaleDateString(),
-                            eventMonth: eventMonth,
-                            targetMonth: monthIndex,
-                            monthName: month,
-                            targetYear: targetYear,
-                            eventYear: eventYear,
-                            matches: eventMonth === monthIndex && eventYear === targetYear
-                        });
-                    }
-                    
                     return eventMonth === monthIndex && eventYear === targetYear;
                 });
-
-                console.log(`${type} events for ${month}:`, monthEvents);
 
                 // Count TOTAL sessions purchased for this event type and compute revenue
                 let totalSessions = 0;
@@ -236,10 +203,6 @@ const Analysis = () => {
                 monthEvents.forEach(e => {
                     const od = e?.originalData || {};
                     const pu = od?.purchasedUsers || e?.purchasedUsers || {};
-                    
-                    console.log(`Event ${e.id || 'unknown'} in ${month}: created ${e.createdAt}, eventDate: ${new Date(e.createdAt).toLocaleDateString()}`);
-                    console.log(`Event data structure:`, { pu, buyers: e?.buyers, purchasedUsers: e?.purchasedUsers });
-                    
                     // Count sessions from this event (for programs KPI)
                     const sessionCount = getPurchaseCount(e);
                     totalSessions += sessionCount;
@@ -254,7 +217,6 @@ const Analysis = () => {
                         pu.forEach(user => {
                             const userId = user?.id || user?.userId || user?.uid || user?.email || user;
                             if (userId) {
-                                console.log(`Adding user ID: ${userId}`);
                                 uniqueUserIds.add(userId);
                             }
                         });
@@ -262,7 +224,6 @@ const Analysis = () => {
                         pu.users.forEach(user => {
                             const userId = user?.id || user?.userId || user?.uid || user?.email || user;
                             if (userId) {
-                                console.log(`Adding user ID from users array: ${userId}`);
                                 uniqueUserIds.add(userId);
                             }
                         });
@@ -270,7 +231,6 @@ const Analysis = () => {
                         e.buyers.forEach(user => {
                             const userId = user?.id || user?.userId || user?.uid || user?.email || user;
                             if (userId) {
-                                console.log(`Adding buyer ID: ${userId}`);
                                 uniqueUserIds.add(userId);
                             }
                         });
@@ -278,7 +238,6 @@ const Analysis = () => {
                         e.purchasedUsers.forEach(user => {
                             const userId = user?.id || user?.userId || user?.uid || user?.email || user;
                             if (userId) {
-                                console.log(`Adding purchased user ID: ${userId}`);
                                 uniqueUserIds.add(userId);
                             }
                         });
@@ -294,7 +253,6 @@ const Analysis = () => {
                 });
                 const purchaseRevenue = purchasesForMonth.reduce((sum, p) => sum + parsePrice(p?.price ?? p?.amount ?? 0), 0);
                 totalRevenue = purchaseRevenue;
-                console.log(`[Revenue] ${type} ${month}: purchases=${purchasesForMonth.length}, revenue=${purchaseRevenue}`);
 
                 // Unique users from purchases
                 const uniquePurchaseUserIds = new Set();
@@ -309,7 +267,6 @@ const Analysis = () => {
 
                 const programsPurchased = totalSessions;
                 const usersPurchased = uniquePurchaseUserIds.size;
-                console.log(`${type} ${month} summary: ${programsPurchased} programs, ${usersPurchased} unique users, userIds:`, Array.from(uniqueUserIds));
 
                 return {
                     month,
@@ -408,8 +365,6 @@ const Analysis = () => {
     const liveSessionData = processedData.liveSession;
     const recordedSessionData = processedData.recordedSession;
     const guideData = processedData.guide;
-
-    console.log("processed data: ", processedData);
 
     // Calculate totals and growth
     const calculateGrowth = (data) => {

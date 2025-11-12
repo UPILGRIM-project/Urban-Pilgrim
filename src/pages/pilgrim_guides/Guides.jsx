@@ -25,7 +25,20 @@ export default function Guides() {
     const guidesData = useSelector(state => state.pilgrimGuides?.guides || []);
 
     useEffect(() => {
-        window.scrollTo(0, 0);
+        // Check if we have a saved scroll position
+        const savedScrollPosition = sessionStorage.getItem('guidesScrollPosition');
+        
+        if (savedScrollPosition) {
+            // Restore scroll position after a small delay to ensure content is rendered
+            setTimeout(() => {
+                window.scrollTo(0, parseInt(savedScrollPosition, 10));
+                // Clear the saved position
+                sessionStorage.removeItem('guidesScrollPosition');
+            }, 100);
+        } else {
+            // Only scroll to top if we're not returning from a guide details page
+            window.scrollTo(0, 0);
+        }
     }, []);
 
     const handleFiltersChange = useCallback((newFilters) => {

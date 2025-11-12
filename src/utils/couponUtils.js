@@ -40,8 +40,6 @@ export const validateCoupon = async (couponCode, cartData, programType = null) =
 
         // Check program type compatibility
         const cartProgramTypes = getCartProgramTypes(cartData);
-        console.log("Cart program types:", cartProgramTypes)
-        console.log("Coupon program type:", coupon.programType)
         if (coupon.programType && !cartProgramTypes.includes(coupon.programType)) {
             return {
                 valid: false,

@@ -98,9 +98,8 @@ export default function GuidesDemo({ filters = {}, bestSellingActive = false }) 
         
     }, [guides, filters, bestSellingActive]);
 
-    useEffect(() => {
-        window.scrollTo(0, 0);
-    }, []);
+    // Removed window.scrollTo here to avoid interfering with scroll restoration
+    // The parent Guides component handles scroll position management
 
     return (
         <section className="px-4 sm:px-6 pt-8 sm:py-8 text-gray-900">

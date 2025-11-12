@@ -34,7 +34,7 @@ export default function EventCard({ data }) {
                 <img
                     src={data.image}
                     alt={data.title}
-                    className="w-full sm:h-60 h-48 aspect-square object-cover rounded-t-xl"
+                    className="w-full sm:h-60 h-48 aspect-square object-fill rounded-t-xl"
                 />
             )}
 
