@@ -50,7 +50,7 @@ export default function MonthlyCalendarModal({
     return () => {
       document.body.style.overflow = "";
     };
-  }, []);
+  }, [isOpen]);
 
   const plan = sessionData?.[dynamicMode?.toLowerCase()]?.[selectedPlan] || {};
   const sessionsPerMonth = Number(plan.sessionsCount || 0);
@@ -312,17 +312,6 @@ export default function MonthlyCalendarModal({
       // For individual slots, if it's booked by anyone (including current user), count as 1
       individualBookingCount =
         isSlotBookedByCurrentUser || isSlotBookedByOthers ? 1 : 0;
-
-      console.log(`Slot ${slotKey} - Individual booking check:`, {
-        isSlotBookedByCurrentUser,
-        isSlotBookedByOthers,
-        actualBookings: Array.isArray(actualBookingsArray)
-          ? actualBookingsArray.length
-          : Number(actualBookingsArray || 0),
-        purchasedCount,
-        userMonthlySlots: userMonthlySlots.length,
-        individualBookingCount,
-      });
     }
 
     const occupancy = dynamicOccupancyType.toLowerCase();
@@ -393,9 +382,6 @@ export default function MonthlyCalendarModal({
 
   const fetchAvailableSlots = async () => {
     if (availableSlots.length > 0) {
-      console.log("Using monthly slots from parent:", availableSlots);
-      console.log("Current occupancyType:", dynamicOccupancyType);
-
       const processedSlots = availableSlots.map((slot, index) => ({
         id: slot.id || `monthly-${slot.date}-${slot.startTime}-${index}`,
         date: slot.date,
@@ -408,15 +394,6 @@ export default function MonthlyCalendarModal({
         tIdx: slot.tIdx,
         duration: 60,
       }));
-
-      console.log("Processed slots:", processedSlots);
-      console.log(
-        "Slots by type:",
-        processedSlots.reduce((acc, slot) => {
-          acc[slot.type] = (acc[slot.type] || 0) + 1;
-          return acc;
-        }, {}),
-      );
 
       setLocalSlots(processedSlots);
     }
@@ -525,22 +502,13 @@ export default function MonthlyCalendarModal({
 
         if (matchingOccupancy && matchingOccupancy.price) {
           pricePerSession = Number(matchingOccupancy.price) || 0;
-          console.log(
-            `Found ${occupancy} price in guideCard:`,
-            pricePerSession,
-          );
         } else {
           // Fallback to plan price
           pricePerSession = Number(planData.price) || 0;
-          console.log(
-            `Using plan fallback price for ${occupancy}:`,
-            pricePerSession,
-          );
         }
       } else {
         // Fallback to plan price
         pricePerSession = Number(planData.price) || 0;
-        console.log(`Using plan price for ${occupancy}:`, pricePerSession);
       }
 
       // Determine monthly discount percent from Firestore structure
@@ -759,13 +727,9 @@ export default function MonthlyCalendarModal({
       // Prefer parent handler if provided; otherwise fallback to Redux dispatch
       try {
         if (typeof onAddToCart === "function") {
-          console.log("Using parent onAddToCart function...");
           await onAddToCart(cartItem);
-          console.log("Parent onAddToCart completed successfully");
         } else {
-          console.log("Using Redux dispatch...");
           dispatch(addToCart(cartItem));
-          console.log("Redux dispatch completed successfully");
         }
 
         const slotCount = finalSlots.length;
@@ -864,13 +828,6 @@ export default function MonthlyCalendarModal({
       return slotType === selectedOccupancy;
     });
 
-    console.log(`Slots for ${dateStr}:`, {
-      totalSlots: slotsForDate.length,
-      selectedOccupancy,
-      filteredSlots: filteredSlots.length,
-      slotTypes: slotsForDate.map((s) => s.type),
-    });
-
     return filteredSlots;
   };
 
@@ -966,9 +923,19 @@ export default function MonthlyCalendarModal({
   ]);
 
   return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div 
+      className="fixed inset-0 bg-black/30 backdrop-blur-xs z-50 flex items-center justify-center p-4"
+      onClick={handleCloseModal}
+      onWheel={(e) => e.stopPropagation()}
+      onTouchMove={(e) => e.stopPropagation()}
+    >
       {/* White modal - scrollable container */}
-      <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+      <div 
+        className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+        onWheel={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b sticky top-0 bg-white z-10">
           <div>

@@ -49,7 +49,6 @@ export default function SignIn({ onClose }) {
             setLoading(true);
             const sendOtpFn = httpsCallable(functions, "sendOtp");
             const result = await sendOtpFn({ email, whatsappNumber });
-            console.log("OTP function result:", result.data);
             setStep(2);
             showSuccess("OTP sent to your email!");
         } catch (err) {
@@ -66,12 +65,10 @@ export default function SignIn({ onClose }) {
             setLoading(true);
             const verifyOtpFn = httpsCallable(functions, "verifyOtp");
             const res = await verifyOtpFn({ email, otp });
-            console.log("OTP verification result:", res.data);
 
             // 🔑 Sign in using custom token
             const result = await signInWithCustomToken(auth, res.data.token);
             const user = result.user;
-            console.log("Sign in result:", user);
 
             // 🔍 Check if user exists in Firestore
             const userRef = doc(db, "users", user.uid, "info", "details");
@@ -85,7 +82,6 @@ export default function SignIn({ onClose }) {
                     whatsappNumber: whatsappNumber,
                     createdAt: new Date(),
                 });
-                console.log("New user created");
             } else {
                 // Update WhatsApp number if changed
                 const existingData = userSnap.data();
@@ -94,7 +90,6 @@ export default function SignIn({ onClose }) {
                         whatsappNumber: whatsappNumber,
                     }, { merge: true });
                 }
-                console.log("Existing user logged in");
             }
 
             dispatch(setUser({
@@ -112,7 +107,6 @@ export default function SignIn({ onClose }) {
                     const userData = userProgramsSnap.data();
                     const programs = userData.yourPrograms || [];
                     dispatch(setUserPrograms(programs));
-                    console.log("User programs loaded on login:", programs);
                 } else {
                     dispatch(setUserPrograms([]));
                 }
@@ -120,8 +114,6 @@ export default function SignIn({ onClose }) {
                 console.error("Error fetching user programs on login:", error);
                 dispatch(setUserPrograms([]));
             }
-
-            console.log("Redux state after setUser:", store.getState().auth.user);
 
             showSuccess("Signed in successfully!");
             onClose();

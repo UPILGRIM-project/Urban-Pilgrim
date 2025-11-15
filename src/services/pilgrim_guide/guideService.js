@@ -9,7 +9,6 @@ import { db } from "../firebase";
  */
 export const saveOrUpdateGuideData = async (uid, arrayName, newArray) => {
     if (!uid) throw new Error("User ID is required");
-    console.log("Saving guide array:", JSON.stringify(newArray, null, 2));
 
     // Handle arrays vs objects differently
     let dataToSave;
@@ -108,7 +107,6 @@ export const fetchGuideData = async (uid) => {
 // };
 
 export const deleteSlideByIndex = async (uid, index) => {
-    console.log("Deleting slide at index:", index, uid);
     try {
         const guideRef = doc(db, `pilgrim_guides/${uid}/guides/data`);
         const docSnap = await getDoc(guideRef);
@@ -156,7 +154,6 @@ export const deleteSlideByIndex = async (uid, index) => {
         // Update only the 'slides' field to avoid rewriting the whole document
         await updateDoc(guideRef, { slides: newSlides });
 
-        console.log(`Item at index ${index} deleted successfully`);
         return "deleted";
     } catch (error) {
         console.error("Error deleting slide by index:", error);
@@ -205,7 +202,6 @@ export const saveGuideOrganizerData = async (organizerData) => {
                 updatedAt: new Date().toISOString()
             });
             
-            console.log("Guide program added to existing organizer:", existingDoc.id);
             return existingDoc.id;
         } else {
             // Organizer doesn't exist - create new with programs array
@@ -225,7 +221,6 @@ export const saveGuideOrganizerData = async (organizerData) => {
                 updatedAt: new Date().toISOString()
             });
             
-            console.log("New organizer created for guide with ID:", docRef.id);
             return docRef.id;
         }
     } catch (error) {

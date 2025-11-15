@@ -177,7 +177,6 @@ export const saveWorkshopOrganizerData = async (organizerData) => {
                 updatedAt: new Date().toISOString()
             });
             
-            console.log("Workshop program added to existing organizer:", existingDoc.id);
             return existingDoc.id;
         } else {
             // Organizer doesn't exist - create new with programs array
@@ -196,7 +195,6 @@ export const saveWorkshopOrganizerData = async (organizerData) => {
                 updatedAt: new Date().toISOString()
             });
             
-            console.log("New organizer created for workshop with ID:", docRef.id);
             return docRef.id;
         }
     } catch (error) {

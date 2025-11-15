@@ -23,7 +23,6 @@ const ClothingSuggestions = ({ weather }) => {
                 try {
                     const result = await model.generateContent(prompt);
                     const text = await result.response.text();
-                    console.log("Generated clothing suggestions:", text);
                     const items = text
                         .split("\n")
                         .filter(line => line.trim() !== "")
@@ -53,8 +52,6 @@ const ClothingSuggestions = ({ weather }) => {
 
         getClothing();
     }, [weather]);
-
-    console.log("Clothing suggestions:", suggestions);
 
     if (loading) return <Loader2 />;
 

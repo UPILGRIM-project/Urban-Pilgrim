@@ -239,8 +239,6 @@ const SessionSlots = () => {
             return false;
         } catch { return false; }
     };
-
-    console.log("sessionData", sessionData)
     
     return (
         <div className=" bg-gradient-to-b from-[#FAF4F0] to-white mt-[100px]">

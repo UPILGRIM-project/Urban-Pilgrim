@@ -42,7 +42,6 @@ export default function EventDetails() {
                     // Get the first document (assuming there's only one data document)
                     const eventDoc = eventsSnapshot.docs[0];
                     const data = eventDoc.data();
-                    console.log("data: ", data);
 
                     // Based on the Firestore structure, look for the event in upcomingSessionCard
                     if (data.upcomingSessionCard) {
@@ -67,7 +66,7 @@ export default function EventDetails() {
 
     useEffect(() => {
         window.scrollTo(0,0);
-    },[])
+    },[eventName])
 
     return (
         <>

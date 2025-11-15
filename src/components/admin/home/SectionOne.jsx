@@ -24,7 +24,6 @@ function SectionOne() {
         const loadData = async () => {
             dispatch(setLoading(true));
             const data = await fetchSectionOne(uid);
-            // console.log("data: ", data);
             dispatch(setSectionOne(data.sectionOne));
             setLocalTitle(data.sectionOne.title);
             setLocalDescription(data.sectionOne.description);
@@ -64,7 +63,6 @@ function SectionOne() {
                     setLocalImage(url);
                     setIsUploading(false);
                     setUploadProgress(0);
-                    console.log("upload successful:");
                 }
             );
         } catch (error) {
@@ -87,7 +85,6 @@ function SectionOne() {
             if (image) {
                 const storageRef = ref(storage, image);
                 await deleteObject(storageRef);
-                console.log("Image deleted from storage:", image);
 
                 setLocalTitle(title);
                 setLocalDescription(description);
@@ -117,7 +114,6 @@ function SectionOne() {
         };
         dispatch(setSectionOne(newData)); // update store
         await saveSectionOne(uid, newData); // update Firestore
-        console.log("Section 1 data saved successfully", newData);
         showSuccess("Data saved successfully");
     };
 

@@ -16,8 +16,6 @@ const SessionDescription = () => {
         window.scrollTo(0, 0);
     }, []);
 
-    console.log("Data from recoded: ", Data)
-
     function normalizeSlug(str) {
         return str
             ?.toLowerCase()

@@ -120,7 +120,6 @@ export default function ImageSlider() {
                     setImage(url);
                     setIsUploading(false);
                     setUploadProgress(0);
-                    console.log("upload successful:");
                 }
             );
         } catch (error) {
@@ -197,7 +196,6 @@ export default function ImageSlider() {
         // persist new order in Firestore
         try {
             await add_Or_Update_Slide(uid, updated);
-            console.log("Slide order updated successfully!");
         } catch (error) {
             console.error("Error updating slide order:", error);
         }

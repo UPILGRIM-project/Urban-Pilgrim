@@ -21,7 +21,6 @@ function SectionTwo() {
         const loadData = async () => {
             dispatch(setLoading(true));
             const data = await fetchSectionTwo(uid);
-            // console.log("data: ", data);
             dispatch(setSectionTwo(data.sectionTwo));
             setTitle(data.sectionTwo.title);
             setDescription(data.sectionTwo.description);
@@ -37,7 +36,6 @@ function SectionTwo() {
         };
         dispatch(setSectionTwo(newData)); // update store
         await saveSectionTwo(uid, newData); // update Firestore
-        console.log("Section 2 data saved successfully", newData);
         showSuccess("Data saved successfully");
     };
 

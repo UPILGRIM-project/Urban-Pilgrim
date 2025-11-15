@@ -242,10 +242,8 @@ export default function SubscriptionCard({ bundle, onAddToCart, isHighestDiscoun
                             e.stopPropagation(); // Prevent event bubbling
                             const formattedTitle = title.replace(/\s+/g, '-').toLowerCase();
                             if (programType === "program") {
-                                // console.log("navigating to", `/program/${formattedTitle}/slots`)
                                 navigate(`/program/${formattedTitle}/slots`);
                             } else {
-                                // console.log("navigating to", `/session/${formattedTitle}/slots`)
                                 navigate(`/session/${formattedTitle}/slots`);
                             }
                         }}

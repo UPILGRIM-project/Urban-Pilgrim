@@ -7,7 +7,6 @@ export default function RetreatCard({ retreat }) {
 
     const handleCardClick = (title) => {
         navigate(`/pilgrim_retreats/${title.trim().replace(/\s+/g, '-').toLowerCase()}`);
-        console.log(`Navigating to retreat: ${title}`);
     };
 
     return (

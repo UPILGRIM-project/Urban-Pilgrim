@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 export default function GuideCard({ image, thumbnailType, category, title, price }) {
     const navigate = useNavigate();
     const handleCardClick = (title) => {
+        // Save scroll position before navigating
+        sessionStorage.setItem('guidesScrollPosition', window.scrollY.toString());
         navigate(`/guide/${title.trim().replace(/\s+/g, '-').toLowerCase()}`);
     };
     return (

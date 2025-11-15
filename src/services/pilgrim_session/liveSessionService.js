@@ -3,7 +3,6 @@ import { db } from "../firebase";
 
 export const saveOrUpdateLiveSessionData = async (uid, arrayName, newArray) => {
     if (!uid) throw new Error("User ID is required");
-    console.log("Saving live session array:", JSON.stringify(newArray, null, 2));
 
     // Add createdAt timestamp to each item in the array if not present
     const dataWithTimestamp = newArray.map(item => ({
@@ -66,8 +65,7 @@ export const deleteLiveSessionByIndex = async (uid, index) => {
     
         // 🔹 Update Firestore as an array (cleaner going forward)
         await updateDoc(guideRef, { slides: updatedSession });
-    
-        console.log(`live session at index ${index} deleted successfully`);
+
         return "deleted";
     } catch (error) {
         console.error("Error deleting live session by index:", error);
@@ -116,7 +114,6 @@ export const saveLiveSessionOrganizerData = async (organizerData) => {
                 updatedAt: new Date().toISOString()
             });
             
-            console.log("Live session program added to existing organizer:", existingDoc.id);
             return existingDoc.id;
         } else {
             // Organizer doesn't exist - create new with programs array
@@ -135,8 +132,6 @@ export const saveLiveSessionOrganizerData = async (organizerData) => {
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             });
-            
-            console.log("New organizer created for live session with ID:", docRef.id);
             return docRef.id;
         }
     } catch (error) {

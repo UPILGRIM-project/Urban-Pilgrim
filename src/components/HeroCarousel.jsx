@@ -24,7 +24,6 @@ export default function HeroCarousel() {
 
                 if (snapshot.exists()) {
                     const data = snapshot.data();
-                    console.log("Fetched images in hero:", data);
                     for (const slide of data.slides) {
                         const image = slide.image;
                         if (image) {

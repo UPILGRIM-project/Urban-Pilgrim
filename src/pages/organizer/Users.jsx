@@ -47,19 +47,15 @@ function OrganizerUsers() {
                 setOrganizerDocId(orgDoc.id);
 
                 const orgData = orgDoc.data() || {};
-                console.log('Organizer data:', orgData);
 
                 const usersData = [];
 
                 // Get programs array
                 const programsArray = Array.isArray(orgData.programs) ? orgData.programs : [];
-                console.log('Found programs:', programsArray.length);
 
                 // Process each program
                 for (const program of programsArray) {
                     if (!program || typeof program !== 'object') continue;
-
-                    console.log('Processing program:', program.title);
 
                     // Get users array from program
                     const usersArray = Array.isArray(program.users) ? program.users : [];
@@ -92,8 +88,6 @@ function OrganizerUsers() {
                         });
                     }
                 }
-
-                console.log('All users data:', usersData);
 
                 if (isMounted) {
                     setAllUsers(usersData);

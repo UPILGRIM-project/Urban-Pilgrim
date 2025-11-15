@@ -15,7 +15,6 @@ function NavbarSection() {
         const loadData = async () => {
             dispatch(setLoading(true));
             const data = await navbarService(uid);
-            console.log("data from navbar: ", data);
             setNavbar(data?.links || []);
             dispatch(setLoading(false));
         };
@@ -42,14 +41,11 @@ function NavbarSection() {
         setNavbar([]);
         dispatch(setNavbars([])); // reset store
         await saveNavbarLinks(uid, []);
-        console.log("Navbar links discarded successfully");
     };
 
     const handleSave = async () => {
-        console.log("Saving navbar links:", navbar);
         dispatch(setNavbars(navbar));
         await saveNavbarLinks(uid, navbar);
-        console.log("Navbar links saved successfully", navbar);
         showSuccess("Navbar links saved successfully!");
     };
 
@@ -59,7 +55,6 @@ function NavbarSection() {
         setNavbar(updated);
         dispatch(setNavbars(updated));
         await deleteNavbarLink(uid, index);
-        console.log("Navbar link deleted successfully", index);
     };
 
     return (

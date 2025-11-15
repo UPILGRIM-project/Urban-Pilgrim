@@ -193,7 +193,6 @@ export default function GiftCardDetails() {
 
             setPurchaseLoading(true);
             setShowUserDetails(false);
-            console.log("giftcard: ", giftCard)
             
             // Create order using new gift card program function
             const createOrder = httpsCallable(functions, 'createGiftCardProgramOrder');

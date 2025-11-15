@@ -78,19 +78,15 @@ function Home({ organizerUid }) {
                 setOrganizerDocId(orgDocId);
     
                 const orgData = orgDoc.data() || {};
-                console.log('Organizer data:', orgData);
     
                 const aggregated = [];
     
                 // Get programs array
                 const programsArray = Array.isArray(orgData.programs) ? orgData.programs : [];
-                console.log('Found programs:', programsArray.length);
     
                 // Process each program
                 for (const program of programsArray) {
                     if (!program || typeof program !== 'object') continue;
-    
-                    console.log('Processing program:', program.title);
     
                     // Get users array
                     const usersArray = Array.isArray(program.users) ? program.users : [];
@@ -131,8 +127,6 @@ function Home({ organizerUid }) {
                     });
                 }
     
-                console.log('Final aggregated programs:', aggregated);
-    
                 if (isMounted) {
                     setPrograms(aggregated);
                 }
@@ -153,16 +147,12 @@ function Home({ organizerUid }) {
     // Mark slot as completed - updates programs[] array structure
     async function markCompleted(programId, userId, slot) {
         try {
-            console.log("🚀 Starting markCompleted function");
-            console.log("Parameters:", { programId, userId, slot });
             
             if (!organizerDocId) {
                 console.error("No organizerDocId found");
                 showError("Organizer ID not found");
                 return;
             }
-    
-            console.log("📄 Fetching organizer document:", organizerDocId);
             const orgRef = doc(db, "organizers", organizerDocId);
             const orgSnap = await getDoc(orgRef);
             
@@ -207,8 +197,6 @@ function Home({ organizerUid }) {
                 showError("Session slot not found");
                 return;
             }
-    
-            console.log("✅ Found slot at index:", slotIndex);
             
             // Update the slot
             slotsArray[slotIndex] = {
@@ -225,15 +213,11 @@ function Home({ organizerUid }) {
             program.users = usersArray;
             programsArray[programIndex] = program;
             
-            console.log("🔄 Attempting Firestore update...");
-            
             // Update the entire programs array
             await updateDoc(orgRef, {
                 programs: programsArray
             });
             
-            console.log("✅ Firestore update completed successfully");
-    
             // Update local UI
             setPrograms(prev =>
                 prev.map(p => {
@@ -256,7 +240,6 @@ function Home({ organizerUid }) {
             );
     
             showSuccess("Session marked as completed ✅");
-            console.log("🎉 markCompleted function completed successfully");
             
         } catch (e) {
             console.error("💥 Error in markCompleted:", e);

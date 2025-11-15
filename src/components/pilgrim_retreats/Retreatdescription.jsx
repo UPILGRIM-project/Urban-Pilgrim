@@ -30,7 +30,6 @@ export default function Retreatdescription() {
 
     const { retreatName } = useParams();
     const formattedTitle = retreatName.replace(/-/g, " ");
-    console.log("title from params: ", formattedTitle);
     const [persons, setPersons] = useState(1);
     const [retreatData, setRetreatData] = useState(null);
     // Removed Bundles Popup state — direct add-to-cart flow
@@ -40,7 +39,7 @@ export default function Retreatdescription() {
 
     useEffect(() => {
         window.scrollTo(0,0);
-    },[])
+    },[retreatName])
 
     // Auto-select first occupancy when retreat data loads
     useEffect(() => {
@@ -87,12 +86,9 @@ export default function Retreatdescription() {
                             ...data[key],
                         }));
 
-                    console.log("All retreats:", retreatsData);
-
                     const found = retreatsData.find(
                         (r) => normalize(r.pilgrimRetreatCard?.title) === normalize(formattedTitle)
                     );
-                    console.log("Found retreat:", found);
 
                     setRetreatData(found || null);
                 }
@@ -260,13 +256,6 @@ export default function Retreatdescription() {
                                     rawPrice = 0;
                                 }
                                 
-                                console.log('Price debugging:', {
-                                    selectedOccupancy: selectedOccupancy,
-                                    selectedOccupancyPrice: selectedOccupancy?.price,
-                                    retreatCardPrice: retreatData?.pilgrimRetreatCard?.price,
-                                    rawPrice: rawPrice,
-                                    rawPriceType: typeof rawPrice
-                                });
                                 
                                 // Convert to number more carefully
                                 let numericPrice = 0;
@@ -276,7 +265,6 @@ export default function Retreatdescription() {
                                     numericPrice = parseFloat(priceString) || 0;
                                 }
                                 
-                                console.log('Final numeric price:', numericPrice, typeof numericPrice);
                                 const derivedImage =
                                     retreatData?.oneTimePurchase?.images?.[0] ||
                                     retreatData?.oneTimeSubscription?.images?.[0] ||

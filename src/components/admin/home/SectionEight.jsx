@@ -15,7 +15,6 @@ function SectionEight() {
         const loadData = async () => {
             dispatch(setLoading(true));
             const data = await fetchSectionEight(uid);
-            console.log("data from section 8: ", data);
             setTitle(data?.sectionEight?.title || "");
             setDescription(data?.sectionEight?.description || "");
             dispatch(setSectionEight(data.sectionEight));
@@ -34,7 +33,6 @@ function SectionEight() {
     const handleSave = async () => {
         dispatch(setSectionEight({ title, description })); // update store
         await saveSectionEight(uid, { title, description }); // update Firestore
-        console.log("Section data saved successfully", { title, description });
         showSuccess("Section data saved successfully");
     };
 

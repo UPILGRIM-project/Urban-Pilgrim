@@ -25,6 +25,10 @@ export default function WorkshopDetails() {
     const [requestData, setRequestData] = useState(null);
 
     useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [title]);
+
+    useEffect(() => {
         const fetchWorkshopByTitle = async () => {
             try {
                 setLoading(true);
@@ -53,7 +57,6 @@ export default function WorkshopDetails() {
                         checkRequestStatusFromDB(foundWorkshop.id, user.uid);
                     }
                 } else {
-                    console.log("Workshop not found for title:", title);
                     showError("Workshop not found");
                 }
             } catch (error) {
@@ -69,12 +72,6 @@ export default function WorkshopDetails() {
 
     const checkRequestStatusFromDB = async (workshopId, userId) => {
         try {
-            console.log(
-                "Checking request status for workshop:",
-                workshopId,
-                "user:",
-                userId,
-            );
             const getRequestStatus = httpsCallable(
                 functions,
                 "getWorkshopRequestStatusByWorkshop",
@@ -89,10 +86,8 @@ export default function WorkshopDetails() {
                 const latestRequest = sortedRequests[0];
                 setRequestStatus(latestRequest.status);
                 setRequestData(latestRequest);
-                console.log("Found request status:", latestRequest.status);
             } else {
                 setRequestStatus("initial");
-                console.log("No request found, status: initial");
             }
         } catch (error) {
             console.error("Error checking request status:", error);
@@ -102,7 +97,6 @@ export default function WorkshopDetails() {
 
     const checkRequestStatus = async (requestId) => {
         try {
-            console.log("Checking request status for requestId:", requestId);
             const getRequestStatus = httpsCallable(
                 functions,
                 "getWorkshopRequestStatus",
@@ -113,7 +107,6 @@ export default function WorkshopDetails() {
                 setRequestStatus(result.data.status);
                 setRequestData(result.data.requestData);
             }
-            console.log("status : ", requestStatus);
         } catch (error) {
             console.error("Error checking request status:", error);
             // Don't show error to user, just keep initial status

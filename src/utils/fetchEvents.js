@@ -51,7 +51,6 @@ export const fetchAllEvents = async (dispatch) => {
             const guidesSnapshot = await getDoc(guidesRef);
             if (guidesSnapshot.exists()) {
                 const guidesData = guidesSnapshot.data();
-                console.log("guides: ", guidesData)
                 if (guidesData.slides) {
                     const slidesArray = Object.values(guidesData.slides); // turn {0: {...}, 1: {...}} → [{...}, {...}]
                   
@@ -112,7 +111,6 @@ export const fetchAllEvents = async (dispatch) => {
             const recordedSnapshot = await getDoc(recordedRef);
             if (recordedSnapshot.exists()) {
                 const recordedData = recordedSnapshot.data();
-                console.log("recorded: ", recordedData)
                 if (recordedData.slides) {
                     const slidesArray = Object.values(recordedData.slides);
                     slidesArray.forEach((program, index) => {

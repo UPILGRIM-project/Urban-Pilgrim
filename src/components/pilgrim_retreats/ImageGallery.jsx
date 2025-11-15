@@ -7,8 +7,6 @@ export default function ImageGallery({ images = [], videos = [] }) {
     const [mainMedia, setMainMedia] = useState(allMedia[0]);
     const [showAllMedia, setShowAllMedia] = useState(false);
 
-    console.log(allMedia)
-
     const isVideo = (url) => {
         return url && (url.includes('.mp4') || url.includes('.webm') || url.includes('.ogg') || url.includes('video'));
     };

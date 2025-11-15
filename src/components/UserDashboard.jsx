@@ -47,7 +47,6 @@ function Dashboard() {
     const userPrograms = useSelector((state) => state.userProgram);
     const currentUser = useSelector((state) => state.auth.user);
 
-    console.log("program: ", userPrograms);
 
     useEffect(() => {
         let active = true;
@@ -131,7 +130,6 @@ function Dashboard() {
             dispatch(logout());
             dispatch(clearUserPrograms());
             dispatch(clearAllEvents());
-            console.log("Logout successful");
             showSuccess("Logout successful");
             navigate("/");
         } catch (err) {

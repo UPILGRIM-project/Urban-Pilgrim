@@ -3,7 +3,6 @@ import { db } from "../firebase";
 
 export const saveOrUpdateRetreatData = async (uid, arrayName, newArray) => {
     if (!uid) throw new Error("User ID is required");
-    console.log("Saving array:", JSON.stringify(newArray, null, 2));
 
     // Handle arrays vs objects differently
     let dataToSave;
@@ -85,7 +84,6 @@ export const deleteRetreatItem = async (uid, arrayName) => {
         // Save updated object
         await setDoc(retreatRef, updatedData);
 
-        console.log(`Deleted array ${arrayName} and reindexed successfully.`);
         return "deleted and reindexed";
     } catch (error) {
         console.error("Error deleting retreat array:", error);
@@ -131,8 +129,7 @@ export const saveOrganizerData = async (organizerData) => {
                 number: number, // Update phone number if changed
                 updatedAt: new Date().toISOString()
             });
-            
-            console.log("Program added to existing organizer:", existingDoc.id);
+
             return existingDoc.id;
         } else {
             // Organizer doesn't exist - create new with programs array
@@ -150,7 +147,6 @@ export const saveOrganizerData = async (organizerData) => {
                 updatedAt: new Date().toISOString()
             });
             
-            console.log("New organizer created with ID:", docRef.id);
             return docRef.id;
         }
     } catch (error) {

@@ -11,7 +11,6 @@ export const fetchSectionFour = async (uid) => {
 export const saveSectionFour = async (uid, data) => {
     const docRef = doc(db, `homepage/${uid}/title_description/sectionFour`);
     const snap = await getDoc(docRef);
-    console.log("data from section four:", data);
 
     if (snap.exists()) {
         await updateDoc(docRef, { sectionFour: { features: data.features, image: data.image } });
