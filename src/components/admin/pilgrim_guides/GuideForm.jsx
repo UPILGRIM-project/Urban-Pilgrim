@@ -364,12 +364,21 @@ export default function GuideForm() {
     };
 
     const handleGuideChange = (field, value) => {
-        const updatedGuide = [...formData.guide];
-        updatedGuide[0][field] = value;
-        setFormData((prev) => ({
-            ...prev,
-            guide: updatedGuide,
-        }));
+        setFormData((prev) => {
+            const guide = prev.guide && prev.guide.length > 0 
+                ? [...prev.guide] 
+                : [{ title: "", description: "", image: null }];
+            
+            guide[0] = {
+                ...guide[0],
+                [field]: value
+            };
+            
+            return {
+                ...prev,
+                guide: guide,
+            };
+        });
     };
 
     const handleGuideImageChange = async (file) => {
