@@ -1320,11 +1320,71 @@ export default function GuideForm() {
     const replicateWeekToMonth = (modeKey) => {
         setFormData((prev) => {
             const next = { ...prev };
+            const slotBasedPattern = next[modeKey].monthly.slotBasedPattern;
             const dayPattern = next[modeKey].monthly.dayBasedPattern;
 
+            // Check if slot-based pattern exists and has data
+            if (slotBasedPattern && slotBasedPattern.length > 0) {
+                // Convert slot-based pattern to weeklyPattern format
+                const weeklyPattern = [];
+                const dayMap = {
+                    Monday: "Mon",
+                    Tuesday: "Tue",
+                    Wednesday: "Wed",
+                    Thursday: "Thu",
+                    Friday: "Fri",
+                    Saturday: "Sat",
+                    Sunday: "Sun",
+                };
+
+                slotBasedPattern.forEach((slot) => {
+                    // Validate slot has time and at least one day selected
+                    if (
+                        slot &&
+                        slot.startTime &&
+                        slot.endTime &&
+                        slot.startTime.trim() !== "" &&
+                        slot.endTime.trim() !== "" &&
+                        slot.days &&
+                        slot.days.length > 0
+                    ) {
+                        // Convert selected days to short format
+                        const shortDays = slot.days.map((day) => dayMap[day]).filter(Boolean);
+
+                        if (shortDays.length > 0) {
+                            weeklyPattern.push({
+                                days: shortDays,
+                                times: [
+                                    {
+                                        startTime: slot.startTime,
+                                        endTime: slot.endTime,
+                                        type: slot.type || "individual",
+                                        bookedCount: slot.bookedCount || 0,
+                                    },
+                                ],
+                            });
+                        }
+                    }
+                });
+
+                if (weeklyPattern.length === 0) {
+                    showError(
+                        "❌ No valid slots found. Please add time slots and select days for each slot.",
+                    );
+                    return prev;
+                }
+
+                next[modeKey].monthly.weeklyPattern = weeklyPattern;
+                showSuccess(
+                    `✅ Slot pattern applied! ${weeklyPattern.length} time slot(s) will repeat on selected days every week.`,
+                );
+                return next;
+            }
+
+            // Fallback to day-based pattern if slot-based doesn't exist
             if (!dayPattern || Object.keys(dayPattern).length === 0) {
                 showError(
-                    "❌ No day-based pattern found to replicate. Please add slots first using 'Initialize Day-Based Setup'.",
+                    "❌ No pattern found to replicate. Please add slots first using either 'Slot-First Setup' or 'Day-Based Setup'.",
                 );
                 return prev;
             }
@@ -1398,6 +1458,73 @@ export default function GuideForm() {
             return next;
         });
     };
+
+    // ========== NEW: Slot-First Approach Functions ==========
+    // Structure: slotBasedPattern: [{ startTime, endTime, type, days: ["Monday", "Tuesday", ...] }]
+    
+    const initializeSlotBasedPattern = (modeKey) => {
+        setFormData((prev) => {
+            const next = { ...prev };
+            if (!next[modeKey].monthly.slotBasedPattern) {
+                next[modeKey].monthly.slotBasedPattern = [];
+            }
+            return next;
+        });
+    };
+
+    const addTimeSlot = (modeKey) => {
+        setFormData((prev) => {
+            const next = { ...prev };
+            if (!next[modeKey].monthly.slotBasedPattern) {
+                next[modeKey].monthly.slotBasedPattern = [];
+            }
+            next[modeKey].monthly.slotBasedPattern.push({
+                startTime: "",
+                endTime: "",
+                type: "individual",
+                days: []
+            });
+            return next;
+        });
+    };
+
+    const updateTimeSlot = (modeKey, slotIndex, field, value) => {
+        setFormData((prev) => {
+            const next = { ...prev };
+            if (next[modeKey].monthly.slotBasedPattern?.[slotIndex]) {
+                next[modeKey].monthly.slotBasedPattern[slotIndex][field] = value;
+            }
+            return next;
+        });
+    };
+
+    const toggleSlotDay = (modeKey, slotIndex, day) => {
+        setFormData((prev) => {
+            const next = { ...prev };
+            if (next[modeKey].monthly.slotBasedPattern?.[slotIndex]) {
+                const slot = next[modeKey].monthly.slotBasedPattern[slotIndex];
+                const daySet = new Set(slot.days || []);
+                if (daySet.has(day)) {
+                    daySet.delete(day);
+                } else {
+                    daySet.add(day);
+                }
+                slot.days = Array.from(daySet);
+            }
+            return next;
+        });
+    };
+
+    const removeTimeSlot = (modeKey, slotIndex) => {
+        setFormData((prev) => {
+            const next = { ...prev };
+            if (next[modeKey].monthly.slotBasedPattern) {
+                next[modeKey].monthly.slotBasedPattern.splice(slotIndex, 1);
+            }
+            return next;
+        });
+    };
+
     const [otOnlineMonth, setOtOnlineMonth] = useState(() => new Date());
     const [otOnlineDate, setOtOnlineDate] = useState(() =>
         new Date().toISOString().slice(0, 10),
@@ -2901,25 +3028,152 @@ export default function GuideForm() {
                                                     Monthly Online – Weekly Hours
                                                 </h3>
 
-                                                <div className="flex items-center gap-2 mb-3">
+                                                <div className="flex items-center gap-2 mb-3 flex-wrap">
                                                     <span className="text-sm text-gray-600">
                                                         Setup Mode:
                                                     </span>
                                                     <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            initializeSlotBasedPattern("online");
+                                                            setTimeout(() => {
+                                                                if (!formData?.online?.monthly?.slotBasedPattern || formData.online.monthly.slotBasedPattern.length === 0) {
+                                                                    addTimeSlot("online");
+                                                                }
+                                                            }, 100);
+                                                        }}
+                                                        className="px-3 py-1.5 rounded border text-sm bg-[#2F6288] text-white border-[#2F6288] hover:bg-[#224b66]"
+                                                    >
+                                                        Slot-First Setup
+                                                    </button>
+                                                    <button
+                                                        type="button"
                                                         onClick={() =>
                                                             initializeDayBasedWeeklyPattern("online")
                                                         }
                                                         className="px-3 py-1.5 rounded border text-sm bg-[#2F6288] text-white border-[#2F6288] hover:bg-[#224b66]"
                                                     >
-                                                        Initialize Day-Based Setup
+                                                        Day-Based Setup
                                                     </button>
                                                     <button
+                                                        type="button"
                                                         onClick={() => replicateWeekToMonth("online")}
                                                         className="px-3 py-1.5 rounded border text-sm bg-[#2F6288] text-white border-[#2F6288] hover:bg-[#224b66]"
                                                     >
                                                         Apply Week to All Month
                                                     </button>
                                                 </div>
+
+                                                {/* NEW: Slot-First Weekly Pattern UI */}
+                                                {formData?.online?.monthly?.slotBasedPattern && formData.online.monthly.slotBasedPattern.length > 0 && (
+                                                    <div className="space-y-4 mb-6">
+                                                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                                                            <div className="flex items-center justify-between mb-3">
+                                                                <h4 className="font-semibold text-gray-800">
+                                                                    Time Slots (Select days for each slot)
+                                                                </h4>
+                                                                <button
+                                                                    onClick={() => addTimeSlot("online")}
+                                                                    className="px-3 py-1.5 bg-green-600 text-white rounded text-sm hover:bg-green-700"
+                                                                >
+                                                                    + Add Time Slot
+                                                                </button>
+                                                            </div>
+                                                            <div className="space-y-4">
+                                                                {formData.online.monthly.slotBasedPattern.map((slot, slotIndex) => (
+                                                                    <div key={slotIndex} className="border border-gray-300 rounded-lg p-4 bg-white">
+                                                                        <div className="flex flex-col gap-4">
+                                                                            {/* Slot Time and Type */}
+                                                                            <div className="flex flex-wrap items-center gap-4">
+                                                                                <div className="flex items-center gap-2">
+                                                                                    <label className="text-sm font-medium text-gray-700">Time:</label>
+                                                                                    <input
+                                                                                        type="time"
+                                                                                        value={slot.startTime || ""}
+                                                                                        onChange={(e) => updateTimeSlot("online", slotIndex, "startTime", e.target.value)}
+                                                                                        className="border border-gray-300 rounded px-3 py-1.5 text-sm"
+                                                                                    />
+                                                                                    <span className="text-gray-500">to</span>
+                                                                                    <input
+                                                                                        type="time"
+                                                                                        value={slot.endTime || ""}
+                                                                                        onChange={(e) => updateTimeSlot("online", slotIndex, "endTime", e.target.value)}
+                                                                                        className="border border-gray-300 rounded px-3 py-1.5 text-sm"
+                                                                                    />
+                                                                                </div>
+                                                                                
+                                                                                {/* Type Selection */}
+                                                                                <div className="flex items-center gap-3 border-l pl-4">
+                                                                                    <label className="inline-flex items-center">
+                                                                                        <input
+                                                                                            type="radio"
+                                                                                            name={`slot-type-${slotIndex}`}
+                                                                                            checked={(slot.type || "individual") === "individual"}
+                                                                                            onChange={() => updateTimeSlot("online", slotIndex, "type", "individual")}
+                                                                                            className="form-radio h-4 w-4 text-green-600"
+                                                                                        />
+                                                                                        <span className="ml-2 text-sm">Individual</span>
+                                                                                    </label>
+                                                                                    <label className="inline-flex items-center">
+                                                                                        <input
+                                                                                            type="radio"
+                                                                                            name={`slot-type-${slotIndex}`}
+                                                                                            checked={slot.type === "couple"}
+                                                                                            onChange={() => updateTimeSlot("online", slotIndex, "type", "couple")}
+                                                                                            className="form-radio h-4 w-4 text-green-600"
+                                                                                        />
+                                                                                        <span className="ml-2 text-sm">Couple</span>
+                                                                                    </label>
+                                                                                    <label className="inline-flex items-center">
+                                                                                        <input
+                                                                                            type="radio"
+                                                                                            name={`slot-type-${slotIndex}`}
+                                                                                            checked={slot.type === "group"}
+                                                                                            onChange={() => updateTimeSlot("online", slotIndex, "type", "group")}
+                                                                                            className="form-radio h-4 w-4 text-green-600"
+                                                                                        />
+                                                                                        <span className="ml-2 text-sm">Group</span>
+                                                                                    </label>
+                                                                                </div>
+
+                                                                                <button
+                                                                                    onClick={() => removeTimeSlot("online", slotIndex)}
+                                                                                    className="ml-auto px-3 py-1.5 bg-red-500 text-white rounded text-sm hover:bg-red-600"
+                                                                                >
+                                                                                    Remove Slot
+                                                                                </button>
+                                                                            </div>
+
+                                                                            {/* Day Selection - Checkboxes */}
+                                                                            <div>
+                                                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                                                    Available on these days:
+                                                                                </label>
+                                                                                <div className="flex flex-wrap gap-3">
+                                                                                    {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day) => (
+                                                                                        <label key={day} className="inline-flex items-center">
+                                                                                            <input
+                                                                                                type="checkbox"
+                                                                                                checked={(slot.days || []).includes(day)}
+                                                                                                onChange={() => toggleSlotDay("online", slotIndex, day)}
+                                                                                                className="form-checkbox h-4 w-4 text-green-600 rounded"
+                                                                                            />
+                                                                                            <span className="ml-2 text-sm font-medium">{day}</span>
+                                                                                        </label>
+                                                                                    ))}
+                                                                                </div>
+                                                                                {(!slot.days || slot.days.length === 0) && (
+                                                                                    <p className="text-xs text-red-500 mt-1">⚠️ Please select at least one day</p>
+                                                                                )}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+
                                                 {/* New Day-Based Weekly Pattern UI */}
                                                 {formData?.online?.monthly?.dayBasedPattern && (
                                                     <div className="space-y-6">
@@ -4310,25 +4564,153 @@ export default function GuideForm() {
                                                 <h3 className="text-lg font-semibold text-gray-700 mb-4">
                                                     Monthly Offline – Weekly Hours
                                                 </h3>
-                                                <div className="flex items-center gap-2 mb-3">
+                                                <div className="flex items-center gap-2 mb-3 flex-wrap">
                                                     <span className="text-sm text-gray-600">
                                                         Setup Mode:
                                                     </span>
                                                     <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            initializeSlotBasedPattern("offline");
+                                                            setTimeout(() => {
+                                                                if (!formData?.offline?.monthly?.slotBasedPattern || formData.offline.monthly.slotBasedPattern.length === 0) {
+                                                                    addTimeSlot("offline");
+                                                                }
+                                                            }, 100);
+                                                        }}
+                                                        className="px-3 py-1.5 rounded border text-sm bg-[#2F6288] text-white border-[#2F6288] hover:bg-[#224b66]"
+                                                    >
+                                                        Slot-First Setup
+                                                    </button>
+                                                    <button
+                                                        type="button"
                                                         onClick={() =>
                                                             initializeDayBasedWeeklyPattern("offline")
                                                         }
                                                         className="px-3 py-1.5 rounded border text-sm bg-[#2F6288] text-white border-[#2F6288] hover:bg-[#224b66]"
                                                     >
-                                                        Initialize Day-Based Setup
+                                                        Day-Based Setup
                                                     </button>
                                                     <button
+                                                        type="button"
                                                         onClick={() => replicateWeekToMonth("offline")}
                                                         className="px-3 py-1.5 rounded border text-sm bg-[#2F6288] text-white border-[#2F6288] hover:bg-[#224b66]"
                                                     >
                                                         Apply Week to All Month
                                                     </button>
                                                 </div>
+
+                                                {/* NEW: Slot-First Weekly Pattern UI for Offline */}
+                                                {formData?.offline?.monthly?.slotBasedPattern && formData.offline.monthly.slotBasedPattern.length > 0 && (
+                                                    <div className="space-y-4 mb-6">
+                                                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                                                            <div className="flex items-center justify-between mb-3">
+                                                                <h4 className="font-semibold text-gray-800">
+                                                                    Time Slots (Select days for each slot)
+                                                                </h4>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => addTimeSlot("offline")}
+                                                                    className="px-3 py-1.5 bg-green-600 text-white rounded text-sm hover:bg-green-700"
+                                                                >
+                                                                    + Add Time Slot
+                                                                </button>
+                                                            </div>
+                                                            <div className="space-y-4">
+                                                                {formData.offline.monthly.slotBasedPattern.map((slot, slotIndex) => (
+                                                                    <div key={slotIndex} className="border border-gray-300 rounded-lg p-4 bg-white">
+                                                                        <div className="flex flex-col gap-4">
+                                                                            {/* Slot Time and Type */}
+                                                                            <div className="flex flex-wrap items-center gap-4">
+                                                                                <div className="flex items-center gap-2">
+                                                                                    <label className="text-sm font-medium text-gray-700">Time:</label>
+                                                                                    <input
+                                                                                        type="time"
+                                                                                        value={slot.startTime || ""}
+                                                                                        onChange={(e) => updateTimeSlot("offline", slotIndex, "startTime", e.target.value)}
+                                                                                        className="border border-gray-300 rounded px-3 py-1.5 text-sm"
+                                                                                    />
+                                                                                    <span className="text-gray-500">to</span>
+                                                                                    <input
+                                                                                        type="time"
+                                                                                        value={slot.endTime || ""}
+                                                                                        onChange={(e) => updateTimeSlot("offline", slotIndex, "endTime", e.target.value)}
+                                                                                        className="border border-gray-300 rounded px-3 py-1.5 text-sm"
+                                                                                    />
+                                                                                </div>
+                                                                                
+                                                                                {/* Type Selection */}
+                                                                                <div className="flex items-center gap-3 border-l pl-4">
+                                                                                    <label className="inline-flex items-center">
+                                                                                        <input
+                                                                                            type="radio"
+                                                                                            name={`offline-slot-type-${slotIndex}`}
+                                                                                            checked={(slot.type || "individual") === "individual"}
+                                                                                            onChange={() => updateTimeSlot("offline", slotIndex, "type", "individual")}
+                                                                                            className="form-radio h-4 w-4 text-green-600"
+                                                                                        />
+                                                                                        <span className="ml-2 text-sm">Individual</span>
+                                                                                    </label>
+                                                                                    <label className="inline-flex items-center">
+                                                                                        <input
+                                                                                            type="radio"
+                                                                                            name={`offline-slot-type-${slotIndex}`}
+                                                                                            checked={slot.type === "couple"}
+                                                                                            onChange={() => updateTimeSlot("offline", slotIndex, "type", "couple")}
+                                                                                            className="form-radio h-4 w-4 text-green-600"
+                                                                                        />
+                                                                                        <span className="ml-2 text-sm">Couple</span>
+                                                                                    </label>
+                                                                                    <label className="inline-flex items-center">
+                                                                                        <input
+                                                                                            type="radio"
+                                                                                            name={`offline-slot-type-${slotIndex}`}
+                                                                                            checked={slot.type === "group"}
+                                                                                            onChange={() => updateTimeSlot("offline", slotIndex, "type", "group")}
+                                                                                            className="form-radio h-4 w-4 text-green-600"
+                                                                                        />
+                                                                                        <span className="ml-2 text-sm">Group</span>
+                                                                                    </label>
+                                                                                </div>
+
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => removeTimeSlot("offline", slotIndex)}
+                                                                                    className="ml-auto px-3 py-1.5 bg-red-500 text-white rounded text-sm hover:bg-red-600"
+                                                                                >
+                                                                                    Remove Slot
+                                                                                </button>
+                                                                            </div>
+
+                                                                            {/* Day Selection - Checkboxes */}
+                                                                            <div>
+                                                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                                                    Available on these days:
+                                                                                </label>
+                                                                                <div className="flex flex-wrap gap-3">
+                                                                                    {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day) => (
+                                                                                        <label key={day} className="inline-flex items-center">
+                                                                                            <input
+                                                                                                type="checkbox"
+                                                                                                checked={(slot.days || []).includes(day)}
+                                                                                                onChange={() => toggleSlotDay("offline", slotIndex, day)}
+                                                                                                className="form-checkbox h-4 w-4 text-green-600 rounded"
+                                                                                            />
+                                                                                            <span className="ml-2 text-sm font-medium">{day}</span>
+                                                                                        </label>
+                                                                                    ))}
+                                                                                </div>
+                                                                                {(!slot.days || slot.days.length === 0) && (
+                                                                                    <p className="text-xs text-red-500 mt-1">⚠️ Please select at least one day</p>
+                                                                                )}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
 
                                                 {/* New Day-Based Weekly Pattern UI for Offline */}
                                                 {formData?.offline?.monthly?.dayBasedPattern && (

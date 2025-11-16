@@ -11,6 +11,7 @@ import { getDownloadURL, ref, uploadBytesResumable, deleteObject } from "firebas
 import { v4 as uuidv4 } from "uuid";
 import { storage } from "../../../services/firebase";
 import { showSuccess } from "../../../utils/toast";
+import RichTextEditor from "../../common/RichTextEditor";
 
 const ItemType = "HIGHLIGHT";
 
@@ -259,7 +260,7 @@ export default function Highlights() {
             </h2>
 
             <div className="mb-6">
-                <h3 className="text-md font-semibold text-gray-700 mb-2">Highlight Title</h3>
+                <h3 className="text-md font-semibold text-gray-700 mb-2">Pilgrim Says Title</h3>
                 <input
                     type="text"
                     placeholder="Enter Highlight title"
@@ -267,16 +268,15 @@ export default function Highlights() {
                     onChange={(e) => setTitle(e.target.value)}
                     className="w-full border p-2 rounded mb-3"
                 />
-                <h3 className="text-md font-semibold text-gray-700 mb-2">Highlight Description</h3>
-                <input
-                    type="textarea"
-                    rows="4"
-                    placeholder="Enter Highlight description"
+                <h3 className="text-md font-semibold text-gray-700 mb-2">Pilgrim Says Description</h3>
+                <RichTextEditor
                     value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className="w-full border p-2 rounded mb-3"
+                    onChange={(value) => setDescription(value)}
+                    placeholder="Enter Highlight description"
+                    rows={4}
                 />
-                <h3 className="text-md font-semibold text-gray-700 mb-2">Add Image or Video</h3>
+                
+                <h3 className="text-md font-semibold text-gray-700 mb-2 mt-4">Add Image or Video</h3>
                 <div
                     {...getRootProps()}
                     className={`border-2 border-dashed border-gray-300 h-40 rounded mb-4 flex items-center justify-center cursor-pointer hover:bg-gray-50 relative ${isUploading ? 'pointer-events-none opacity-75' : ''}`}

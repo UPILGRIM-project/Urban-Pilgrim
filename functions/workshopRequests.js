@@ -148,7 +148,7 @@ exports.handleWorkshopRequestResponse = functions.https.onRequest(async (req, re
                         </h1>
                         <p>The workshop request has been ${action === 'approve' ? 'approved' : 'rejected'} successfully.</p>
                         <p>The customer has been notified via email.</p>
-                        <a href="https://your-admin-panel-url.com" class="button">Back to Admin Panel</a>
+                        <a href="https://urbanpilgrim.in/admin" class="button">Back to Admin Panel</a>
                     </div>
                 </body>
             </html>

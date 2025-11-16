@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { httpsCallable } from "firebase/functions";
-import { signInWithCustomToken } from "firebase/auth";
-import { auth, db, functions } from "../../services/firebase";
+import { signInWithCustomToken, sendPasswordResetEmail } from "firebase/auth";
+import { auth, functions } from "../../services/firebase";
 import { useDispatch } from "react-redux";
-import { doc, getDoc } from "firebase/firestore";
 import { setAdmin } from "../../features/adminAuthSlice";
 import { showError, showSuccess } from "../../utils/toast";
 import Loader2 from "../Loader2";
@@ -57,6 +56,24 @@ export default function AdminSignIn() {
         } catch (err) {
             console.error(err);
             showError(err.message || "Invalid OTP or unauthorized access");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleForgotPassword = async () => {
+        if (!email) {
+            showError("Please enter your email address first");
+            return;
+        }
+
+        try {
+            setLoading(true);
+            await sendPasswordResetEmail(auth, email);
+            showSuccess("Password reset email sent! Please check your inbox.");
+        } catch (err) {
+            console.error(err);
+            showError(err.message || "Failed to send password reset email");
         } finally {
             setLoading(false);
         }
@@ -118,9 +135,14 @@ export default function AdminSignIn() {
                     {loading ? (step === 1 ? "Sending..." : "Verifying...") : (step === 1 ? "Continue →" : "Verify OTP →")}
                 </button>
 
-                <p className="text-xs text-left text-gray-500 mt-4 cursor-pointer hover:underline">
-                    Admin Privacy Policy
-                </p>
+                {step === 1 && (
+                    <p 
+                        onClick={handleForgotPassword}
+                        className="text-xs text-left text-gray-500 mt-4 cursor-pointer hover:underline"
+                    >
+                        Forgot password?
+                    </p>
+                )}
             </div>
         </div>
     );
