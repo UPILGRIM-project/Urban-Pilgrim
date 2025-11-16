@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import Loader2 from "../../components/Loader2"
 import { showError } from "../../utils/toast"
 
-const genAI = new GoogleGenerativeAI("AIzaSyC5vS7r9yDolUy4NJuuXSVvLDVweYZs7l0");
+const genAI = new GoogleGenerativeAI("AIzaSyB-Gh2HeQR4NTNPXcFlmyytdez5c-vCMFY");
 
 const ClothingSuggestions = ({ weather }) => {
     const [suggestions, setSuggestions] = useState([]);

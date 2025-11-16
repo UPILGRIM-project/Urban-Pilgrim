@@ -10,6 +10,7 @@ import Loader2 from "../Loader2";
 
 export default function AdminSignIn() {
     const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
     const [otp, setOtp] = useState("");
     const [step, setStep] = useState(1); // 1: enter email, 2: enter OTP
     const [loading, setLoading] = useState(false);
@@ -17,16 +18,17 @@ export default function AdminSignIn() {
 
     const sendOtp = async () => {
         if (!email) return alert("Enter email!");
+        if (!password) return alert("Enter password!");
 
         try {
             setLoading(true);
             const sendOtpFn = httpsCallable(functions, "sendAdminOtp");
-            const result = await sendOtpFn({ email });
+            await sendOtpFn({ email, password });
             setStep(2);
             showSuccess("OTP sent to your admin email!");
         } catch (err) {
             console.error(err);
-            showError(err.message || "Failed to send OTP. Please check if you're an authorized admin.");
+            showError(err.message || "Failed to send OTP. Please check your credentials.");
         } finally {
             setLoading(false);
         }
@@ -74,19 +76,29 @@ export default function AdminSignIn() {
                 <h2 className="text-3xl font-bold mb-3">Admin Sign in</h2>
                 <p className="text-gray-600 text-sm mb-6">
                     {step === 1
-                        ? "Enter your admin email and we'll send you a verification code"
+                        ? "Enter your admin credentials and we'll send you a verification code"
                         : "Enter the OTP sent to your admin email"}
                 </p>
 
                 {step === 1 ? (
-                    <input
-                        type="email"
-                        placeholder="Enter your admin email address..."
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        disabled={loading}
-                        className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
-                    />
+                    <>
+                        <input
+                            type="email"
+                            placeholder="Enter your admin email address..."
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            disabled={loading}
+                            className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
+                        />
+                        <input
+                            type="password"
+                            placeholder="Enter your password..."
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            disabled={loading}
+                            className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
+                        />
+                    </>
                 ) : (
                     <input
                         type="text"
