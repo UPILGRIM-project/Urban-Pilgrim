@@ -108,7 +108,11 @@ export default function YogaCard() {
                 <div className="md:w-1/2 w-full p-6 flex md:flex-row flex-col justify-between items-center">
                     <div className="px-4">
                         <h2 className="text-sm sm:text-xl md:text-2xl line-clamp-2 font-semibold mb-4">{currentHighlight?.title}</h2>
-                        <p className="text-xs text-gray-600 mb-6 line-clamp-2">{currentHighlight?.description}</p>
+                        {/* <p className="text-xs text-gray-600 mb-6 line-clamp-2">{currentHighlight?.description}</p> */}
+                        <div
+                            className="text-xs prose text-gray-600 mb-6 line-clamp-2"
+                            dangerouslySetInnerHTML={{ __html: currentHighlight.description || "" }}
+                        />
                         <p
                             onClick={() =>
                                 navigate(`/yoga/${slugify(currentHighlight?.title)}`, {

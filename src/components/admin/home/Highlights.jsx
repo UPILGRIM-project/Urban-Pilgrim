@@ -39,8 +39,8 @@ function HighlightItem({ highlight, index, moveHighlight, onEdit, onDelete, onTo
             <div className="flex items-center gap-3">
                 <MdDragIndicator className="text-gray-400 cursor-move" />
                 {highlight.image && highlight.image.includes('video') || 
-                 (highlight.image && (highlight.image.includes('.mp4') || highlight.image.includes('.webm') || 
-                  highlight.image.includes('.ogg') || highlight.image.includes('.avi') || highlight.image.includes('.mov'))) ? (
+                    (highlight.image && (highlight.image.includes('.mp4') || highlight.image.includes('.webm') || 
+                    highlight.image.includes('.ogg') || highlight.image.includes('.avi') || highlight.image.includes('.mov'))) ? (
                     <video 
                         src={highlight.image} 
                         className="h-12 w-12 rounded object-cover"
@@ -53,7 +53,13 @@ function HighlightItem({ highlight, index, moveHighlight, onEdit, onDelete, onTo
                 )}
                 <div>
                     <p className="font-semibold">{highlight.title}</p>
-                    <p className="text-sm text-gray-500">Description: {highlight.description}</p>
+                    <div className="text-sm text-gray-500">
+                        <span className="font-medium">Description: </span>
+                        <div
+                            className="mt-1 prose max-w-none text-sm text-gray-700"
+                            dangerouslySetInnerHTML={{ __html: highlight.description || "" }}
+                        />
+                    </div>
                 </div>
             </div>
             <div className="flex items-center gap-3">

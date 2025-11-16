@@ -37,36 +37,36 @@ export default function YogaDesc() {
                 {/* Image or Video - Left Side */}
                 <div className="w-full lg:w-1/2 flex-shrink-0">
                     {(image?.includes('.mp4') || 
-                      image?.includes('.mov') || 
-                      image?.includes('.webm') || 
-                      image?.includes('.avi') || 
-                      image?.includes('.mkv')) ? (
-                        <video
-                            src={image}
-                            controls
-                            autoPlay
-                            loop
-                            muted
-                            playsInline
-                            className="rounded-xl shadow-lg border border-gray-200 w-full h-[300px] md:h-[400px] lg:h-[500px] object-cover"
-                        >
-                            Your browser does not support the video tag.
-                        </video>
-                    ) : (
-                        <img
-                            src={image}
-                            alt={title}
-                            className="rounded-xl shadow-lg border border-gray-200 w-full h-[300px] md:h-[400px] lg:h-[500px] object-cover"
-                        />
-                    )}
+                        image?.includes('.mov') || 
+                        image?.includes('.webm') || 
+                        image?.includes('.avi') || 
+                        image?.includes('.mkv')) ? (
+                            <video
+                                src={image}
+                                controls
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
+                                className="rounded-xl shadow-lg border border-gray-200 w-full h-[300px] md:h-[400px] lg:h-[500px] object-cover"
+                            >
+                                Your browser does not support the video tag.
+                            </video>
+                        ) : (
+                            <img
+                                src={image}
+                                alt={title}
+                                className="rounded-xl shadow-lg border border-gray-200 w-full h-[300px] md:h-[400px] lg:h-[500px] object-cover"
+                            />
+                        )
+                    }
                 </div>
 
                 {/* Description - Right Side */}
-                <div className="w-full lg:w-1/2 text-gray-700 lg:text-base sm:text-sm text-xs leading-relaxed space-y-4">
-                    {description.split("\n").map((para, idx) => (
-                        <p key={idx}>{para}</p>
-                    ))}
-                </div>
+                <div 
+                    className="w-full lg:w-1/2 text-gray-700 lg:text-base sm:text-sm text-xs leading-relaxed space-y-4 prose max-w-none"
+                    dangerouslySetInnerHTML={{ __html: description || "" }}
+                />
             </div>
         </section>
     );
