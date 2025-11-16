@@ -643,6 +643,15 @@ function RequestModal({
         additionalNotes: "",
     });
 
+    // Prevent body scroll when modal is open
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, []);
+
     const handleSubmit = (e) => {
         e.preventDefault();
 
@@ -676,10 +685,71 @@ function RequestModal({
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
+
+
     return (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                <div className="p-6">
+        <div 
+            className="fixed inset-0 bg-black/30 backdrop-blur-xs flex items-center justify-center z-50 p-4"
+            data-modal-container
+            onClick={(e) => {
+                if (e.target === e.currentTarget) {
+                    onClose();
+                }
+            }}
+            onWheel={(e) => {
+                // Only prevent if the wheel event didn't come from modal content
+                const isFromModalContent = e.target.closest('[data-modal-content] > div');
+                if (!isFromModalContent) {
+                    e.preventDefault();
+                }
+            }}
+            style={{ 
+                overflow: 'hidden' // Prevent overlay from scrolling
+            }}
+        >
+            <div 
+                className="bg-white rounded-lg max-w-2xl w-full shadow-2xl"
+                data-modal-content
+                onClick={(e) => e.stopPropagation()}
+                style={{ 
+                    height: '90vh', // Reduced height
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden' // Ensure container doesn't scroll
+                }}
+            >
+                <div 
+                    className="flex-1 overflow-y-scroll"
+                    onWheel={(e) => {
+                        e.stopPropagation(); // Prevent event from bubbling up
+                        
+                        // Manual scroll handling if needed
+                        const target = e.currentTarget;
+                        const atTop = target.scrollTop === 0;
+                        const atBottom = target.scrollTop >= (target.scrollHeight - target.clientHeight);
+                        
+                        // Only allow background scroll if we're at the boundaries and scrolling further
+                        if ((atTop && e.deltaY < 0) || (atBottom && e.deltaY > 0)) {
+                            // Allow default behavior (background scroll)
+                            return;
+                        }
+                        
+                        // Prevent default to stop background scroll
+                        e.preventDefault();
+                    }}
+                    onTouchMove={(e) => {
+                        e.stopPropagation(); // Prevent event from bubbling up
+                    }}
+                    style={{ 
+                        minHeight: 0, // Allow flex child to shrink
+                        WebkitOverflowScrolling: 'touch', // Enable smooth scrolling on iOS
+                        scrollbarWidth: 'thin', // Firefox
+                        msOverflowStyle: 'auto', // IE/Edge
+                        position: 'relative',
+                        zIndex: 1000 // Ensure it's above other elements
+                    }}
+                >
+                    <div className="p-6">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-2xl font-bold text-gray-900">
                             Workshop Request
@@ -712,21 +782,22 @@ function RequestModal({
                         </p>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        {/* Personal Information */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Full Name *
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.name}
-                                    onChange={(e) => handleChange("name", e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#c16a00] focus:border-transparent"
-                                    required
-                                />
-                            </div>
+                    <div className="pt-4">
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            {/* Personal Information */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Full Name *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.name}
+                                        onChange={(e) => handleChange("name", e.target.value)}
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#c16a00] focus:border-transparent"
+                                        required
+                                    />
+                                </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Email *
@@ -840,25 +911,27 @@ function RequestModal({
                                 rows="3"
                                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#c16a00] focus:border-transparent"
                             />
-                        </div>
+                            </div>
 
-                        {/* Action Buttons */}
-                        <div className="flex gap-4 pt-4">
-                            <button
-                                type="button"
-                                onClick={onClose}
-                                className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 transition-colors"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="submit"
-                                className="flex-1 px-6 py-3 bg-[#c16a00] text-white rounded-full hover:bg-[rgba(193,93,5,0.95)] transition-colors"
-                            >
-                                Submit Request
-                            </button>
-                        </div>
-                    </form>
+                            {/* Action Buttons */}
+                            <div className="flex gap-4 pt-4">
+                                <button
+                                    type="button"
+                                    onClick={onClose}
+                                    className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="flex-1 px-6 py-3 bg-[#c16a00] text-white rounded-full hover:bg-[rgba(193,93,5,0.95)] transition-colors"
+                                >
+                                    Submit Request
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    </div>
                 </div>
             </div>
         </div>
