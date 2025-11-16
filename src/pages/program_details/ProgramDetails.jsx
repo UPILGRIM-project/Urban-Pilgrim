@@ -82,7 +82,7 @@ export default function ProgramDetails() {
         if (!programData) return;
 
         const cartItem = {
-            id: programData.recordedProgramCard?.title, // use unique id if available
+            id: `${programData.recordedProgramCard?.title || 'recorded'}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, // unique id
             title: programData.recordedProgramCard?.title,
             price: getNumericPrice(),
             gst: programData.recordedProgramCard?.gst || 0,

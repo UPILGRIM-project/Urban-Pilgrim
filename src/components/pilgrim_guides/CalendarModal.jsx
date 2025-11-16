@@ -128,7 +128,7 @@ export default function CalendarModal({
 
     selectedSlotsMulti.forEach((slot) => {
       const cartItem = {
-        id: `${sessionData?.guideCard?.title}-${slot.id}`,
+        id: `${sessionData?.guideCard?.title}-${slot.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         title: sessionData?.guideCard?.title,
         price: price,
         gst: sessionData?.guideCard?.gst || 0,
@@ -187,7 +187,7 @@ export default function CalendarModal({
     }
 
     const cartItem = {
-      id: `${sessionData?.guideCard?.title}-monthly-${Date.now()}`,
+      id: `${sessionData?.guideCard?.title}-monthly-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       title: sessionData?.guideCard?.title,
       price: price, // monthly price
       gst: sessionData?.guideCard?.gst || 0,
@@ -414,7 +414,7 @@ export default function CalendarModal({
     }
 
     const cartItem = {
-      id: `${sessionData?.guideCard?.title}-${selectedSlot.id}`, // unique id
+      id: `${sessionData?.guideCard?.title}-${selectedSlot.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, // unique id
       title: sessionData?.guideCard?.title,
       price: price,
       gst: sessionData?.guideCard?.gst || 0,

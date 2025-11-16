@@ -21,7 +21,7 @@ import { MdPeopleAlt  } from "react-icons/md";
 import WeatherSection from "./WeatherSection";
 // Removed BundlesPopup in favor of direct add-to-cart
 import { addToCart } from "../../features/cartSlice";
-import { showSuccess } from "../../utils/toast";
+import { showSuccess, showError } from "../../utils/toast";
 import { getProgramButtonConfig } from "../../utils/userProgramUtils";
 import { useNavigate } from "react-router-dom";
 import { Package } from "lucide-react";
@@ -256,13 +256,24 @@ export default function Retreatdescription() {
                                     rawPrice = 0;
                                 }
                                 
-                                
                                 // Convert to number more carefully
                                 let numericPrice = 0;
                                 if (rawPrice) {
                                     // Handle both string and number types
                                     const priceString = String(rawPrice).replace(/,/g, "").replace(/[^0-9.]/g, "");
-                                    numericPrice = parseFloat(priceString) || 0;
+                                    numericPrice = parseFloat(priceString);
+                                    
+                                    // Validate the parsed price
+                                    if (isNaN(numericPrice) || numericPrice < 0) {
+                                        console.error("Invalid price:", rawPrice);
+                                        showError("Invalid price. Please contact support.");
+                                        return;
+                                    }
+                                }
+                                
+                                // Ensure we have a valid price
+                                if (numericPrice === 0) {
+                                    console.warn("Price is 0 for retreat");
                                 }
                                 
                                 const derivedImage =
@@ -272,7 +283,7 @@ export default function Retreatdescription() {
                                     "/assets/retreats.svg";
 
                                 const cartItem = {
-                                    id: retreatData?.id || `${retreatData?.pilgrimRetreatCard?.title || 'retreat'}-${Date.now()}`,
+                                    id: `${retreatData?.pilgrimRetreatCard?.title || 'retreat'}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                                     title: retreatData?.pilgrimRetreatCard?.title || "Retreat",
                                     price: numericPrice,
                                     gst: retreatData?.pilgrimRetreatCard?.gst || 0,

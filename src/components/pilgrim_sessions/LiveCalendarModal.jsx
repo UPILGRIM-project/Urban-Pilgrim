@@ -74,7 +74,7 @@ export default function LiveCalendarModal({ isOpen, onClose, sessionData, select
 
         selectedSlotsMulti.forEach((slot) => {
             const cartItem = {
-                id: `${sessionData?.guideCard?.title}-${slot.id}`,
+                id: `${sessionData?.guideCard?.title}-${slot.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                 title: sessionData?.guideCard?.title,
                 price: slot.selectedPrice || getPerSlotPrice(), // Use individual slot price
                 gst: sessionData?.guideCard?.gst || 0,
@@ -106,7 +106,7 @@ export default function LiveCalendarModal({ isOpen, onClose, sessionData, select
         const price = sessionData[modeKey]?.[subscriptionKey]?.price;
 
         const cartItem = {
-            id: `${sessionData?.guideCard?.title}-monthly-${Date.now()}`,
+            id: `${sessionData?.guideCard?.title}-monthly-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             title: sessionData?.guideCard?.title,
             price: price, // monthly price
             gst: sessionData?.guideCard?.gst || 0,
@@ -348,7 +348,7 @@ export default function LiveCalendarModal({ isOpen, onClose, sessionData, select
         const price = sessionData[modeKey]?.[subscriptionKey]?.price;
 
         const cartItem = {
-            id: `${sessionData?.guideCard?.title}-${selectedSlot.id}`, // unique id
+            id: `${sessionData?.guideCard?.title}-${selectedSlot.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, // unique id
             title: sessionData?.guideCard?.title,
             price: price,
             persons: 1, // default to 1 person

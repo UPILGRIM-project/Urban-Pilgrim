@@ -227,7 +227,7 @@ export default function WorkshopDetails() {
     const handleAddToCart = () => {
         try {
             const cartItem = {
-                id: workshop.id,
+                id: `${workshop.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                 title: workshop.title,
                 price: calculateTotalPrice(),
                 gst: workshop.gst || 0,

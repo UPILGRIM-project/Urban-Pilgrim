@@ -716,7 +716,8 @@ export default function MonthlyCalendarModal({
 				return;
 			}
 
-			cartItemId = `${sessionData?.guideCard?.title || "guide"}-monthly-${dynamicOccupancyType}-${Date.now()}`;
+			// Generate unique cart item ID to ensure each "Add to Cart" creates a separate item
+			cartItemId = `${sessionData?.guideCard?.title || "guide"}-monthly-${dynamicOccupancyType}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
 			// Calculate booking lifecycle dates
 			const bookingDate = new Date();
