@@ -722,31 +722,82 @@ function Home() {
                     <div className="relative">
                         <motion.div 
                             ref={sessionsScrollRef}
-                            className="c5bottom lg:!overflow-visible overflow-x-auto no-scrollbar" 
+                            className="c5bottom overflow-x-auto no-scrollbar 
+                                lg:!overflow-visible"
                             initial={{ y: 100, opacity: 0 }} 
                             whileInView={{ y: 0, opacity: 1 }} 
                             transition={{ duration: 0.5, ease: "easeOut" }} 
                             viewport={{ once: true, amount: 0.1 }}
                             onScroll={handleSessionsScroll}
                         >
-                            {
-                                filteredLiveSessions && filteredLiveSessions.length > 0 &&
-                                filteredLiveSessions.map((session, index) => (
-                                    <PersondetailsCard type="live-session" key={`live-${index}`} image={session?.liveSessionCard?.thumbnail} title={session?.liveSessionCard?.title} price={session?.liveSessionCard?.price} />
-                                ))
-                            }
-                            {
-                                filteredRecordedSessions && filteredRecordedSessions.length > 0 &&
-                                filteredRecordedSessions.map((session, index) => (
-                                    <PersondetailsCard type="recorded-session" key={`recorded-${index}`} image={session?.recordedProgramCard?.thumbnail} title={session?.recordedProgramCard?.title} price={session?.recordedProgramCard?.price} />
-                                ))
-                            }
-                            {
-                                filteredWorkshops && filteredWorkshops.length > 0 &&
-                                filteredWorkshops.map((workshop, index) => (
-                                    <PersondetailsCard type="workshop" key={`workshop-${index}`} image={workshop?.thumbnail} title={workshop?.title} price={workshop?.price} />
-                                ))
-                            }
+
+                            {/* MOBILE + TABLET (default) */}
+                            <div className="flex md:hidden">
+                                {filteredLiveSessions?.map((session, index) => (
+                                    <PersondetailsCard 
+                                        type="live-session"
+                                        key={`live-${index}`}
+                                        image={session?.liveSessionCard?.thumbnail}
+                                        title={session?.liveSessionCard?.title}
+                                        price={session?.liveSessionCard?.price}
+                                    />
+                                ))}
+
+                                {filteredRecordedSessions?.map((session, index) => (
+                                    <PersondetailsCard 
+                                        type="recorded-session"
+                                        key={`recorded-${index}`}
+                                        image={session?.recordedProgramCard?.thumbnail}
+                                        title={session?.recordedProgramCard?.title}
+                                        price={session?.recordedProgramCard?.price}
+                                    />
+                                ))}
+
+                                {filteredWorkshops?.map((workshop, index) => (
+                                    <PersondetailsCard 
+                                        type="workshop"
+                                        key={`workshop-${index}`}
+                                        image={workshop?.thumbnail}
+                                        title={workshop?.title}
+                                        price={workshop?.price}
+                                    />
+                                ))}
+                            </div>
+
+
+                            {/* DESKTOP ONLY */}
+                            <div className="hidden md:flex md:gap-15 lg:gap-20">
+                                {filteredLiveSessions?.map((session, index) => (
+                                    <PersondetailsCard 
+                                        type="live-session"
+                                        key={`live-d-${index}`}
+                                        image={session?.liveSessionCard?.thumbnail}
+                                        title={session?.liveSessionCard?.title}
+                                        price={session?.liveSessionCard?.price}
+                                    />
+                                ))}
+
+                                {filteredRecordedSessions?.map((session, index) => (
+                                    <PersondetailsCard 
+                                        type="recorded-session"
+                                        key={`recorded-d-${index}`}
+                                        image={session?.recordedProgramCard?.thumbnail}
+                                        title={session?.recordedProgramCard?.title}
+                                        price={session?.recordedProgramCard?.price}
+                                    />
+                                ))}
+
+                                {filteredWorkshops?.map((workshop, index) => (
+                                    <PersondetailsCard 
+                                        type="workshop"
+                                        key={`workshop-d-${index}`}
+                                        image={workshop?.thumbnail}
+                                        title={workshop?.title}
+                                        price={workshop?.price}
+                                    />
+                                ))}
+                            </div>
+
                         </motion.div>
                         
                         {/* Horizontal Progress Bar - Bottom Center */}
