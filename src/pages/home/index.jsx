@@ -28,12 +28,12 @@ function Home() {
     const [sessions, setSessions] = useState(null);
     const [guides, setGuides] = useState(null);
     const [selectedGuideCategory, setSelectedGuideCategory] = useState('all');
-    
+
     // Scroll progress states
     const [guidesScrollProgress, setGuidesScrollProgress] = useState(0);
     const [retreatsScrollProgress, setRetreatsScrollProgress] = useState(0);
     const [sessionsScrollProgress, setSessionsScrollProgress] = useState(0);
-    
+
     // Refs for scroll containers
     const guidesScrollRef = useRef(null);
     const retreatsScrollRef = useRef(null);
@@ -114,7 +114,7 @@ function Home() {
                         }));
 
                     setExperienceData(retreatsData || null);
-                    
+
                     // Extract unique categories for retreat filter
                     const categories = ['all', ...new Set(retreatsData.map(retreat => retreat?.pilgrimRetreatCard?.category).filter(Boolean))];
                     setRetreatCategories(categories);
@@ -183,7 +183,7 @@ function Home() {
                 // Fetch workshops
                 const workshopsCollectionRef = collection(db, 'workshops');
                 const workshopsSnapshot = await getDocs(workshopsCollectionRef);
-                
+
                 if (!workshopsSnapshot.empty) {
                     const workshopsArray = workshopsSnapshot.docs.map(doc => ({
                         id: doc.id,
@@ -241,7 +241,7 @@ function Home() {
                     const data = snapshot.data();
                     const actual = Object.values(data.slides);
                     setGuideData(actual || []);
-                    
+
                     // Extract unique categories for filter
                     const categories = ['all', ...new Set(actual.map(guide => guide?.guideCard?.category).filter(Boolean))];
                     setGuideCategories(categories);
@@ -261,7 +261,7 @@ function Home() {
         if (selectedGuideCategory === 'all') return true;
         return guide?.guideCard?.category === selectedGuideCategory;
     }) : [];
-    
+
     const guideArray = filteredGuides;
 
     // Filter retreats based on selected category
@@ -269,7 +269,7 @@ function Home() {
         if (selectedRetreatCategory === 'all') return true;
         return retreat?.pilgrimRetreatCard?.category === selectedRetreatCategory;
     }) : [];
-    
+
     const retreatArray = filteredRetreats;
 
     // Filter sessions based on selected category
@@ -324,11 +324,11 @@ function Home() {
             const clickX = e.clientX - rect.left;
             const progressBarWidth = rect.width;
             const clickProgress = (clickX / progressBarWidth) * 100;
-            
+
             const { scrollWidth, clientWidth } = guidesScrollRef.current;
             const maxScroll = scrollWidth - clientWidth;
             const targetScrollLeft = (clickProgress / 100) * maxScroll;
-            
+
             guidesScrollRef.current.scrollTo({
                 left: targetScrollLeft,
                 behavior: 'smooth'
@@ -342,11 +342,11 @@ function Home() {
             const clickX = e.clientX - rect.left;
             const progressBarWidth = rect.width;
             const clickProgress = (clickX / progressBarWidth) * 100;
-            
+
             const { scrollWidth, clientWidth } = retreatsScrollRef.current;
             const maxScroll = scrollWidth - clientWidth;
             const targetScrollLeft = (clickProgress / 100) * maxScroll;
-            
+
             retreatsScrollRef.current.scrollTo({
                 left: targetScrollLeft,
                 behavior: 'smooth'
@@ -360,11 +360,11 @@ function Home() {
             const clickX = e.clientX - rect.left;
             const progressBarWidth = rect.width;
             const clickProgress = (clickX / progressBarWidth) * 100;
-            
+
             const { scrollWidth, clientWidth } = sessionsScrollRef.current;
             const maxScroll = scrollWidth - clientWidth;
             const targetScrollLeft = (clickProgress / 100) * maxScroll;
-            
+
             sessionsScrollRef.current.scrollTo({
                 left: targetScrollLeft,
                 behavior: 'smooth'
@@ -439,7 +439,7 @@ function Home() {
                 <div className="div">
                     <Program_Explorer />
                 </div>
-            </div>  
+            </div>
 
             {/* content */}
             <div className="content3">
@@ -449,7 +449,7 @@ function Home() {
                     </motion.div>
                     <motion.div className="c3text_container" initial={{ x: 100, opacity: 0 }} whileInView={{ x: 0, opacity: 1 }} transition={{ duration: 0.5, ease: "easeOut" }} viewport={{ once: true }}>
                         <motion.div className="datacontainer">
-                            { contentFeatures &&
+                            {contentFeatures &&
                                 contentFeatures.map((feature, index) => (
                                     <C3_container_data key={index} imageCss="lg:max-h-[40px] lg:max-w-[30px] sm:max-h-[40px] sm:max-w-[30px] sm:mt-0 mt-1 max-h-[30px] max-w-[25px]" img={feature?.image} heading={feature?.title} content={feature?.shorttitle} />
                                 ))
@@ -458,13 +458,13 @@ function Home() {
                     </motion.div>
                 </div>
             </div>
-            
+
             {/* Find your Guides */}
             <div className="content6">
                 <div className="meditateimg ">
                     <img src="/assets/meditationimg.png" alt="error" />
                 </div>
-                
+
                 <div className="c6container">
                     <div className="imgover-content">
                         {/* Heading */}
@@ -475,7 +475,7 @@ function Home() {
                                     ?.split(" ")
                                     .slice(0, 10)
                                     .join(" ")}...
-                            
+
                             </div>
                         </motion.div>
 
@@ -499,7 +499,7 @@ function Home() {
                                         </span>
                                         <ChevronDown className={`w-3 h-3 text-[#C16A00] group-hover:text-white transition-transform duration-200 ${showGuideCategoryDropdown ? 'rotate-180' : ''}`} />
                                     </button>
-                                    
+
                                     {/* Dropdown Menu */}
                                     {showGuideCategoryDropdown && (
                                         <div className="absolute top-full left-0 mt-1 w-full min-w-[150px] bg-white border border-gray-200 rounded-lg shadow-lg z-50">
@@ -519,7 +519,7 @@ function Home() {
                                         </div>
                                     )}
                                 </div>
-                                
+
                                 {/* View all */}
                                 <div>
                                     <ViewAll link="/pilgrim_guides" />
@@ -528,13 +528,13 @@ function Home() {
                         </div>
 
                         <div className="relative">
-                            <div 
+                            <div
                                 ref={guidesScrollRef}
                                 className="c6bottom lg:!gap-10 lg:!overflow-visible overflow-hidden overflow-x-auto no-scrollbar"
                                 onScroll={handleGuidesScroll}
                             >
                                 {
-                                    
+
                                     guideArray &&
                                     guideArray.map((guide, index) => (
                                         <motion.div key={index} initial={{ y: 100, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} transition={{ duration: 0.5, ease: "easeOut" }} viewport={{ once: true, amount: 0.1 }}>
@@ -546,11 +546,11 @@ function Home() {
 
                             {/* Horizontal Progress Bar - Bottom Center */}
                             <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 sm:hidden mb-7 z-10">
-                                <div 
+                                <div
                                     className="w-24 h-1.5 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300 transition-colors"
                                     onClick={handleGuidesProgressClick}
                                 >
-                                    <div 
+                                    <div
                                         className="h-full bg-[#C5703F] rounded-full transition-all duration-300 ease-out"
                                         style={{ width: `${guidesScrollProgress}%` }}
                                     />
@@ -595,7 +595,7 @@ function Home() {
                                     </span>
                                     <ChevronDown className={`w-3 h-3 text-[#C16A00] group-hover:text-white transition-transform duration-200 ${showRetreatCategoryDropdown ? 'rotate-180' : ''}`} />
                                 </button>
-                                
+
                                 {/* Dropdown Menu */}
                                 {showRetreatCategoryDropdown && (
                                     <div className="absolute top-full left-0 mt-1 w-full min-w-[150px] bg-white border border-gray-200 rounded-lg shadow-lg z-50">
@@ -626,12 +626,12 @@ function Home() {
 
                     {/* Card */}
                     <div className="relative">
-                        <motion.div 
+                        <motion.div
                             ref={retreatsScrollRef}
-                            className="c5bottom lg:!overflow-visible overflow-x-auto no-scrollbar" 
-                            initial={{ y: 100, opacity: 0 }} 
-                            whileInView={{ y: 0, opacity: 1 }} 
-                            transition={{ duration: 0.5, ease: "easeOut" }} 
+                            className="c5bottom lg:!overflow-visible overflow-x-auto no-scrollbar"
+                            initial={{ y: 100, opacity: 0 }}
+                            whileInView={{ y: 0, opacity: 1 }}
+                            transition={{ duration: 0.5, ease: "easeOut" }}
                             viewport={{ once: true, amount: 0.1 }}
                             onScroll={handleRetreatsScroll}
                         >
@@ -644,11 +644,11 @@ function Home() {
 
                         {/* Horizontal Progress Bar - Bottom Center */}
                         <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 sm:hidden mb-3 z-10">
-                            <div 
+                            <div
                                 className="w-24 h-1.5 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300 transition-colors"
                                 onClick={handleRetreatsProgressClick}
                             >
-                                <div 
+                                <div
                                     className="h-full bg-[#C5703F] rounded-full transition-all duration-300 ease-out"
                                     style={{ width: `${retreatsScrollProgress}%` }}
                                 />
@@ -691,7 +691,7 @@ function Home() {
                                 </span>
                                 <ChevronDown className={`w-3 h-3 text-[#C16A00] group-hover:text-white transition-transform duration-200 ${showSessionCategoryDropdown ? 'rotate-180' : ''}`} />
                             </button>
-                            
+
                             {/* Dropdown Menu */}
                             {showSessionCategoryDropdown && (
                                 <div className="absolute top-full left-0 mt-1 w-full min-w-[150px] bg-white border border-gray-200 rounded-lg shadow-lg z-50">
@@ -711,7 +711,7 @@ function Home() {
                                 </div>
                             )}
                         </div>
-                        
+
                         <div>
                             <ViewAll link="/pilgrim_sessions" />
                         </div>
@@ -719,42 +719,89 @@ function Home() {
 
                     {/* Card */}
                     <div className="relative">
-                        <motion.div 
+                        <motion.div
                             ref={sessionsScrollRef}
-                            className="c5bottom lg:!overflow-visible overflow-x-auto no-scrollbar" 
-                            initial={{ y: 100, opacity: 0 }} 
-                            whileInView={{ y: 0, opacity: 1 }} 
-                            transition={{ duration: 0.5, ease: "easeOut" }} 
+                            className="c5bottom overflow-x-auto no-scrollbar lg:!overflow-visible"
+                            initial={{ y: 100, opacity: 0 }}
+                            whileInView={{ y: 0, opacity: 1 }}
+                            transition={{ duration: 0.5, ease: "easeOut" }}
                             viewport={{ once: true, amount: 0.1 }}
                             onScroll={handleSessionsScroll}
                         >
-                            {
-                                filteredLiveSessions && filteredLiveSessions.length > 0 &&
-                                filteredLiveSessions.map((session, index) => (
-                                    <PersondetailsCard type="live-session" key={`live-${index}`} image={session?.liveSessionCard?.thumbnail} title={session?.liveSessionCard?.title} price={session?.liveSessionCard?.price} />
-                                ))
-                            }
-                            {
-                                filteredRecordedSessions && filteredRecordedSessions.length > 0 &&
-                                filteredRecordedSessions.map((session, index) => (
-                                    <PersondetailsCard type="recorded-session" key={`recorded-${index}`} image={session?.recordedProgramCard?.thumbnail} title={session?.recordedProgramCard?.title} price={session?.recordedProgramCard?.price} />
-                                ))
-                            }
-                            {
-                                filteredWorkshops && filteredWorkshops.length > 0 &&
-                                filteredWorkshops.map((workshop, index) => (
-                                    <PersondetailsCard type="workshop" key={`workshop-${index}`} image={workshop?.thumbnail} title={workshop?.title} price={workshop?.price} />
-                                ))
-                            }
+                            {/* MOBILE + TABLET (default) */}
+                            <div className="flex md:hidden">
+                                {filteredLiveSessions?.map((session, index) => (
+                                    <PersondetailsCard
+                                        type="live-session"
+                                        key={`live-${index}`}
+                                        image={session?.liveSessionCard?.thumbnail}
+                                        title={session?.liveSessionCard?.title}
+                                        price={session?.liveSessionCard?.price}
+                                    />
+                                ))}
+
+                                {filteredRecordedSessions?.map((session, index) => (
+                                    <PersondetailsCard
+                                        type="recorded-session"
+                                        key={`recorded-${index}`}
+                                        image={session?.recordedProgramCard?.thumbnail}
+                                        title={session?.recordedProgramCard?.title}
+                                        price={session?.recordedProgramCard?.price}
+                                    />
+                                ))}
+
+                                {filteredWorkshops?.map((workshop, index) => (
+                                    <PersondetailsCard
+                                        type="workshop"
+                                        key={`workshop-${index}`}
+                                        image={workshop?.thumbnail}
+                                        title={workshop?.title}
+                                        price={workshop?.price}
+                                    />
+                                ))}
+                            </div>
+
+                            {/* DESKTOP ONLY */}
+                            <div className="hidden md:flex md:gap-15 lg:gap-20">
+                                {filteredLiveSessions?.map((session, index) => (
+                                    <PersondetailsCard
+                                        type="live-session"
+                                        key={`live-d-${index}`}
+                                        image={session?.liveSessionCard?.thumbnail}
+                                        title={session?.liveSessionCard?.title}
+                                        price={session?.liveSessionCard?.price}
+                                    />
+                                ))}
+
+                                {filteredRecordedSessions?.map((session, index) => (
+                                    <PersondetailsCard
+                                        type="recorded-session"
+                                        key={`recorded-d-${index}`}
+                                        image={session?.recordedProgramCard?.thumbnail}
+                                        title={session?.recordedProgramCard?.title}
+                                        price={session?.recordedProgramCard?.price}
+                                    />
+                                ))}
+
+                                {filteredWorkshops?.map((workshop, index) => (
+                                    <PersondetailsCard
+                                        type="workshop"
+                                        key={`workshop-d-${index}`}
+                                        image={workshop?.thumbnail}
+                                        title={workshop?.title}
+                                        price={workshop?.price}
+                                    />
+                                ))}
+                            </div>
                         </motion.div>
-                        
+
                         {/* Horizontal Progress Bar - Bottom Center */}
                         <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 sm:hidden mb-3 z-10">
-                            <div 
+                            <div
                                 className="w-24 h-1.5 bg-gray-200 rounded-full cursor-pointer hover:bg-gray-300 transition-colors"
                                 onClick={handleSessionsProgressClick}
                             >
-                                <div 
+                                <div
                                     className="h-full bg-[#C5703F] rounded-full transition-all duration-300 ease-out"
                                     style={{ width: `${sessionsScrollProgress}%` }}
                                 />

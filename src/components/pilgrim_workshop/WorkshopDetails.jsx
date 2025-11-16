@@ -309,7 +309,7 @@ export default function WorkshopDetails() {
                             controls
                             autoPlay
                             muted
-                            className="rounded-xl xl:h-[400px] xl:w-[700px] md:h-[450px] sm:h-[480px] object-cover"
+                            className="rounded-xl xl:h-[400px] xl:w-[700px] md:h-[450px] sm:h-[480px] object-cover lg:object-fill"
                             preload="metadata"
                         >
                             Your browser does not support the video tag.
@@ -318,7 +318,7 @@ export default function WorkshopDetails() {
                         <img
                             src={mainImage || workshop.thumbnail}
                             alt={workshop.title}
-                            className="rounded-xl xl:h-[400px] xl:w-[700px] md:h-[450px] sm:h-[480px] object-cover"
+                            className="rounded-xl xl:h-[400px] xl:w-[700px] md:h-[450px] sm:h-[480px] object-cover lg:object-fill"
                         />
                     )}
 
@@ -645,6 +645,15 @@ function RequestModal({
         additionalNotes: "",
     });
 
+    // Prevent body scroll when modal is open
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, []);
+
     const handleSubmit = (e) => {
         e.preventDefault();
 
@@ -679,188 +688,251 @@ function RequestModal({
     };
 
     return (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                <div className="p-6">
-                    <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-bold text-gray-900">
-                            Workshop Request
-                        </h2>
-                        <button
-                            onClick={onClose}
-                            className="text-gray-400 hover:text-gray-600 text-2xl"
-                        >
-                            ×
-                        </button>
-                    </div>
-
-                    {/* Workshop Details Summary */}
-                    <div className="bg-gray-50 p-4 rounded-lg mb-6">
-                        <h3 className="font-semibold mb-2">Workshop Details:</h3>
-                        <p>
-                            <strong>Title:</strong> {workshop.title}
-                        </p>
-                        <p>
-                            <strong>Participants:</strong> {participants}
-                        </p>
-                        {selectedVariant && (
-                            <p>
-                                <strong>Variant:</strong> {selectedVariant.name}
-                            </p>
-                        )}
-                        <p>
-                            <strong>Price:</strong> ₹
-                            {Number(workshop.price || 0).toLocaleString("en-IN")}
-                        </p>
-                    </div>
-
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        {/* Personal Information */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Full Name *
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.name}
-                                    onChange={(e) => handleChange("name", e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#c16a00] focus:border-transparent"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Email *
-                                </label>
-                                <input
-                                    type="email"
-                                    value={formData.email}
-                                    onChange={(e) => handleChange("email", e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#c16a00] focus:border-transparent"
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Mobile Number *
-                                </label>
-                                <input
-                                    type="tel"
-                                    value={formData.mobile}
-                                    onChange={(e) => handleChange("mobile", e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#c16a00] focus:border-transparent"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Your Address
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.address}
-                                    onChange={(e) => handleChange("address", e.target.value)}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#c16a00] focus:border-transparent"
-                                />
-                            </div>
-                        </div>
-
-                        {/* Venue Information */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Preferred Venue Name *
-                            </label>
-                            <input
-                                type="text"
-                                value={formData.venue}
-                                onChange={(e) => handleChange("venue", e.target.value)}
-                                placeholder="e.g., Community Center, Hotel Conference Room"
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#c16a00] focus:border-transparent"
-                                required
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Full Venue Address *
-                            </label>
-                            <textarea
-                                value={formData.venueAddress}
-                                onChange={(e) => handleChange("venueAddress", e.target.value)}
-                                placeholder="Complete address with city, state, and pincode"
-                                rows="3"
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#c16a00] focus:border-transparent"
-                                required
-                            />
-                        </div>
-
-                        {/* Preferred Schedule */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Preferred Date
-                                </label>
-                                <input
-                                    type="date"
-                                    value={formData.preferredDate}
-                                    onChange={(e) =>
-                                        handleChange("preferredDate", e.target.value)
-                                    }
-                                    min={new Date().toISOString().split("T")[0]}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#c16a00] focus:border-transparent"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Preferred Time
-                                </label>
-                                <input
-                                    type="time"
-                                    value={formData.preferredTime}
-                                    onChange={(e) =>
-                                        handleChange("preferredTime", e.target.value)
-                                    }
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#c16a00] focus:border-transparent"
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Additional Notes
-                            </label>
-                            <textarea
-                                value={formData.additionalNotes}
-                                onChange={(e) =>
-                                    handleChange("additionalNotes", e.target.value)
-                                }
-                                placeholder="Any special requirements or additional information"
-                                rows="3"
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#c16a00] focus:border-transparent"
-                            />
-                        </div>
-
-                        {/* Action Buttons */}
-                        <div className="flex gap-4 pt-4">
+        <div 
+            className="fixed inset-0 bg-black/30 backdrop-blur-xs flex items-center justify-center z-50 p-4"
+            data-modal-container
+            onClick={(e) => {
+                if (e.target === e.currentTarget) {
+                    onClose();
+                }
+            }}
+            onWheel={(e) => {
+                // Only prevent if the wheel event didn't come from modal content
+                const isFromModalContent = e.target.closest('[data-modal-content] > div');
+                if (!isFromModalContent) {
+                    e.preventDefault();
+                }
+            }}
+            style={{ 
+                overflow: 'hidden' // Prevent overlay from scrolling
+            }}
+        >
+            <div 
+                className="bg-white rounded-lg max-w-2xl w-full shadow-2xl"
+                data-modal-content
+                onClick={(e) => e.stopPropagation()}
+                style={{ 
+                    height: '90vh', // Reduced height
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden' // Ensure container doesn't scroll
+                }}
+            >
+                <div 
+                    className="flex-1 overflow-y-scroll"
+                    onWheel={(e) => {
+                        e.stopPropagation(); // Prevent event from bubbling up
+                        
+                        // Manual scroll handling if needed
+                        const target = e.currentTarget;
+                        const atTop = target.scrollTop === 0;
+                        const atBottom = target.scrollTop >= (target.scrollHeight - target.clientHeight);
+                        
+                        // Only allow background scroll if we're at the boundaries and scrolling further
+                        if ((atTop && e.deltaY < 0) || (atBottom && e.deltaY > 0)) {
+                            // Allow default behavior (background scroll)
+                            return;
+                        }
+                        
+                        // Prevent default to stop background scroll
+                        e.preventDefault();
+                    }}
+                    onTouchMove={(e) => {
+                        e.stopPropagation(); // Prevent event from bubbling up
+                    }}
+                    style={{ 
+                        minHeight: 0, // Allow flex child to shrink
+                        WebkitOverflowScrolling: 'touch', // Enable smooth scrolling on iOS
+                        scrollbarWidth: 'thin', // Firefox
+                        msOverflowStyle: 'auto', // IE/Edge
+                        position: 'relative',
+                        zIndex: 1000 // Ensure it's above other elements
+                    }}
+                >
+                    <div className="p-6">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-2xl font-bold text-gray-900">
+                                Workshop Request
+                            </h2>
                             <button
-                                type="button"
                                 onClick={onClose}
-                                className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 transition-colors"
+                                className="text-gray-400 hover:text-gray-600 text-2xl"
                             >
-                                Cancel
-                            </button>
-                            <button
-                                type="submit"
-                                className="flex-1 px-6 py-3 bg-[#c16a00] text-white rounded-full hover:bg-[rgba(193,93,5,0.95)] transition-colors"
-                            >
-                                Submit Request
+                                ×
                             </button>
                         </div>
-                    </form>
+
+                        {/* Workshop Details Summary */}
+                        <div className="bg-gray-50 p-4 rounded-lg mb-6">
+                            <h3 className="font-semibold mb-2">Workshop Details:</h3>
+                            <p>
+                                <strong>Title:</strong> {workshop.title}
+                            </p>
+                            <p>
+                                <strong>Participants:</strong> {participants}
+                            </p>
+                            {selectedVariant && (
+                                <p>
+                                    <strong>Variant:</strong> {selectedVariant.name}
+                                </p>
+                            )}
+                            <p>
+                                <strong>Price:</strong> ₹
+                                {Number(workshop.price || 0).toLocaleString("en-IN")}
+                            </p>
+                        </div>
+
+                        <div className="pt-4">
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                {/* Personal Information */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Full Name *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formData.name}
+                                            onChange={(e) => handleChange("name", e.target.value)}
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#c16a00] focus:border-transparent"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Email *
+                                        </label>
+                                        <input
+                                            type="email"
+                                            value={formData.email}
+                                            onChange={(e) => handleChange("email", e.target.value)}
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#c16a00] focus:border-transparent"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Mobile Number *
+                                        </label>
+                                        <input
+                                            type="tel"
+                                            value={formData.mobile}
+                                            onChange={(e) => handleChange("mobile", e.target.value)}
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#c16a00] focus:border-transparent"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Your Address
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={formData.address}
+                                            onChange={(e) => handleChange("address", e.target.value)}
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#c16a00] focus:border-transparent"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Venue Information */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Preferred Venue Name *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.venue}
+                                        onChange={(e) => handleChange("venue", e.target.value)}
+                                        placeholder="e.g., Community Center, Hotel Conference Room"
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#c16a00] focus:border-transparent"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Full Venue Address *
+                                    </label>
+                                    <textarea
+                                        value={formData.venueAddress}
+                                        onChange={(e) => handleChange("venueAddress", e.target.value)}
+                                        placeholder="Complete address with city, state, and pincode"
+                                        rows="3"
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#c16a00] focus:border-transparent"
+                                        required
+                                    />
+                                </div>
+
+                                {/* Preferred Schedule */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Preferred Date
+                                        </label>
+                                        <input
+                                            type="date"
+                                            value={formData.preferredDate}
+                                            onChange={(e) =>
+                                                handleChange("preferredDate", e.target.value)
+                                            }
+                                            min={new Date().toISOString().split("T")[0]}
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#c16a00] focus:border-transparent"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Preferred Time
+                                        </label>
+                                        <input
+                                            type="time"
+                                            value={formData.preferredTime}
+                                            onChange={(e) =>
+                                                handleChange("preferredTime", e.target.value)
+                                            }
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#c16a00] focus:border-transparent"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Additional Notes
+                                    </label>
+                                    <textarea
+                                        value={formData.additionalNotes}
+                                        onChange={(e) =>
+                                            handleChange("additionalNotes", e.target.value)
+                                        }
+                                        placeholder="Any special requirements or additional information"
+                                        rows="3"
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#c16a00] focus:border-transparent"
+                                    />
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="flex gap-4 pt-4">
+                                    <button
+                                        type="button"
+                                        onClick={onClose}
+                                        className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="flex-1 px-6 py-3 bg-[#c16a00] text-white rounded-full hover:bg-[rgba(193,93,5,0.95)] transition-colors"
+                                    >
+                                        Submit Request
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
