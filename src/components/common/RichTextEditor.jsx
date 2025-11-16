@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { FiBold, FiItalic, FiUnderline } from 'react-icons/fi';
+import { FiBold, FiItalic, FiUnderline, FiList } from 'react-icons/fi';
+import { MdFormatListNumbered } from 'react-icons/md';
 
 export default function RichTextEditor({ value = '', onChange, placeholder = 'Enter text...', rows = 3 }) {
     const editorRef = useRef(null);
@@ -35,9 +36,9 @@ export default function RichTextEditor({ value = '', onChange, placeholder = 'En
         const temp = document.createElement('div');
         temp.innerHTML = text;
 
-        // Clean up - keep only b, i, u, strong, em tags
+        // Clean up - keep only b, i, u, strong, em, ul, ol, li tags
         const cleanHTML = temp.innerHTML
-            .replace(/<(?!\/?(b|i|u|strong|em)\b)[^>]+>/gi, '')
+            .replace(/<(?!\/?(b|i|u|strong|em|ul|ol|li)\b)[^>]+>/gi, '')
             .replace(/style="[^"]*"/gi, '')
             .replace(/class="[^"]*"/gi, '');
 
@@ -83,6 +84,27 @@ export default function RichTextEditor({ value = '', onChange, placeholder = 'En
                 >
                     <FiUnderline className="w-4 h-4" />
                 </button>
+                <div className="w-px bg-gray-300 mx-1"></div>
+                <button
+                    type="button"
+                    onClick={() => applyFormat('insertUnorderedList')}
+                    className={`p-2 rounded hover:bg-gray-200 transition-colors ${
+                        isFormatActive('insertUnorderedList') ? 'bg-gray-300' : ''
+                    }`}
+                    title="Bullet List"
+                >
+                    <FiList className="w-4 h-4" />
+                </button>
+                <button
+                    type="button"
+                    onClick={() => applyFormat('insertOrderedList')}
+                    className={`p-2 rounded hover:bg-gray-200 transition-colors ${
+                        isFormatActive('insertOrderedList') ? 'bg-gray-300' : ''
+                    }`}
+                    title="Numbered List"
+                >
+                    <MdFormatListNumbered className="w-4 h-4" />
+                </button>
             </div>
 
             {/* Editor Area */}
@@ -112,6 +134,22 @@ export default function RichTextEditor({ value = '', onChange, placeholder = 'En
                 }
                 [contentEditable] {
                     position: relative;
+                }
+                [contentEditable] ul {
+                    margin: 0.5em 0;
+                    padding-left: 2em;
+                    list-style-type: disc;
+                    list-style-position: outside;
+                }
+                [contentEditable] ol {
+                    margin: 0.5em 0;
+                    padding-left: 2em;
+                    list-style-type: decimal;
+                    list-style-position: outside;
+                }
+                [contentEditable] li {
+                    margin: 0.25em 0;
+                    display: list-item;
                 }
             `}</style>
         </div>

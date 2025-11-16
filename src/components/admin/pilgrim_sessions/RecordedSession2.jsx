@@ -2503,7 +2503,7 @@ export default function RecordedSession2() {
                   />
                   <span>Click to upload image</span>
                   <span className="text-sm text-gray-400">
-                    Size: (402×453)px
+                    Size: (400×540)px
                   </span>
                   <input
                     type="file"

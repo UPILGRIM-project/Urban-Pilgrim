@@ -3647,6 +3647,7 @@ export default function GuideForm() {
                                                                 const y = d ? fmtYMD(d) : "";
                                                                 const selected =
                                                                     y && otOnlineSelectedDates.includes(y);
+                                                                const hasSlots = y && (formData?.online?.oneTime?.slots || []).some(s => ymd(s.date) === y);
                                                                 return (
                                                                     <button
                                                                         key={i}
@@ -3665,7 +3666,7 @@ export default function GuideForm() {
                                                                                 setOtOnlineDate(ymd);
                                                                             }
                                                                         }}
-                                                                        className={`h-10 rounded border text-sm ${!d || isPast(d)
+                                                                        className={`h-10 rounded border text-sm relative ${!d || isPast(d)
                                                                                 ? "text-gray-300 border-gray-200 cursor-not-allowed"
                                                                                 : selected ||
                                                                                     (y === otOnlineDate && !otOnlineMulti)
@@ -3674,6 +3675,13 @@ export default function GuideForm() {
                                                                             }`}
                                                                     >
                                                                         {d ? d.getDate() : ""}
+                                                                        {hasSlots && (
+                                                                            <span className={`absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full ${
+                                                                                selected || (y === otOnlineDate && !otOnlineMulti) 
+                                                                                    ? 'bg-white' 
+                                                                                    : 'bg-[#2F6288]'
+                                                                            }`}></span>
+                                                                        )}
                                                                     </button>
                                                                 );
                                                             })}
@@ -5037,6 +5045,7 @@ export default function GuideForm() {
                                                             const y = d ? fmtYMD(d) : "";
                                                             const selected =
                                                                 y && otOfflineSelectedDates.includes(y);
+                                                            const hasSlots = y && (formData?.offline?.oneTime?.slots || []).some(s => ymd(s.date) === y);
                                                             return (
                                                                 <button
                                                                     key={i}
@@ -5055,7 +5064,7 @@ export default function GuideForm() {
                                                                             setOtOfflineDate(ymd);
                                                                         }
                                                                     }}
-                                                                    className={`h-10 rounded border text-sm ${!d || isPast(d)
+                                                                    className={`h-10 rounded border text-sm relative ${!d || isPast(d)
                                                                             ? "text-gray-300 border-gray-200 cursor-not-allowed"
                                                                             : selected ||
                                                                                 (y === otOfflineDate && !otOfflineMulti)
@@ -5064,6 +5073,13 @@ export default function GuideForm() {
                                                                         }`}
                                                                 >
                                                                     {d ? d.getDate() : ""}
+                                                                    {hasSlots && (
+                                                                        <span className={`absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full ${
+                                                                            selected || (y === otOfflineDate && !otOfflineMulti) 
+                                                                                ? 'bg-white' 
+                                                                                : 'bg-[#2F6288]'
+                                                                        }`}></span>
+                                                                    )}
                                                                 </button>
                                                             );
                                                         })}
@@ -5913,7 +5929,7 @@ export default function GuideForm() {
                                         />
                                         <span>Click to upload image</span>
                                         <span className="text-sm text-gray-400">
-                                            Size: (402×453)px
+                                            Size: (400×540)px
                                         </span>
                                         <input
                                             id="guide-upload"

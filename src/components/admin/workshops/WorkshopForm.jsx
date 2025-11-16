@@ -1216,7 +1216,7 @@ export default function WorkshopForm() {
                   className="w-12 h-12 mb-2"
                 />
                 <span>Click to upload image</span>
-                <span className="text-sm text-gray-400">Size: (402×453)px</span>
+                <span className="text-sm text-gray-400">Size: (400×540)px</span>
                 <input
                   id="guide-upload"
                   type="file"

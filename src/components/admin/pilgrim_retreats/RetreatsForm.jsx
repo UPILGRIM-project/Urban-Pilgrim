@@ -2314,6 +2314,10 @@ export default function RetreatsForm() {
                                     className="hidden"
                                     disabled={formData.isGuideUploading}
                                 />
+                                <span>Click to upload image</span>
+                                <span className="text-sm text-gray-400">
+                                    Size: (400×540)px
+                                </span>
                             </label>
                         </div>
                     )}
