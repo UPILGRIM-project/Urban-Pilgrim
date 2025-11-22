@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { httpsCallable } from "firebase/functions";
-import { signInWithCustomToken, sendPasswordResetEmail } from "firebase/auth";
-import { auth, functions } from "../../services/firebase";
+import { signInWithEmailAndPassword, signInWithCustomToken, sendPasswordResetEmail } from "firebase/auth";
+import { auth, functions, db } from "../../services/firebase";
 import { useDispatch } from "react-redux";
 import { setAdmin } from "../../features/adminAuthSlice";
 import { showError, showSuccess } from "../../utils/toast";
 import Loader2 from "../Loader2";
+import { collection, query, where, getDocs } from "firebase/firestore";
 
 export default function AdminSignIn() {
     const [email, setEmail] = useState("");
@@ -21,8 +22,27 @@ export default function AdminSignIn() {
 
         try {
             setLoading(true);
+            
+            // Validate credentials with Firebase Auth
+            await signInWithEmailAndPassword(auth, email, password);
+            
+            // Check if user is authorized admin in Firestore
+            const adminsRef = collection(db, "admins");
+            const q = query(adminsRef, where("email", "==", email));
+            const querySnapshot = await getDocs(q);
+            
+            if (querySnapshot.empty) {
+                throw new Error("This email is not authorized as an admin");
+            }
+            
+            const adminData = querySnapshot.docs[0].data();
+            if (adminData.isActive === false) {
+                throw new Error("Admin account is deactivated");
+            }
+            
+            // Now send OTP
             const sendOtpFn = httpsCallable(functions, "sendAdminOtp");
-            await sendOtpFn({ email, password });
+            await sendOtpFn({ email });
             setStep(2);
             showSuccess("OTP sent to your admin email!");
         } catch (err) {
