@@ -22,6 +22,7 @@ import GuideClassDetails from "./components/pilgrim_guides/GuideClassDetails";
 import Retreatdescription from "./components/pilgrim_retreats/Retreatdescription";
 import GiftCardDetails from "./components/gift_card/GiftCardDetails";
 import Admin from "./pages/admin/Admin";
+import AdminGiftCards from "./pages/admin/GiftCards";
 import ProgramDetails from "./pages/program_details/ProgramDetails";
 import UserDashboard from "./components/UserDashboard";
 import PrivacyPolicy from "./pages/privacy_policy/PrivacyPolicy";
@@ -40,7 +41,8 @@ function App() {
     const isAdminRoute = location.pathname === "/admin" || 
     location.pathname === "/userdashboard" || 
     location.pathname === "/organizer" || 
-    location.pathname === "/organizer/users";
+    location.pathname === "/organizer/users" ||
+    location.pathname.startsWith("/admin/");
 
     // Decide whether to show loader only on the very first visit
     useEffect(() => {
@@ -126,6 +128,7 @@ function App() {
                             {/* event */}
                             <Route path="/event/:eventName" element={<EventDetails />} />
                             <Route path="/admin" element={<Admin />} />
+                            <Route path="/admin/giftcards" element={<AdminGiftCards />} />
                             <Route path="/userdashboard" element={<UserDashboard />} />
                             <Route path="/organizer" element={<Organizer />} />
                             <Route path="/organizer/users" element={<OrganizerUsers />} />

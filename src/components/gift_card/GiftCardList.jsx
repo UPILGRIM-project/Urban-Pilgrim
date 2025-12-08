@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../../services/firebase";
 import GiftCardItem from "./GiftCardItem";
 
 export default function GiftCardList() {
@@ -29,80 +31,52 @@ export default function GiftCardList() {
     }, []);
 
     useEffect(() => {
-        const sampleGiftCards = [
-            {
-                id: "gift-1",
-                title: "Wellness Retreat",
-                description: "Perfect for wellness retreats, yoga sessions, and meditation classes. Give the gift of inner peace and transformation.",
-                priceOptions: [
-                    { value: 1000, originalValue: 1200, discount: 17 },
-                    { value: 2000, originalValue: 2400, discount: 17 },
-                    { value: 5000, originalValue: 6000, discount: 17 }
-                ],
-                startingPrice: 1000,
-                thumbnail: "/assets/golden-mandala.png",
-                gallery: ["/assets/golden-mandala.png", "/assets/meditationimg.jpg", "/assets/yoga.svg"],
-                validityMonths: 12,
-                features: [
-                    "Valid for all wellness retreat programs",
-                    "Can be used for yoga and meditation sessions",
-                    "Transferable to family and friends",
-                    "12 months validity from purchase date"
-                ],
-                category: "wellness-retreat",
-                isPopular: true
-            },
-            {
-                id: "gift-2", 
-                title: "Wellness Program",
-                description: "Ideal for wellness programs, guided sessions, and personal development experiences. A meaningful gift for holistic growth.",
-                priceOptions: [
-                    { value: 1000, originalValue: 1200, discount: 17 },
-                    { value: 2000, originalValue: 2400, discount: 17 },
-                    { value: 5000, originalValue: 6000, discount: 17 }
-                ],
-                startingPrice: 1000,
-                thumbnail: "/assets/meditationimg.jpg",
-                gallery: ["/assets/meditationimg.jpg", "/assets/golden-mandala.png", "/assets/yogapeople.png"],
-                validityMonths: 18,
-                features: [
-                    "Valid for all wellness programs",
-                    "Includes guided meditation sessions",
-                    "Personal development workshops included",
-                    "18 months validity from purchase date"
-                ],
-                category: "wellness-program",
-                isPopular: false
-            },
-            {
-                id: "gift-3",
-                title: "Pilgrim Guide",
-                description: "Comprehensive gift card for pilgrim guide services and spiritual journeys. The ultimate gift for spiritual seekers.",
-                priceOptions: [
-                    { value: 1000, originalValue: 1200, discount: 17 },
-                    { value: 2000, originalValue: 2400, discount: 17 },
-                    { value: 5000, originalValue: 6000, discount: 17 }
-                ],
-                startingPrice: 1000,
-                thumbnail: "/assets/yogapeople.png",
-                gallery: ["/assets/yogapeople.png", "/assets/golden-mandala.png", "/assets/meditationimg.jpg"],
-                validityMonths: 24,
-                features: [
-                    "Valid for all pilgrim guide services",
-                    "Priority booking for spiritual journeys",
-                    "Includes personal spiritual consultation",
-                    "24 months validity from purchase date"
-                ],
-                category: "pilgrim-guide",
-                isPopular: true
+        const fetchGiftCards = async () => {
+            try {
+                setLoading(true);
+                const giftCardsRef = collection(db, 'giftCards');
+                const querySnapshot = await getDocs(giftCardsRef);
+                
+                const fetchedGiftCards = querySnapshot.docs
+                    .map(doc => {
+                        const data = doc.data();
+                        
+                        // Only include active gift cards
+                        if (!data.isActive) return null;
+                        
+                        return {
+                            id: doc.id,
+                            title: data.title || 'Untitled Gift Card',
+                            description: data.description || '',
+                            priceOptions: data.pricingOptions?.map(opt => ({
+                                value: opt.amount,
+                                originalValue: Math.round(opt.amount / (1 - opt.discount / 100)),
+                                discount: opt.discount
+                            })) || [],
+                            startingPrice: data.pricingOptions?.[0]?.amount || 1000,
+                            thumbnail: data.mainImage || '/assets/golden-mandala.png',
+                            gallery: data.images?.length > 0 ? data.images : [data.mainImage || '/assets/golden-mandala.png'],
+                            validityMonths: 12,
+                            features: data.whatsIncluded?.filter(item => item.trim() !== '') || [
+                                'Valid for all Urban Pilgrim services',
+                                'Digital delivery within 24 hours'
+                            ],
+                            category: data.relatedItem?.type || 'any',
+                            isPopular: data.isActive || false
+                        };
+                    })
+                    .filter(card => card !== null); // Remove inactive cards
+                
+                setGiftCards(fetchedGiftCards);
+            } catch (error) {
+                console.error('Error fetching gift cards:', error);
+                setGiftCards([]);
+            } finally {
+                setLoading(false);
             }
-        ];
+        };
 
-        // Simulate loading
-        setTimeout(() => {
-            setGiftCards(sampleGiftCards);
-            setLoading(false);
-        }, 1000);
+        fetchGiftCards();
     }, []);
 
     if (loading) {

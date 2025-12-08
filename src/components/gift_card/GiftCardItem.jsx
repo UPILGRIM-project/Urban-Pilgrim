@@ -1,24 +1,24 @@
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+// import { useDispatch } from "react-redux";
 
 export default function GiftCardItem({ giftCard }) {
     const navigate = useNavigate();
     const cardRef = useRef(null);
-    const [mainImage, setMainImage] = useState(giftCard.thumbnail);
-    const [mainImageType, setMainImageType] = useState('image');
-    const [imageError, setImageError] = useState(false);
+    // const [mainImage, setMainImage] = useState(giftCard.thumbnail || giftCard.mainImage);
+    // const [mainImageType, setMainImageType] = useState('image');
+    // const [imageError, setImageError] = useState(false);
 
-    const getMediaType = (url) => {
-        if (!url) return 'image';
-        const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi'];
-        return videoExtensions.some(ext => url.toLowerCase().includes(ext)) ? 'video' : 'image';
-    };
+    // const getMediaType = (url) => {
+    //     if (!url) return 'image';
+    //     const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi'];
+    //     return videoExtensions.some(ext => url.toLowerCase().includes(ext)) ? 'video' : 'image';
+    // };
 
-    const handleMediaSelect = (mediaUrl) => {
-        setMainImage(mediaUrl);
-        setMainImageType(getMediaType(mediaUrl));
-    };
+    // const handleMediaSelect = (mediaUrl) => {
+    //     setMainImage(mediaUrl);
+    //     setMainImageType(getMediaType(mediaUrl));
+    // };
 
     const handlePurchase = () => {
         // Save scroll position before navigating
@@ -37,10 +37,9 @@ export default function GiftCardItem({ giftCard }) {
             {/* Main Media Display */}
             <div className="relative">
                 <img
-                    src="/gift_card.jpg"
+                    src={giftCard.thumbnail || giftCard.mainImage || "/gift_card.jpg"}
                     alt={giftCard.title}
                     className="w-full h-[210px] object-cover"
-                    onError={() => setImageError(true)}
                 />
 
                 {/* Discount Badge */}
@@ -65,14 +64,14 @@ export default function GiftCardItem({ giftCard }) {
                 </div>
 
                 {/* Validity */}
-                <div className="my-4">
+                {/* <div className="my-4">
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
                         <span>Valid for {giftCard.validityMonths} months</span>
                     </div>
-                </div>
+                </div> */}
 
                 {/* Purchase Buttons */}
                 <div className="mt-3 sm:mt-4 flex items-center justify-between" onClick={() => handlePurchase()}>

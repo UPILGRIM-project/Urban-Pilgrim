@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { addToCart } from "../../features/cartSlice";
+// import { addToCart } from "../../features/cartSlice";
 import { showSuccess, showError } from "../../utils/toast";
 import { httpsCallable } from "firebase/functions";
 import { functions, auth, db } from "../../services/firebase";
@@ -23,113 +23,71 @@ export default function GiftCardDetails() {
     const [purchaseLoading, setPurchaseLoading] = useState(false);
     const [processingPayment, setProcessingPayment] = useState(false);
     const [showUserDetails, setShowUserDetails] = useState(false);
+    const [selectedMedia, setSelectedMedia] = useState(null);
+    const [selectedMediaType, setSelectedMediaType] = useState('image');
 
     useEffect(() => {
-        // Sample gift card data - replace with Firebase fetch later
-        const sampleGiftCards = [
-            {
-                id: "gift-1",
-                title: "Wellness Retreat Gift Card",
-                description: "Perfect for yoga Retreats, meditation Retreats, and wellness Retreats. Give the gift of inner peace and transformation to your loved ones. This comprehensive gift card opens doors to a world of spiritual growth and wellness experiences.",
-                priceOptions: [
-                    { value: 1000, originalValue: 1200, discount: 17 },
-                    { value: 2000, originalValue: 2400, discount: 17 },
-                    { value: 5000, originalValue: 6000, discount: 17 }
-                ],
-                startingPrice: 1000,
-                thumbnail: "/assets/golden-mandala.png",
-                gallery: ["/assets/golden-mandala.png", "/assets/meditationimg.jpg", "/assets/yoga.svg"],
-                validityMonths: 12,
-                features: [
-                    "Valid for all yoga Retreats, meditation Retreats, and wellness Retreats",
-                    "Can be used for retreat bookings",
-                    "Transferable to family and friends",
-                    "12 months validity from purchase date",
-                    "No expiry on unused balance",
-                    "Digital delivery within 24 hours"
-                ],
-                category: "pilgrim retreat",
-                isPopular: true,
-                termsAndConditions: [
-                    "Gift card is valid for 12 months from the date of purchase",
-                    "Can be used for multiple transactions until balance is exhausted",
-                    "Non-refundable and cannot be exchanged for cash",
-                    "Lost or stolen gift cards cannot be replaced",
-                    "Gift card balance cannot be transferred to another account"
-                ]
-            },
-            {
-                id: "gift-2", 
-                title: "Wellness Program Gift Card",
-                description: "Ideal for spiritual retreats and guided meditation experiences. A meaningful gift for those seeking spiritual growth and inner transformation.",
-                priceOptions: [
-                    { value: 1000, originalValue: 1200, discount: 17 },
-                    { value: 2000, originalValue: 2400, discount: 17 },
-                    { value: 5000, originalValue: 6000, discount: 17 }
-                ],
-                startingPrice: 1000,
-                thumbnail: "/assets/meditationimg.jpg",
-                gallery: ["/assets/meditationimg.jpg", "/assets/golden-mandala.png", "/assets/yogapeople.png"],
-                validityMonths: 18,
-                features: [
-                    "Valid for all wellness programs",
-                    "Includes guided meditation sessions",
-                    "Personal spiritual guidance included",
-                    "18 months validity from purchase date",
-                    "Priority booking for popular retreats",
-                    "Digital delivery within 24 hours"
-                ],
-                category: "pilgrim wellness program",
-                isPopular: false,
-                termsAndConditions: [
-                    "Gift card is valid for 18 months from the date of purchase",
-                    "Can be used for multiple transactions until balance is exhausted",
-                    "Non-refundable and cannot be exchanged for cash",
-                    "Lost or stolen gift cards cannot be replaced",
-                    "Gift card balance cannot be transferred to another account"
-                ]
-            },
-            {
-                id: "gift-3",
-                title: "Pilgrim Guide Package",
-                description: "Comprehensive gift card covering all Urban Pilgrim services. The ultimate gift for wellness enthusiasts seeking complete transformation.",
-                priceOptions: [
-                    { value: 1000, originalValue: 1200, discount: 17 },
-                    { value: 2000, originalValue: 2400, discount: 17 },
-                    { value: 5000, originalValue: 6000, discount: 17 }
-                ],
-                startingPrice: 1000,
-                thumbnail: "/assets/yogapeople.png",
-                gallery: ["/assets/yogapeople.png", "/assets/golden-mandala.png", "/assets/meditationimg.jpg"],
-                validityMonths: 24,
-                features: [
-                    "Valid for all Urban Pilgrim services",
-                    "Priority booking for popular sessions",
-                    "Includes personal consultation",
-                    "24 months validity from purchase date",
-                    "Exclusive access to premium content",
-                    "Digital delivery within 24 hours"
-                ],
-                category: "pilgrim guide",
-                isPopular: true,
-                termsAndConditions: [
-                    "Gift card is valid for 24 months from the date of purchase",
-                    "Can be used for multiple transactions until balance is exhausted",
-                    "Non-refundable and cannot be exchanged for cash",
-                    "Lost or stolen gift cards cannot be replaced",
-                    "Gift card balance cannot be transferred to another account"
-                ]
+        const fetchGiftCard = async () => {
+            try {
+                setLoading(true);
+                const giftCardRef = doc(db, 'giftCards', id);
+                const giftCardSnap = await getDoc(giftCardRef);
+                
+                if (giftCardSnap.exists()) {
+                    const data = giftCardSnap.data();
+                    
+                    // Transform Firestore data to match component structure
+                    const transformedGiftCard = {
+                        id: giftCardSnap.id,
+                        title: data.title || 'Untitled Gift Card',
+                        description: data.description || '',
+                        priceOptions: data.pricingOptions?.map(opt => ({
+                            value: Math.round(opt.amount - (opt.amount * (opt.discount/100))),
+                            originalValue: opt.amount,
+                            discount: opt.discount
+                        })) || [],
+                        startingPrice: data.pricingOptions?.[0]?.amount || 1000,
+                        thumbnail: data.mainImage || '/assets/golden-mandala.png',
+                        gallery: data.images?.length > 0 ? data.images : [data.mainImage || '/assets/golden-mandala.png'],
+                        validityMonths: 12, // Default validity
+                        features: data.whatsIncluded?.filter(item => item.trim() !== '') || [
+                            'Valid for all Urban Pilgrim services',
+                            'Digital delivery within 24 hours'
+                        ],
+                        category: data.relatedItem?.type || 'any',
+                        relatedItemName: data.relatedItem?.name || null,
+                        isPopular: data.isActive || false,
+                        isActive: data.isActive || false,
+                        termsAndConditions: data.termsAndConditions?.filter(term => term.trim() !== '') || [
+                            'Gift card is valid for 12 months from the date of purchase',
+                            'Can be used for multiple transactions until balance is exhausted',
+                            'Non-refundable and cannot be exchanged for cash'
+                        ]
+                    };
+                    
+                    setGiftCard(transformedGiftCard);
+                    
+                    // Set initial selected media
+                    setSelectedMedia(transformedGiftCard.thumbnail);
+                    setSelectedMediaType(getMediaType(transformedGiftCard.thumbnail));
+                    
+                    if (transformedGiftCard.priceOptions && transformedGiftCard.priceOptions.length > 0) {
+                        setSelectedPrice(transformedGiftCard.priceOptions[0]);
+                    }
+                } else {
+                    console.error('Gift card not found');
+                    setGiftCard(null);
+                }
+            } catch (error) {
+                console.error('Error fetching gift card:', error);
+                showError('Failed to load gift card details');
+                setGiftCard(null);
+            } finally {
+                setLoading(false);
             }
-        ];
+        };
 
-        const foundGiftCard = sampleGiftCards.find(card => card.id === id);
-        if (foundGiftCard) {
-            setGiftCard(foundGiftCard);
-            if (foundGiftCard.priceOptions && foundGiftCard.priceOptions.length > 0) {
-                setSelectedPrice(foundGiftCard.priceOptions[0]);
-            }
-        }
-        setLoading(false);
+        fetchGiftCard();
     }, [id]);
 
     const getMediaType = (url) => {
@@ -149,6 +107,11 @@ export default function GiftCardDetails() {
         }
 
         setShowUserDetails(true);
+    };
+
+    const handleMediaSelect = (mediaUrl) => {
+        setSelectedMedia(mediaUrl);
+        setSelectedMediaType(getMediaType(mediaUrl));
     };
 
     // OTP helpers wired to Cloud Functions
@@ -291,7 +254,7 @@ export default function GiftCardDetails() {
             {/* Title and Price */}
             <div className="max-w-7xl mx-auto px-4">
                 <div className="flex items-center">
-                    <h1 className="sm:text-4xl text-2xl font-bold">
+                    <h1 className="sm:text-4xl text-2xl font-bold capitalize">
                         {giftCard.title}
                     </h1>
                 </div>
@@ -311,11 +274,68 @@ export default function GiftCardDetails() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-7xl mx-auto px-4 md:py-10 py-4">
                 {/* Image - Sticky */}
                 <div className="flex-shrink-0 space-y-4 md:sticky mx-auto top-24 self-start">
-                    <img
-                        src="/gift_card.jpg"
-                        alt={giftCard.title}
-                        className="rounded-xl xl:h-[380px] lg:h-[280px] md:h-[210px] sm:h-[350px] object-cover"
-                    />
+                    {/* Main Image/Video Display */}
+                    <div className="rounded-xl overflow-hidden">
+                        {selectedMediaType === 'video' ? (
+                            <video
+                                src={selectedMedia || giftCard.thumbnail}
+                                controls
+                                className="w-full xl:h-[380px] lg:h-[280px] md:h-[210px] sm:h-[350px] object-cover"
+                            />
+                        ) : (
+                            <img
+                                src={selectedMedia || giftCard.thumbnail || "/gift_card.jpg"}
+                                alt={giftCard.title}
+                                className="w-full xl:h-[380px] lg:h-[280px] md:h-[210px] sm:h-[350px] object-cover"
+                                onError={(e) => {
+                                    e.target.src = "/gift_card.jpg";
+                                }}
+                            />
+                        )}
+                    </div>
+
+                    {/* Gallery Thumbnails */}
+                    {giftCard.gallery && giftCard.gallery.length > 0 && (
+                        <div className="grid grid-cols-4 gap-2">
+                            {giftCard.gallery.map((media, index) => {
+                                const mediaType = getMediaType(media);
+                                const isSelected = selectedMedia === media;
+                                
+                                return (
+                                    <div
+                                        key={index}
+                                        onClick={() => handleMediaSelect(media)}
+                                        className={`relative cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${
+                                            isSelected ? 'border-[#2F6288] shadow-lg' : 'border-gray-200 hover:border-[#2F6288]/50'
+                                        }`}
+                                    >
+                                        {mediaType === 'video' ? (
+                                            <div className="relative">
+                                                <video
+                                                    src={media}
+                                                    className="w-full h-20 object-cover"
+                                                />
+                                                <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                                                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <img
+                                                src={media}
+                                                alt={`Gallery ${index + 1}`}
+                                                className="w-full h-20 object-cover"
+                                                onError={(e) => {
+                                                    e.target.src = "/gift_card.jpg";
+                                                }}
+                                            />
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
 
                 {/* Details and Purchase */}
@@ -329,14 +349,14 @@ export default function GiftCardDetails() {
                     </div>
 
                     {/* Validity */}
-                    <div className="bg-gradient-to-r from-orange-50 to-red-50 p-4 rounded-lg border border-[rgb(197,112,63)]/30">
+                    {/* <div className="bg-gradient-to-r from-orange-50 to-red-50 p-4 rounded-lg border border-[rgb(197,112,63)]/30">
                         <div className="flex items-center gap-2 text-[rgb(197,112,63)]">
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                             </svg>
                             <span className="font-semibold">Valid for {giftCard.validityMonths} months from purchase</span>
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* Features */}
                     <div>
