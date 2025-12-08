@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { FiBold, FiItalic, FiUnderline, FiList } from 'react-icons/fi';
 import { MdFormatListNumbered } from 'react-icons/md';
+import DOMPurify from "dompurify";
 
 export default function RichTextEditor({ value = '', onChange, placeholder = 'Enter text...', rows = 3 }) {
     const editorRef = useRef(null);
@@ -28,19 +29,17 @@ export default function RichTextEditor({ value = '', onChange, placeholder = 'En
     };
 
     // Handle paste - strip unwanted formatting but keep basic formatting
+    // Handle paste: preserve formatting, remove unsafe HTML
     const handlePaste = (e) => {
         e.preventDefault();
-        const text = e.clipboardData.getData('text/html') || e.clipboardData.getData('text/plain');
+        let pastedData = e.clipboardData.getData('text/html') 
+                        || e.clipboardData.getData('text/plain');
 
-        // Create a temporary div to parse the HTML
-        const temp = document.createElement('div');
-        temp.innerHTML = text;
-
-        // Clean up - keep only b, i, u, strong, em, ul, ol, li tags
-        const cleanHTML = temp.innerHTML
-            .replace(/<(?!\/?(b|i|u|strong|em|ul|ol|li)\b)[^>]+>/gi, '')
-            .replace(/style="[^"]*"/gi, '')
-            .replace(/class="[^"]*"/gi, '');
+        // Sanitize while keeping formatting (Word styles included)
+        const cleanHTML = DOMPurify.sanitize(pastedData, {
+            ALLOWED_ATTR: ['style', 'class'], // Keep Word styling
+            KEEP_CONTENT: true
+        });
 
         document.execCommand('insertHTML', false, cleanHTML);
     };

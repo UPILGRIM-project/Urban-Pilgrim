@@ -283,6 +283,28 @@ export default function WorkshopDetails() {
     }
 
     return (
+        <>
+        <style>{`
+            .workshop-content ul {
+                list-style-type: disc;
+                margin-left: 1.5rem;
+                margin-top: 0.5rem;
+                margin-bottom: 0.5rem;
+                padding-left: 0.5rem;
+            }
+            .workshop-content ol {
+                list-style-type: decimal;
+                margin-left: 1.5rem;
+                margin-top: 0.5rem;
+                margin-bottom: 0.5rem;
+                padding-left: 0.5rem;
+            }
+            .workshop-content li {
+                margin-top: 0.25rem;
+                margin-bottom: 0.25rem;
+                display: list-item;
+            }
+        `}</style>
         <div className="px-4 lg:py-10 py-6 md:mt-[100px] mt-[70px] bg-gradient-to-r from-[#FAF4F0] to-white">
             {/* Title and Price */}
             <div className="max-w-7xl mx-auto ">
@@ -378,7 +400,7 @@ export default function WorkshopDetails() {
                             About This Workshop
                         </h2>
                         <div
-                            className="text-gray-700 leading-relaxed prose prose-sm max-w-none lg:text-base md:text-sm text-xs"
+                            className="text-gray-700 leading-relaxed lg:text-base md:text-sm text-xs workshop-content"
                             dangerouslySetInnerHTML={{
                                 __html:
                                     workshop.description || "Workshop description coming soon...",
@@ -513,7 +535,7 @@ export default function WorkshopDetails() {
                         <div>
                             <h3 className="text-xl font-bold mb-4">Session Details</h3>
                             <div
-                                className="text-gray-700 xl:text-base text-sm leading-relaxed prose prose-sm max-w-none"
+                                className="text-gray-700 xl:text-base text-sm leading-relaxed workshop-content"
                                 dangerouslySetInnerHTML={{
                                     __html: workshop.sessionDescription,
                                 }}
@@ -532,7 +554,7 @@ export default function WorkshopDetails() {
                                         className="bg-gradient-to-r from-orange-50 to-amber-50 border border-[#c16a00]/20 rounded-lg p-4 hover:shadow-md transition-shadow"
                                     >
                                         <div className="flex items-start gap-3">
-                                            <div className="flex-shrink-0 w-8 h-8 bg-[#c16a00] text-white rounded-full flex items-center justify-center font-bold text-sm">
+                                            <div className="flex-shrink-0 w-8 h-8 bg-[#c16a00] text-white rounded-full flex items-center justify-center font-bold text-sm mt-1">
                                                 {index + 1}
                                             </div>
                                             <div className="flex-1">
@@ -541,7 +563,7 @@ export default function WorkshopDetails() {
                                                 </h4>
                                                 {topic.description && (
                                                     <div
-                                                        className="text-gray-700 md:text-sm text-xs leading-relaxed prose prose-sm max-w-none"
+                                                        className="text-gray-700 md:text-sm text-xs leading-relaxed workshop-content"
                                                         dangerouslySetInnerHTML={{
                                                             __html: topic.description,
                                                         }}
@@ -577,7 +599,7 @@ export default function WorkshopDetails() {
                                     {/* Mobile: Truncated text with See More/Less */}
                                     <div className="md:hidden">
                                         <div
-                                            className="text-gray-700 text-sm leading-relaxed prose prose-sm max-w-none"
+                                            className="text-gray-700 text-sm leading-relaxed workshop-content"
                                             dangerouslySetInnerHTML={{
                                                 __html: expandedGuides[index]
                                                     ? guide.description
@@ -597,8 +619,7 @@ export default function WorkshopDetails() {
                                     {/* Desktop: Full text */}
                                     <div className="hidden md:block">
                                         <div
-                                            className="text-gray-700 xl:text-base lg:text-sm md:text-xs
-                                        lg:leading-relaxed md:leading-normal prose prose-sm max-w-none"
+                                            className="text-gray-700 xl:text-base lg:text-sm md:text-xs lg:leading-relaxed md:leading-normal workshop-content"
                                             dangerouslySetInnerHTML={{ __html: guide.description }}
                                         />
                                     </div>
@@ -621,6 +642,7 @@ export default function WorkshopDetails() {
                 />
             )}
         </div>
+        </>
     );
 }
 
