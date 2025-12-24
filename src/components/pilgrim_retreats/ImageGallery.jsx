@@ -8,7 +8,7 @@ export default function ImageGallery({ images = [], videos = [] }) {
     const [showAllMedia, setShowAllMedia] = useState(false);
 
     const isVideo = (url) => {
-        return url && (url.includes('.mp4') || url.includes('.webm') || url.includes('.ogg') || url.includes('video'));
+        return url && (url.includes('.mp4') || url.includes('.webm') || url.includes('.ogg') || url.includes('video') || url.includes('mov'));
     };
 
     const handleMediaClick = (clickedMedia) => {
