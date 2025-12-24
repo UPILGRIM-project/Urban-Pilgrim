@@ -8,7 +8,8 @@ export default function ImageGallery({ images = [], videos = [] }) {
     const [showAllMedia, setShowAllMedia] = useState(false);
 
     const isVideo = (url) => {
-        return url && (url.includes('.mp4') || url.includes('.webm') || url.includes('.ogg') || url.includes('video') || url.includes('mov'));
+        const lowerURL = url ? url.toLowerCase() : '';
+        return url && (lowerURL.includes('.mp4') || lowerURL.includes('.webm') || lowerURL.includes('.ogg') || lowerURL.includes('video') || lowerURL.includes('.mov'));
     };
 
     const handleMediaClick = (clickedMedia) => {
@@ -29,17 +30,23 @@ export default function ImageGallery({ images = [], videos = [] }) {
         }
     }, [images, videos]);
 
+    // otherMedia contains everything except the main (first) item
+    const otherMedia = allMedia.slice(1);
+    const thumbsToShow = otherMedia.length <= 3 ? otherMedia : otherMedia.slice(0, 2);
+    const overlayMedia = otherMedia[2]; // corresponds to allMedia[3]
+
     return (
         <>
             <div className="flex flex-col md:flex-row gap-4 max-w-7xl mx-auto">
-                {/* Main Media - only show if more than 3 items */}
-                {allMedia.length > 3 && (
+                {/* Main Media - always show if any media exists */}
+                {allMedia.length > 0 && (
                     <>
                         {isVideo(mainMedia) ? (
                             <motion.video
                                 src={mainMedia}
+                                alt="Main"
                                 controls
-                                className="w-full md:w-5/6 xl:h-[60vh] lg:h-[60vh] md:h-[60vh] h-auto object-cover rounded-xl"
+                                className={`w-full ${otherMedia.length > 0 ? 'md:w-5/6' : ''} xl:h-[60vh] lg:h-[60vh] md:h-[60vh] h-auto object-cover rounded-xl`}
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 transition={{ duration: 0.5 }}
@@ -49,7 +56,7 @@ export default function ImageGallery({ images = [], videos = [] }) {
                             <motion.img
                                 src={mainMedia}
                                 alt="Main"
-                                className="w-full md:w-5/6 xl:h-[60vh] lg:h-[60vh] md:h-[60vh] h-auto object-cover rounded-xl"
+                                className={`w-full ${otherMedia.length > 0 ? 'md:w-5/6' : ''} xl:h-[60vh] lg:h-[60vh] md:h-[60vh] h-auto object-cover rounded-xl`}
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 transition={{ duration: 0.5 }}
@@ -60,14 +67,16 @@ export default function ImageGallery({ images = [], videos = [] }) {
                 )}
 
                 {/* Thumbnail Column */}
-                <div className={`flex md:flex-col flex-row gap-3 md:h-[60vh] ${allMedia.length <= 3 ? 'w-full' : 'md:w-1/6'}`}>
-                    {(allMedia.length <= 3 ? allMedia : allMedia.slice(1, 3)).map((media, idx) => (
-                        <div key={idx} className={`relative ${allMedia.length <= 3 ? 'w-1/3 md:w-full' : 'w-1/3 md:w-full'} flex-1 md:h-[18vh] h-auto rounded-xl overflow-hidden cursor-pointer hover:opacity-80 transition-opacity`}
-                             onClick={() => handleMediaClick(media)}>
+                {otherMedia.length > 0 && (
+                    <div className={`flex md:flex-col flex-row gap-3 md:h-[60vh] md:w-1/6`}>
+                        {thumbsToShow.map((media, idx) => (
+                        <div key={idx} className={`relative w-1/3 md:w-full flex-1 md:h-[18vh] h-auto rounded-xl overflow-hidden cursor-pointer hover:opacity-80 transition-opacity`}
+                            onClick={() => handleMediaClick(media)}>
                             {isVideo(media) ? (
                                 <>
                                     <video
                                         src={media}
+                                        alt={`thumb video-${idx}`}
                                         className="w-full h-full object-cover rounded-xl"
                                         muted
                                     />
@@ -82,39 +91,40 @@ export default function ImageGallery({ images = [], videos = [] }) {
                             ) : (
                                 <motion.img
                                     src={media}
-                                    alt={`thumb-${idx}`}
+                                    alt={`thumb image-${idx}`}
                                     className="w-full h-full object-cover rounded-xl"
                                     whileHover={{ scale: 1.05 }}
                                 />
                             )}
                         </div>
-                    ))}
+                        ))}
 
-                    {/* Overlay Media - only show if more than 3 items */}
-                    {allMedia.length > 3 && (
-                        <div 
-                            className="relative w-1/3 md:w-full flex-1 md:h-[18vh] h-auto rounded-xl overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
-                            onClick={handleShowAllMedia}
-                        >
-                            {isVideo(allMedia[3]) ? (
-                                <video
-                                    src={allMedia[3]}
-                                    className="w-full h-full object-cover"
-                                    muted
-                                />
-                            ) : (
-                                <img
-                                    src={allMedia[3]}
-                                    alt="thumb-3"
-                                    className="w-full h-full object-cover"
-                                />
-                            )}
-                            <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white text-lg font-semibold">
-                                +{allMedia.length - 3}
+                        {/* Overlay Media - show when there are more than 3 other items (i.e., total media > 4) */}
+                        {otherMedia.length > 3 && (
+                            <div
+                                className="relative w-1/3 md:w-full flex-1 md:h-[18vh] h-auto rounded-xl overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                                onClick={handleShowAllMedia}
+                            >
+                                {overlayMedia && isVideo(overlayMedia) ? (
+                                    <video
+                                        src={overlayMedia}
+                                        className="w-full h-full object-cover"
+                                        muted
+                                    />
+                                ) : (
+                                    <img
+                                        src={overlayMedia}
+                                        alt="thumb-3"
+                                        className="w-full h-full object-cover"
+                                    />
+                                )}
+                                <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white text-lg font-semibold">
+                                    +{allMedia.length - 3}
+                                </div>
                             </div>
-                        </div>
-                    )}
-                </div>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* Modal for All Media */}

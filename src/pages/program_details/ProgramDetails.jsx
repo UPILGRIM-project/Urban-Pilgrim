@@ -158,7 +158,7 @@ export default function ProgramDetails() {
                     <h2 className="md:text-2xl font-bold text-xl">
                         {programData?.recordedProgramCard?.title || "Retreat Title"}
                     </h2>
-                    <ImageGallery images={programData?.oneTimeSubscription?.images || []} videos={programData?.oneTimePurchase?.videos || []} />
+                    <ImageGallery images={programData?.oneTimeSubscription?.images || []} videos={programData?.oneTimeSubscription?.videos || []} />
                 </div>
 
                 <div className="flex flex-col justify-between">
