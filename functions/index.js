@@ -1152,6 +1152,159 @@ async function createWhatsAppReminderDocs({
     }
 }
 
+// Sanitize a single content variable: remove newlines/tabs, collapse spaces, trim
+function sanitizeVariable(input) {
+    if (input === null || input === undefined) return "";
+    let s = String(input);
+    // Replace newlines and tabs with a single space
+    s = s.replace(/[\r\n\t]+/g, " ");
+    // Collapse multiple spaces to single
+    s = s.replace(/ {2,}/g, " ");
+    // Trim
+    s = s.trim();
+    return s;
+}
+
+// Keep only allowed template variable keys and sanitize their values
+function sanitizeVariablesObject(vars) {
+    const allowed = ["1", "2"];
+    const out = {};
+    if (!vars || typeof vars !== 'object') return out;
+    for (const k of allowed) {
+        if (Object.prototype.hasOwnProperty.call(vars, k)) {
+            out[k] = sanitizeVariable(vars[k]);
+        }
+    }
+    return out;
+}
+
+async function sendBulkWhatsApp({
+    users = [],
+    messageText = "",
+    contentSid = null,
+    batchSize = 10,
+    delayMs = 1000
+}) {
+    if (!users || users.length === 0) {
+        return { success: 0, failed: 0, errors: ["No users provided"] };
+    }
+
+    const client = getTwilioClient();
+    if (!client) {
+        return {
+            success: 0,
+            failed: users.length,
+            errors: ["Twilio client not configured"]
+        };
+    }
+
+    const messagingServiceSid = process.env.TWILIO_MESSAGING_SERVICE_SID_BULK;
+
+    if (!messagingServiceSid) {
+        return {
+            success: 0,
+            failed: users.length,
+            errors: ["Messaging Service SID not configured"]
+        };
+    }
+
+    if (!contentSid) {
+        return {
+            success: 0,
+            failed: users.length,
+            errors: ["contentSid is required for template messages"]
+        };
+    }
+
+    const results = { success: 0, failed: 0, errors: [] };
+
+    for (let i = 0; i < users.length; i += batchSize) {
+        const batch = users.slice(i, i + batchSize);
+
+        const promises = batch.map(async (user) => {
+            const name = user.name || "User";
+            const phone = formatPhoneNumber(user.phone);
+
+            if (!phone) {
+                results.failed++;
+                results.errors.push(`Invalid phone for ${name}`);
+                return;
+            }
+
+            try {
+                let variables = {
+                    "1": name,
+                    "2": String(messageText).replace("{name}", name)
+                };
+
+                // Sanitize and only keep allowed keys
+                variables = sanitizeVariablesObject(variables);
+
+                // Validate that required {{2}} is present and not empty
+                if (!variables["2"] || variables["2"].length === 0) {
+                    results.failed++;
+                    results.errors.push(`Failed for ${name}: template variable {{2}} is empty or invalid`);
+                    console.error(`❌ Invalid contentVariables for ${name}:`, variables);
+                    return;
+                }
+
+                console.log("📨 Sending with vars (sanitized):", variables);
+
+                await client.messages.create({
+                    messagingServiceSid,
+                    to: `whatsapp:${phone}`,
+                    contentSid,
+                    contentVariables: JSON.stringify(variables)
+                });
+
+                results.success++;
+            } catch (err) {
+                results.failed++;
+                results.errors.push(
+                    `Failed for ${name}: ${err.message}`
+                );
+                console.error(`❌ Failed for ${name}`, err.message);
+            }
+        });
+
+        await Promise.all(promises);
+
+        if (i + batchSize < users.length) {
+            await new Promise(r => setTimeout(r, delayMs));
+        }
+    }
+
+    return results;
+}
+
+// Exported Cloud Function for bulk WhatsApp messaging
+exports.sendBulkWhatsAppMessages = functions.https.onCall(async (request) => {
+    try {
+        const { users, messageText, contentSid } = request.data;
+
+        if (!users || !Array.isArray(users) || users.length === 0) {
+            throw new functions.https.HttpsError(
+                "invalid-argument",
+                "Users array is required"
+            );
+        }
+
+        const result = await sendBulkWhatsApp({
+            users,
+            messageText,
+            contentSid
+        });
+
+        return { success: true, ...result };
+    } catch (error) {
+        console.error(error);
+        throw new functions.https.HttpsError(
+            "internal",
+            error.message
+        );
+    }
+});
+
 exports.processWhatsappReminders = onSchedule(
     {
         schedule: "every minute",

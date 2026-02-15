@@ -12,6 +12,7 @@ import Analysis from "./Analysis";
 import Organizers from "./Organizers";
 import UpcomingEvents from "../../components/admin/upcoming_events/UpcomingEvents";
 import AdminProtectedRoute from "../../components/admin/AdminProtectedRoute";
+import BulkWhatsAppSender from "../../components/admin/BulkWhatsAppSender";
 
 export default function Admin() {
   const [activeSection, setActiveSection] = useState("home");
@@ -36,6 +37,8 @@ export default function Admin() {
         return <Coupons />;
       case "analysis":
         return <Analysis />;
+      case "whatsapp":
+        return <BulkWhatsAppSender />;
       default:
         return <Home />;
     }

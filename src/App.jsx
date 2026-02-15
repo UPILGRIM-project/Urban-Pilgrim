@@ -34,6 +34,7 @@ import Lenis from "@studio-freight/lenis";
 import WhatsAppFloatingButton from "./components/WhatsAppFloatingButton.jsx";
 import Organizer from "./pages/organizer/Organizer.jsx";
 import OrganizerUsers from "./pages/organizer/Users.jsx";
+import BulkWhatsAppSender from "./components/admin/BulkWhatsAppSender.jsx";
 
 function App() {
     const [loading, setLoading] = useState(true);
@@ -77,6 +78,8 @@ function App() {
             lenis.destroy();
         };
     }, []);
+
+    
 
     return (
         <CartProvider>
@@ -129,6 +132,7 @@ function App() {
                             <Route path="/event/:eventName" element={<EventDetails />} />
                             <Route path="/admin" element={<Admin />} />
                             <Route path="/admin/giftcards" element={<AdminGiftCards />} />
+                            <Route path="/admin/whatsapp" element={<BulkWhatsAppSender />} />
                             <Route path="/userdashboard" element={<UserDashboard />} />
                             <Route path="/organizer" element={<Organizer />} />
                             <Route path="/organizer/users" element={<OrganizerUsers />} />

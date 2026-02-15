@@ -18,6 +18,7 @@ export default function Sidebar({ activeSection, setActiveSection }) {
         { name: "Organizer", key: "organizer" },
         { name: "Coupons", key: "coupons" },
         { name: "Analytics", key: "analysis" },
+        { name: "WhatsApp Bulk Sender", key: "whatsapp" },
     ];
 
     const toggleSidebar = () => {

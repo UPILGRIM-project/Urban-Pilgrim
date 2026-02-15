@@ -21,13 +21,18 @@ export const db = getFirestore(app);
 export const functions = getFunctions(app);
 
 // Connect to emulator in development
-if (process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost') {
+// Set USE_EMULATOR=true in .env.local to enable emulator
+const USE_EMULATOR = import.meta.env.VITE_USE_EMULATOR === 'true';
+
+if (USE_EMULATOR) {
     try {
         connectFunctionsEmulator(functions, "127.0.0.1", 5002);
         console.log("🔧 Connected to Functions Emulator");
     } catch (error) {
         console.log("Functions emulator already connected or not available");
     }
+} else {
+    console.log("🚀 Using Production Firebase Functions");
 }
 
 export const storage = getStorage(app);
