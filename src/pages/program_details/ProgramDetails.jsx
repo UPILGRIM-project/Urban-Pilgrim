@@ -113,6 +113,9 @@ export default function ProgramDetails() {
         return isNaN(num) ? null : num;
     };
 
+    console.log("Program Data:", programData);
+    console.log("User Programs from Redux:", userPrograms);
+
     return (
         <>
             <SEO
@@ -158,7 +161,19 @@ export default function ProgramDetails() {
                     <h2 className="md:text-2xl font-bold text-xl">
                         {programData?.recordedProgramCard?.title || "Retreat Title"}
                     </h2>
-                    <ImageGallery images={programData?.oneTimeSubscription?.images || []} videos={programData?.oneTimeSubscription?.videos || []} />
+                    <ImageGallery
+                        images={
+                            programData?.recordedProgramCard?.thumbnail
+                                ? [
+                                      programData.recordedProgramCard.thumbnail,
+                                      ...(programData?.oneTimeSubscription?.images || []),
+                                  ]
+                                : programData?.oneTimeSubscription?.images || []
+                        }
+                        videos={programData?.oneTimeSubscription?.videos || []}
+                        thumbnail={programData?.recordedProgramCard?.thumbnail || null}
+                    />
+                    
                 </div>
 
                 <div className="flex flex-col justify-between">
@@ -218,6 +233,15 @@ export default function ProgramDetails() {
                                 </button>
                             </span>
                         </div>
+
+                        {programData?.recordedProgramCard?.description && (
+                            <div
+                                className="text-sm text-gray-700 prose prose-sm max-w-none mt-4"
+                                dangerouslySetInnerHTML={{
+                                    __html: programData.recordedProgramCard.description,
+                                }}
+                            />
+                        )}
                     </div>
 
                     {(() => {
