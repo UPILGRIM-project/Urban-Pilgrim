@@ -44,6 +44,8 @@ export default function CartItem({
     onRemove?.(item.id);
   };
 
+  console.log("item: ", item)
+
   return (
     <div className="flex items-start gap-4 p-4 border-b last:border-none w-full">
       {/* Product Image/Video */}
@@ -54,6 +56,7 @@ export default function CartItem({
           className="w-20 h-20 rounded-md object-cover flex-shrink-0"
           muted
           loop
+          autoPlay
           playsInline
         />
       ) : (

@@ -87,7 +87,7 @@ export default function ProgramDetails() {
             price: getNumericPrice(),
             gst: programData.recordedProgramCard?.gst || 0,
             persons,
-            image: programData.recordedProgramCard?.thumbnail,
+            image: programData?.recordedProgramCard?.thumbnail || programData?.oneTimeSubscription?.images?.[0] || programData?.oneTimeSubscription?.videos?.[0],
             quantity: 1,
             type: "recorded",
         };

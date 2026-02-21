@@ -220,8 +220,6 @@ export default function SubscriptionCard({ bundle, onAddToCart, isHighestDiscoun
         );
     }
 
-    // Legacy mode for non-bundle cards
-    // ✅ Check if program already purchased
     const alreadyPurchased = userPrograms?.some(
         (program) => program?.title === title
     );

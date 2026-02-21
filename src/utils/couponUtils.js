@@ -108,34 +108,48 @@ export const calculateDiscount = (subtotal, coupon) => {
 export const getCartProgramTypes = (cartData) => {
     const types = new Set();
 
+    const normalize = (t) => {
+        if (!t) return null;
+        const s = String(t).toLowerCase();
+        if (s === 'live' || s === 'live-session' || s === 'live_session') return 'live_session';
+        if (s === 'recorded' || s === 'recorded-session' || s === 'recorded_session' || s === 'recordedsession') return 'recorded_session';
+        if (s === 'retreat' || s === 'pilgrim_retreat' || s === 'pilgrim-retreat') return 'retreat';
+        if (s === 'guide' || s === 'pilgrim_guide' || s === 'pilgrim-guide') return 'guide';
+        return null;
+    };
+
     cartData.forEach(item => {
-        if (item.type === 'live_session' || item.category === 'live_session') {
-            types.add('live_session');
-        } else if (item.type === 'recorded_session' || item.category === 'recorded_session') {
-            types.add('recorded_session');
-        } else if (item.type === 'retreat' || item.category === 'retreat') {
-            types.add('retreat');
-        } else if (item.type === 'guide' || item.category === 'guide') {
-            types.add('guide');
-        }
+        const t = normalize(item.type) || normalize(item.category);
+        if (t) types.add(t);
     });
 
     return Array.from(types);
 };
 
 export const calculateApplicableSubtotal = (cartData, programType) => {
+    const normalize = (t) => {
+        if (!t) return null;
+        const s = String(t).toLowerCase();
+        if (s === 'live' || s === 'live-session' || s === 'live_session') return 'live_session';
+        if (s === 'recorded' || s === 'recorded-session' || s === 'recorded_session' || s === 'recordedsession') return 'recorded_session';
+        if (s === 'retreat' || s === 'pilgrim_retreat' || s === 'pilgrim-retreat') return 'retreat';
+        if (s === 'guide' || s === 'pilgrim_guide' || s === 'pilgrim-guide') return 'guide';
+        return null;
+    };
+
+    const target = normalize(programType);
+
+    // If no programType is specified or not recognized, coupon applies to whole cart
+    if (!target) {
+        return cartData.reduce((sum, item) => {
+            return sum + (item.price * (item.persons ?? 1) * (item.quantity ?? 1) * (item.duration ?? 1));
+        }, 0);
+    }
+
     return cartData
         .filter(item => {
-            if (programType === 'live_session') {
-                return item.type === 'live_session' || item.category === 'live_session';
-            } else if (programType === 'recorded_session') {
-                return item.type === 'recorded_session' || item.category === 'recorded_session';
-            } else if (programType === 'retreat') {
-                return item.type === 'retreat' || item.category === 'retreat';
-            } else if (programType === 'guide') {
-                return item.type === 'guide' || item.category === 'guide';
-            }
-            return false;
+            const t = normalize(item.type) || normalize(item.category);
+            return t === target;
         })
         .reduce((sum, item) => {
             return sum + (item.price * (item.persons ?? 1) * (item.quantity ?? 1) * (item.duration ?? 1));
