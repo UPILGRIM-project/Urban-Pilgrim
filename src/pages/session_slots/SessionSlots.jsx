@@ -180,7 +180,7 @@ const SessionSlots = () => {
             const startTime = toHHMM(s.startTime || s.start_time || s.time || isoStart);
             const endTime = toHHMM(s.endTime || s.end_time || isoEnd);
             return { date, startTime, endTime, meetLink: safeLink(s.meetLink || s.link || null), title: sessionData?.title };
-          }).filter(sl => sl.date)
+        }).filter(sl => sl.date)
         : null;
 
     const slots = bookedSlots || normalizedSessionSelected || sessionData?.liveSlots || [];

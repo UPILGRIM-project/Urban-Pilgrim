@@ -17,6 +17,7 @@ import { showSuccess } from "../../utils/toast.js"
  // import BundlesPopup from "../../components/pilgrim_retreats/BundlesPopup.jsx";
 import { fetchAllEvents } from "../../utils/fetchEvents";
 import { getProgramButtonConfig } from "../../utils/userProgramUtils";
+import DOMPurify from "dompurify";
 
 export default function ProgramDetails() {
     const params = useParams();
@@ -87,7 +88,7 @@ export default function ProgramDetails() {
             price: getNumericPrice(),
             gst: programData.recordedProgramCard?.gst || 0,
             persons,
-            image: programData?.recordedProgramCard?.thumbnail || programData?.oneTimeSubscription?.images?.[0] || programData?.oneTimeSubscription?.videos?.[0],
+            image: programData?.recordedProgramCard?.thumbnail,
             quantity: 1,
             type: "recorded",
         };
@@ -112,9 +113,6 @@ export default function ProgramDetails() {
         const num = Number(String(raw).toString().replace(/,/g, ""));
         return isNaN(num) ? null : num;
     };
-
-    console.log("Program Data:", programData);
-    console.log("User Programs from Redux:", userPrograms);
 
     return (
         <>
@@ -161,17 +159,9 @@ export default function ProgramDetails() {
                     <h2 className="md:text-2xl font-bold text-xl">
                         {programData?.recordedProgramCard?.title || "Retreat Title"}
                     </h2>
-                    <ImageGallery
-                        images={
-                            programData?.recordedProgramCard?.thumbnail
-                                ? [
-                                      programData.recordedProgramCard.thumbnail,
-                                      ...(programData?.oneTimeSubscription?.images || []),
-                                  ]
-                                : programData?.oneTimeSubscription?.images || []
-                        }
-                        videos={programData?.oneTimeSubscription?.videos || []}
-                        thumbnail={programData?.recordedProgramCard?.thumbnail || null}
+                    <ImageGallery 
+                        images={programData?.oneTimeSubscription?.images || []} 
+                        videos={programData?.oneTimeSubscription?.videos || []} 
                     />
                     
                 </div>
@@ -301,12 +291,73 @@ export default function ProgramDetails() {
                         );
                     })()}
 
-                    {programData?.programSchedule && programData.programSchedule.length > 0 && (
-                        <div className="flex flex-col">
-                            <p className="text-lg font-semibold text-gray-800 mt-4">
-                                Program Schedule
+                    {programData?.recordedVideo && programData.recordedVideo.length > 0 && (
+                        <div className="flex flex-col mt-4">
+                            <p className="text-lg font-semibold text-gray-800 mb-4">
+                                Program Videos
                             </p>
-                            <ProgramSchedule programSchedules={programData?.programSchedule} />
+                            <motion.div
+                                className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                                initial={{ y: 100, opacity: 0 }}
+                                whileInView={{ y: 0, opacity: 1 }}
+                                transition={{ duration: 0.5, ease: "easeOut" }}
+                                viewport={{ once: true, amount: 0.1 }}
+                            >
+                                {programData.recordedVideo.map((video, index) => {
+                                    const src = video?.src || video?.url || video?.video || video?.link || '';
+                                    const ytId = src.match(/[?&]v=([^&]+)/)?.[1]
+                                        || src.match(/youtu\.be\/([^?&\/]+)/)?.[1]
+                                        || src.match(/embed\/([^?&\/]+)/)?.[1];
+                                    const thumbnail = video?.thumbnail || video?.image || video?.thumb
+                                        || (ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null);
+                                    const title = video?.title || video?.name || `Video ${index + 1}`;
+                                    const description = video?.description || video?.desc || '';
+
+                                    return (
+                                        <motion.div
+                                            key={video.id || index}
+                                            className="flex gap-3 bg-white rounded-xl shadow-sm p-3 cursor-pointer hover:shadow-md transition-shadow"
+                                            initial={{ y: 100, opacity: 0 }}
+                                            whileInView={{ y: 0, opacity: 1 }}
+                                            transition={{ duration: 0.5, delay: index * 0.06, ease: "easeOut" }}
+                                            viewport={{ once: true, amount: 0.1 }}
+                                        >
+                                            {/* Thumbnail */}
+                                            <div className="relative w-28 h-18 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+                                                {thumbnail ? (
+                                                    <img
+                                                        src={thumbnail}
+                                                        alt={title}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                                                        <svg className="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                                                            <path d="M8 5v14l11-7z" />
+                                                        </svg>
+                                                    </div>
+                                                )}
+                                                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                                                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                                        <path d="M8 5v14l11-7z" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+
+                                            {/* Text */}
+                                            <div className="flex flex-col justify-center min-w-0">
+                                                <p className="text-sm font-semibold text-gray-800 line-clamp-2 leading-snug">{title}</p>
+                                                {description && (
+                                                    <div
+                                                        className="text-xs text-gray-500 mt-1 line-clamp-2 leading-snug prose prose-xs max-w-none"
+                                                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(description) }}
+                                                    />
+                                                )}
+                                            </div>
+                                        </motion.div>
+                                    );
+                                })}
+                            </motion.div>
                         </div>
                     )}
 
@@ -373,25 +424,6 @@ export default function ProgramDetails() {
                 </motion.div>
             </div>
 
-            {/* Bundles Popup */}
-            {/** BundlesPopup disabled per request
-            <BundlesPopup
-                isOpen={showBundlesPopup}
-                onClose={() => setShowBundlesPopup(false)}
-                programType="recorded"
-                retreatData={{
-                    id: programData?.recordedProgramCard?.title,
-                    pilgrimRetreatCard: {
-                        title: programData?.recordedProgramCard?.title,
-                        price: programData?.oneTimeSubscription?.price,
-                        location: programData?.recordedProgramCard?.location
-                    },
-                    oneTimePurchase: {
-                        images: [programData?.recordedProgramCard?.thumbnail]
-                    }
-                }}
-            />
-            */}
         </>
     );
 }

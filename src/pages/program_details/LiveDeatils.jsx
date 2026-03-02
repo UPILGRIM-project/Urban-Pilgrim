@@ -219,16 +219,8 @@ export default function LiveDetails() {
                         {programData?.liveSessionCard?.title || "Retreat Title"}
                     </h2>
                     <ImageGallery
-                        images={
-                            programData?.liveSessionCard?.thumbnail
-                                ? [
-                                      programData.liveSessionCard.thumbnail,
-                                      ...(programData?.oneTimeSubscription?.images || []),
-                                  ]
-                                : programData?.oneTimeSubscription?.images || []
-                        }
+                        images={programData?.oneTimeSubscription?.images || []}
                         videos={programData?.oneTimeSubscription?.videos || []}
-                        thumbnail={programData?.liveSessionCard?.thumbnail || null}
                     />
                 </div>
 

@@ -1,4 +1,5 @@
 import YouTubeVideoPlaylist from "../../components/sessions/VideoPlayerSection"
+import DOMPurify from 'dompurify';
 import SEO from "../../components/SEO.jsx";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -38,10 +39,6 @@ const SessionDescription = () => {
 
     // Get videos from recordedVideo array (new data structure)
     const videos = programData?.recordedVideo || [];
-    
-    // Get program details from slides array
-    const programSlides = programData?.slides || [];
-    const programSchedule = programData?.programSchedule || [];
     
     // Get main program info from recordedProgramCard
     const programCard = programData?.recordedProgramCard || {};
@@ -94,7 +91,7 @@ const SessionDescription = () => {
                         {programCard?.description && (
                             <div className="mb-8 p-6 bg-white rounded-lg shadow-sm">
                                 <h2 className="text-xl font-semibold text-[#2F6288] mb-3">About This Program</h2>
-                                <p className="text-gray-700 leading-relaxed">{programCard.description}</p>
+                                <div className="text-gray-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(programCard.description) }} />
                                 {programCard?.price && (
                                     <div className="mt-4 flex items-center gap-4">
                                         <span className="text-2xl font-bold text-[#2F6288]">₹{Number(programCard.price).toLocaleString()}</span>
@@ -103,21 +100,6 @@ const SessionDescription = () => {
                                         )}
                                     </div>
                                 )}
-                            </div>
-                        )}
-
-                        {/* Program Schedule */}
-                        {programSchedule.length > 0 && (
-                            <div className="mb-8 p-6 bg-white rounded-lg shadow-sm">
-                                <h2 className="text-xl font-semibold text-[#2F6288] mb-4">Program Schedule</h2>
-                                <div className="space-y-3">
-                                    {programSchedule.map((schedule, index) => (
-                                        <div key={index} className="p-4 bg-gray-50 rounded-lg">
-                                            <h3 className="font-medium text-gray-900">{schedule.title}</h3>
-                                            <p className="text-sm text-gray-600 mt-1">{schedule.description}</p>
-                                        </div>
-                                    ))}
-                                </div>
                             </div>
                         )}
 

@@ -26,7 +26,7 @@ export default function RecordedPrograms({ filters = {}, bestSellingActive = fal
     }, [dispatch]);
 
     const programs = recordedProgramData && recordedProgramData.length > 0 && recordedProgramData?.map((program) => ({
-        image: program?.recordedProgramCard?.thumbnail || program?.oneTimeSubscription?.images?.[0] || program?.oneTimeSubscription?.videos?.[0],
+        image: program?.recordedProgramCard?.thumbnail,
         category: program?.recordedProgramCard?.category,
         title: program?.recordedProgramCard?.title,
         days: program?.recordedProgramCard?.days,

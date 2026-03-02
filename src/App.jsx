@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { CartProvider } from "./context/CartContext";
+import Lenis from '@studio-freight/lenis'
 import NavBar from "./components/navbar/NavBar";
 import Loader from "./components/Loader";
 import Home from "./pages/home";
@@ -30,7 +31,6 @@ import YogaDesc from "./components/YogaDesc";
 import EventDetails from "./components/upcoming_events/EventDetails";
 import LiveDetails from "./pages/program_details/LiveDeatils";
 import WorkshopDetails from "./components/pilgrim_workshop/WorkshopDetails";
-import Lenis from "@studio-freight/lenis";
 import WhatsAppFloatingButton from "./components/WhatsAppFloatingButton.jsx";
 import Organizer from "./pages/organizer/Organizer.jsx";
 import OrganizerUsers from "./pages/organizer/Users.jsx";
@@ -39,11 +39,11 @@ import BulkWhatsAppSender from "./components/admin/BulkWhatsAppSender.jsx";
 function App() {
     const [loading, setLoading] = useState(true);
     const location = useLocation();
-    const isAdminRoute = location.pathname === "/admin" || 
-    location.pathname === "/userdashboard" || 
-    location.pathname === "/organizer" || 
-    location.pathname === "/organizer/users" ||
-    location.pathname.startsWith("/admin/");
+    const isAdminRoute = location.pathname === "/admin" ||
+        location.pathname === "/userdashboard" ||
+        location.pathname === "/organizer" ||
+        location.pathname === "/organizer/users" ||
+        location.pathname.startsWith("/admin/");
 
     // Decide whether to show loader only on the very first visit
     useEffect(() => {
@@ -59,27 +59,27 @@ function App() {
             if (isAdminRoute) setLoading(false);
         }
     }, [isAdminRoute]);
-
-    useEffect(() => {
-        const lenis = new Lenis({
-            duration: 1.2,
-            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-            smooth: true,
-        });
-
-        function raf(time) {
-            lenis.raf(time);
-            requestAnimationFrame(raf);
-        }
-
-        requestAnimationFrame(raf);
-
-        return () => {
-            lenis.destroy();
-        };
-    }, []);
-
     
+    // useEffect(() => {
+    //     const lenis = new Lenis({
+    //         duration: 1.2,
+    //         smooth: true,
+    //     });
+
+    //     let rafId;
+
+    //     function raf(time) {
+    //         lenis.raf(time);
+    //         rafId = requestAnimationFrame(raf);
+    //     }
+
+    //     rafId = requestAnimationFrame(raf);
+
+    //     return () => {
+    //         cancelAnimationFrame(rafId);
+    //         lenis.destroy();
+    //     };
+    // }, []);
 
     return (
         <CartProvider>
@@ -88,7 +88,7 @@ function App() {
                 {loading && !isAdminRoute && (
                     <Loader
                         onFinish={() => {
-                            try { localStorage.setItem('hasSeenLoader', 'true'); } catch {}
+                            try { localStorage.setItem('hasSeenLoader', 'true'); } catch { }
                             setLoading(false);
                         }}
                     />

@@ -1167,7 +1167,7 @@ function sanitizeVariable(input) {
 
 // Keep only allowed template variable keys and sanitize their values
 function sanitizeVariablesObject(vars) {
-    const allowed = ["1", "2"];
+    const allowed = ["1", "2", "3"]; // "3" used by bulk_message_with_media template
     const out = {};
     if (!vars || typeof vars !== 'object') return out;
     for (const k of allowed) {
@@ -1232,13 +1232,20 @@ async function sendBulkWhatsApp({
             }
 
             try {
-                let variables = {
-                    "1": name,
-                    "2": String(messageText).replace("{name}", name)
-                };
+                // Build raw variables — support both plain string and { contentVariables: {...} } object
+                let rawVars;
+                if (messageText && typeof messageText === 'object' && messageText.contentVariables) {
+                    // Media (or other object) template: merge name into provided vars
+                    rawVars = { "1": name, ...messageText.contentVariables };
+                } else {
+                    rawVars = {
+                        "1": name,
+                        "2": String(messageText).replace("{name}", name)
+                    };
+                }
 
-                // Sanitize and only keep allowed keys
-                variables = sanitizeVariablesObject(variables);
+                // Sanitize and only keep allowed keys ("1", "2", "3")
+                let variables = sanitizeVariablesObject(rawVars);
 
                 // Validate that required {{2}} is present and not empty
                 if (!variables["2"] || variables["2"].length === 0) {

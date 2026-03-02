@@ -19,7 +19,7 @@ function Faqs({ faqs }) {
           viewport={{ once: true, amount: 0.5 }}
           className="space-y-4"
         >
-          {faqs &&
+          {Array.isArray(faqs) && faqs.length > 0 && faqs[0]?.title &&
             faqs.map((faq, index) => (
               <div
                 key={index + 1}

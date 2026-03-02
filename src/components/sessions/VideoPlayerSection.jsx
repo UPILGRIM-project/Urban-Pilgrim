@@ -1,12 +1,57 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { FiPlay } from "react-icons/fi";
 import ReactPlayer from "react-player";
+import DOMPurify from "dompurify";
 
-export default function YouTubeVideoPlaylist({ videos = [], programData = null }) {
-    const [currentVideo, setCurrentVideo] = useState(videos[0] || null);
+// Extract YouTube video ID from any YouTube URL format
+const extractYouTubeId = (url) => {
+    if (!url) return null;
+    const u = String(url);
+    const vMatch = u.match(/[?&]v=([^&]+)/);
+    if (vMatch) return vMatch[1];
+    const shortMatch = u.match(/youtu\.be\/([^?&\/]+)/);
+    if (shortMatch) return shortMatch[1];
+    const embMatch = u.match(/embed\/([^?&\/]+)/);
+    if (embMatch) return embMatch[1];
+    return null;
+};
 
-    if (!currentVideo || videos.length === 0) {
+// Normalize any video value (string URL or object with various field names) to { id, src, thumbnail, title, description }
+const resolveVideoObject = (video) => {
+    if (!video) return null;
+    if (typeof video === "string") {
+        const yt = extractYouTubeId(video);
+        return {
+            id: yt || video,
+            src: video,
+            thumbnail: yt ? `https://img.youtube.com/vi/${yt}/hqdefault.jpg` : null,
+            title: "",
+            description: "",
+        };
+    }
+    const src = video.src || video.url || video.video || video.link || null;
+    if (!src) return null;
+    const yt = extractYouTubeId(src);
+    return {
+        id: video.id || yt || src,
+        src,
+        thumbnail: video.thumbnail || video.image || video.thumb ||
+            (yt ? `https://img.youtube.com/vi/${yt}/hqdefault.jpg` : null),
+        title: video.title || video.name || video.label || "",
+        description: video.description || video.desc || "",
+    };
+};
+
+export default function YouTubeVideoPlaylist({ videos = []}) {
+    const normalizedVideos = useMemo(() => {
+        if (!Array.isArray(videos)) return [];
+        return videos.map(resolveVideoObject).filter(Boolean);
+    }, [videos]);
+
+    const [currentVideo, setCurrentVideo] = useState(() => normalizedVideos[0] || null);
+
+    if (!currentVideo || normalizedVideos.length === 0) {
         return (
             <div className="max-w-6xl mx-auto px-4 py-10 text-center">
                 <div className="text-gray-400 text-lg mb-2">🎥</div>
@@ -20,7 +65,7 @@ export default function YouTubeVideoPlaylist({ videos = [], programData = null }
         <div className="max-w-6xl mx-auto px-4 py-10">
             <div className="aspect-video rounded-xl overflow-hidden">
                 <ReactPlayer
-                    src={currentVideo?.src || currentVideo?.url}
+                    url={currentVideo?.src}
                     controls
                     width="100%"
                     height="100%"
@@ -28,38 +73,44 @@ export default function YouTubeVideoPlaylist({ videos = [], programData = null }
                 />
             </div>
 
-            <h3 className="text-lg font-semibold mt-4">
-                {currentVideo?.title}
-            </h3>
+            {currentVideo?.title && (
+                <h3 className="text-lg font-semibold mt-4">{currentVideo.title}</h3>
+            )}
 
-            {programData?.oneTimeSubscription?.description && (
-                <p className="text-gray-600 mt-2">
-                    {programData.oneTimeSubscription.description}
-                </p>
+            {currentVideo?.description && (
+                <div
+                    className="text-gray-600 mt-2 prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(currentVideo.description) }}
+                />
             )}
 
             <div className="mt-6 bg-white border rounded-xl p-4">
-                <p className="text-sm font-medium mb-4">All Videos ({videos.length})</p>
+                <p className="text-sm font-medium mb-4">All Videos ({normalizedVideos.length})</p>
                 <div className="space-y-3 max-h-[300px] overflow-y-auto">
-                    {videos.map((video, index) => (
+                    {normalizedVideos.map((video, index) => (
                         <motion.div
                             key={video.id || index}
                             whileHover={{ scale: 1 }}
                             onClick={() => setCurrentVideo(video)}
-                            className={`flex items-center gap-4 cursor-pointer rounded-md p-2 hover:bg-gray-100 transition ${currentVideo?.id === video.id ? 'bg-blue-50 border border-blue-200' : ''
-                                }`}
+                            className={`flex items-center gap-4 cursor-pointer rounded-md p-2 hover:bg-gray-100 transition ${currentVideo?.id === video.id ? 'bg-blue-50 border border-blue-200' : ''}`}
                         >
                             <div className="relative w-28 h-16 overflow-hidden rounded-md flex-shrink-0">
-                                <img
-                                    src={video.thumbnail || video.image || `https://img.youtube.com/vi/${video.src?.split('v=')[1]}/hqdefault.jpg`}
-                                    alt={video.title}
-                                    className="w-full h-full object-cover"
-                                />
+                                {video.thumbnail ? (
+                                    <img
+                                        src={video.thumbnail}
+                                        alt={video.title || `Video ${index + 1}`}
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                                        <FiPlay className="text-gray-400 w-5 h-5" />
+                                    </div>
+                                )}
                                 <span className="absolute inset-0 flex items-center justify-center bg-black/40">
                                     <FiPlay className="text-white w-4 h-4" />
                                 </span>
                             </div>
-                            <p className="text-sm">{video.title}</p>
+                            <p className="text-sm">{video.title || `Video ${index + 1}`}</p>
                         </motion.div>
                     ))}
                 </div>
