@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { CloudCog, Package, ShoppingCart } from "lucide-react";
 import { useState } from "react";
 
-export default function SubscriptionCard({ bundle, onAddToCart, isHighestDiscount = false, title = "", price, handleClick = "", redirectToProgram="", programType = "session" }) {
+export default function SubscriptionCard({ bundle, onAddToCart, isHighestDiscount = false, title = "", price, handleClick = "", redirectToProgram="", programType = "session", hasFreeTrail = false, onFreeTrialClick }) {
     const userPrograms = useSelector((state) => state.userProgram);
     const navigate = useNavigate();
     const [expandedVariants, setExpandedVariants] = useState({});
@@ -254,10 +254,6 @@ export default function SubscriptionCard({ bundle, onAddToCart, isHighestDiscoun
         );
     }
 
-    const showFreeTrail = () => {
-        
-    }
-
     // ✅ Default Subscription Box if not purchased
     return (
         <div className="flex justify-start items-start py-4">
@@ -293,13 +289,15 @@ export default function SubscriptionCard({ bundle, onAddToCart, isHighestDiscoun
                     Add to cart
                 </motion.button>
 
-                <motion.button
-                    whileTap={{ scale: 0.95 }}
-                    onClick={showFreeTrail}
-                    className="w-full border border-[#2F5D82] text-[#2F5D82] font-semibold py-3 rounded-md hover:bg-[#e6edf3] transition-colors"
-                >
-                    Get a Free Trial
-                </motion.button>
+                {hasFreeTrail && (
+                    <motion.button
+                        whileTap={{ scale: 0.95 }}
+                        onClick={onFreeTrialClick}
+                        className="w-full border border-[#2F5D82] text-[#2F5D82] font-semibold py-3 rounded-md hover:bg-[#e6edf3] transition-colors"
+                    >
+                        Get a Free Trial
+                    </motion.button>
+                )}
             </motion.div>
         </div>
     );

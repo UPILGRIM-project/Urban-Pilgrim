@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 export default function ImageGallery({ images = [], videos = [] }) {
     // Combine images and videos into a single media array
     const allMedia = [...images, ...videos];
-    const [mainMedia, setMainMedia] = useState(allMedia[0]);
+    const [mainIndex, setMainIndex] = useState(0);
     const [showAllMedia, setShowAllMedia] = useState(false);
+
+    const mainMedia = allMedia[mainIndex] ?? allMedia[0];
 
     const isVideo = (url) => {
         const lowerURL = url ? url.toLowerCase() : '';
@@ -13,7 +15,8 @@ export default function ImageGallery({ images = [], videos = [] }) {
     };
 
     const handleMediaClick = (clickedMedia) => {
-        setMainMedia(clickedMedia);
+        const idx = allMedia.indexOf(clickedMedia);
+        if (idx !== -1) setMainIndex(idx);
     };
 
     const handleShowAllMedia = () => {
@@ -25,13 +28,11 @@ export default function ImageGallery({ images = [], videos = [] }) {
     };
     
     useEffect(() => {
-        if (allMedia.length > 0) {
-            setMainMedia(allMedia[0]);
-        }
+        setMainIndex(0);
     }, [images, videos]);
 
-    // otherMedia contains everything except the main (first) item
-    const otherMedia = allMedia.slice(1);
+    // otherMedia contains everything except the current main item
+    const otherMedia = allMedia.filter((_, i) => i !== mainIndex);
     const thumbsToShow = otherMedia.length <= 3 ? otherMedia : otherMedia.slice(0, 2);
     const overlayMedia = otherMedia[2]; // corresponds to allMedia[3]
 
@@ -147,10 +148,10 @@ export default function ImageGallery({ images = [], videos = [] }) {
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                                 {allMedia.map((media, idx) => (
                                     <div key={idx} className="relative w-full h-48 rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
-                                         onClick={() => {
-                                             handleMediaClick(media);
-                                             handleCloseModal();
-                                         }}>
+                                        onClick={() => {
+                                            handleMediaClick(media);
+                                            handleCloseModal();
+                                        }}>
                                         {isVideo(media) ? (
                                             <>
                                                 <video

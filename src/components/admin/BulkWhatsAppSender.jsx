@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import { sendBulkWhatsApp, validatePhoneNumbers } from '../../services/whatsappService';
-import { collectionGroup, getDocs } from 'firebase/firestore';
+import { collectionGroup, getDocs, doc, setDoc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../../services/firebase';
 
 // Hardcoded template SIDs
-const TEMPLATE_NO_MEDIA  = 'HX12e2193907d8fda6066b2387c3821d81';  // {{1}} name, {{2}} message
+const TEMPLATE_NO_MEDIA   = 'HX12e2193907d8fda6066b2387c3821d81';  // {{1}} name, {{2}} message
 const TEMPLATE_WITH_MEDIA = 'HX122046fd28126270220d4d536c48cf73'; // {{1}} name, {{2}} message, {{3}} media var
+const TEMPLATE_QUICK_REPLY = 'HX700dc966d8e30f63646b30ea183ba535'; // {{1}} name only — users reply YES to opt in
 
 const extractMediaVar = (downloadUrl) => {
     try {
@@ -32,7 +33,10 @@ const BulkWhatsAppSender = () => {
     const [loading, setLoading] = useState(false);
     const [fetchLoading, setFetchLoading] = useState(true);
     const [result, setResult] = useState(null);
+    // Campaign type: 'promotional' | 'quickReply'
+    const [campaignType, setCampaignType] = useState('promotional');
     const [message, setMessage] = useState('');
+    const [followUpMessage, setFollowUpMessage] = useState('');
     // Media upload state
     const [mediaFile, setMediaFile] = useState(null);       // File object chosen by admin
     const [mediaPreview, setMediaPreview] = useState(null); // local object URL for preview
@@ -253,7 +257,26 @@ const BulkWhatsAppSender = () => {
             if (invalid.length > 0) console.warn('Invalid numbers:', invalid);
             if (valid.length === 0) throw new Error('No valid phone numbers found');
 
-            if (!mediaVar) {
+            if (campaignType === 'quickReply') {
+                // ── Quick Reply flow ──────────────────────────────────────────
+                // 1. Save the follow-up message to Firestore so the webhook can read it
+                if (!followUpMessage.trim()) throw new Error('Please enter the follow-up message to send after users reply YES.');
+                await setDoc(doc(db, 'admin', 'whatsapp_settings'), {
+                    followUpMessage: followUpMessage.trim(),
+                    updatedAt: new Date().toISOString()
+                }, { merge: true });
+
+                // 2. Send Quick Reply template — only {{1}} = name
+                const res = await sendBulkWhatsApp(valid, { contentVariables: {} }, {
+                    useTemplate: true,
+                    contentSid: TEMPLATE_QUICK_REPLY
+                });
+                setResult({
+                    type: 'success',
+                    message: `✅ Quick Reply sent: ${res.success}, ❌ Failed: ${res.failed}, ⚠️ Invalid: ${invalid.length}`,
+                    details: res
+                });
+            } else if (!mediaVar) {
                 // No media → without_media template ({{1}} name, {{2}} message)
                 const messageText = message || 'Welcome to Urban Pilgrim! 🧘‍♀️';
                 const res = await sendBulkWhatsApp(valid, messageText, {
@@ -298,17 +321,56 @@ const BulkWhatsAppSender = () => {
         <div className="p-6 max-w-4xl mx-auto">
             <h2 className="text-2xl font-bold mb-6">Bulk WhatsApp Sender</h2>
 
-            {/* Message Input */}
-            <div className="mb-4">
-                <label className="block mb-2 font-semibold">Message</label>
-                <textarea
-                    className="w-full p-3 border rounded-lg"
-                    rows="3"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Welcome to Urban Pilgrim!"
-                />
+            {/* Campaign Type */}
+            <div className="mb-5">
+                <label className="block mb-2 font-semibold">Campaign Type</label>
+                <div className="flex md:flex-row flex-col gap-2">
+                    {[
+                        { id: 'promotional', label: 'Promotional', desc: 'Send message directly (with or without media)' },
+                        { id: 'quickReply',  label: 'Quick Reply', desc: 'Send opt-in ping → reply YES → you send details' },
+                    ].map(({ id, label, desc }) => (
+                        <button key={id} type="button"
+                            onClick={() => setCampaignType(id)}
+                            className={`flex-1 px-4 py-3 rounded-xl border text-left transition-colors ${
+                                campaignType === id
+                                    ? 'bg-[#C5703F] text-white border-[#C5703F]'
+                                    : 'bg-white text-gray-600 border-gray-300 hover:border-[#C5703F]'
+                            }`}
+                        >
+                            <span className="font-semibold text-sm block">{label}</span>
+                            <span className={`text-xs ${campaignType === id ? 'text-orange-100' : 'text-gray-400'}`}>{desc}</span>
+                        </button>
+                    ))}
+                </div>
             </div>
+
+            {campaignType === 'quickReply' ? (
+                /* ── Quick Reply: follow-up message only ── */
+                <div className="mb-4 border rounded-xl p-4 bg-amber-50 border-amber-200">
+                    <label className="block mb-1.5 font-semibold text-sm">Follow-up message </label>
+                    <textarea
+                        className="w-full p-3 border border-amber-300 rounded-lg text-sm bg-white"
+                        rows="4"
+                        value={followUpMessage}
+                        onChange={(e) => setFollowUpMessage(e.target.value)}
+                        placeholder="e.g. Thank you! Here are the details of our upcoming retreat: https://urbanpilgrim.in/retreat — Urban Pilgrim Team"
+                    />
+                    <p className="mt-1.5 text-xs text-amber-600">This message is saved to Firestore and sent automatically when a user replies YES.</p>
+                </div>
+            ) : (
+                /* ── Promotional: message + media ── */
+                <>
+                    {/* Message Input */}
+                    <div className="mb-4">
+                        <label className="block mb-2 font-semibold">Message</label>
+                        <textarea
+                            className="w-full p-3 border rounded-lg"
+                            rows="3"
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            placeholder="Welcome to Urban Pilgrim!"
+                        />
+                    </div>
 
             {/* Media upload */}
             <div className="mb-6 border rounded-xl p-4 bg-gray-50">
@@ -382,6 +444,9 @@ const BulkWhatsAppSender = () => {
                     onChange={handleMediaChange}
                 />
             </div>
+
+                </>
+            )}
 
             {/* Recipients — mode toggle + list */}
             <div className="mb-6">
@@ -570,6 +635,7 @@ const BulkWhatsAppSender = () => {
                     onClick={sendMessages}
                     disabled={
                         loading || uploadLoading ||
+                        (campaignType === 'quickReply' && !followUpMessage.trim()) ||
                         (recipientMode === 'database' && (fetchLoading || users.length === 0)) ||
                         (recipientMode === 'excel' && importedUsers.length === 0)
                     }
@@ -577,6 +643,10 @@ const BulkWhatsAppSender = () => {
                 >
                     {loading ? 'Sending…'
                         : uploadLoading ? 'Uploading media…'
+                        : campaignType === 'quickReply'
+                            ? recipientMode === 'excel'
+                                ? `Send Quick Reply to ${selectedImportedPhones.size || importedUsers.length}`
+                                : `Send Quick Reply to ${selectedPhones.size || users.length} User${(selectedPhones.size || users.length) !== 1 ? 's' : ''}`
                         : recipientMode === 'excel'
                             ? selectedImportedPhones.size > 0
                                 ? `Send to ${selectedImportedPhones.size} Selected`

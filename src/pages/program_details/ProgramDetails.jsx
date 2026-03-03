@@ -24,6 +24,10 @@ export default function ProgramDetails() {
     const [programData, setProgramData] = useState(null);
     const programId = params.programId;
     const [persons, setPersons] = useState(1);
+    const [freeTrialOpen, setFreeTrialOpen] = useState(false);
+    const [freeTrialIndex, setFreeTrialIndex] = useState(0);
+    const [expandedVideo, setExpandedVideo] = useState(null);
+    const freeTrialVideos = programData?.recordedVideo?.filter(v => v.isFreeTrail) || [];
     // const [showBundlesPopup, setShowBundlesPopup] = useState(false);
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -287,6 +291,8 @@ export default function ProgramDetails() {
                                 title={programData?.recordedProgramCard?.title}
                                 redirectToProgram={redirectToProgram}
                                 programType="program"
+                                hasFreeTrail={freeTrialVideos.length > 0}
+                                onFreeTrialClick={() => { setFreeTrialIndex(0); setFreeTrialOpen(true); }}
                             />
                         );
                     })()}
@@ -303,69 +309,145 @@ export default function ProgramDetails() {
                                 transition={{ duration: 0.5, ease: "easeOut" }}
                                 viewport={{ once: true, amount: 0.1 }}
                             >
-                                {programData.recordedVideo.map((video, index) => {
-                                    const src = video?.src || video?.url || video?.video || video?.link || '';
-                                    const ytId = src.match(/[?&]v=([^&]+)/)?.[1]
-                                        || src.match(/youtu\.be\/([^?&\/]+)/)?.[1]
-                                        || src.match(/embed\/([^?&\/]+)/)?.[1];
-                                    const thumbnail = video?.thumbnail || video?.image || video?.thumb
-                                        || (ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null);
-                                    const title = video?.title || video?.name || `Video ${index + 1}`;
-                                    const description = video?.description || video?.desc || '';
+                                {(() => {
+                                    return programData.recordedVideo.map((video, index) => {
+                                        const src = video?.src || video?.url || video?.video || video?.link || '';
+                                        const ytId = src.match(/[?&]v=([^&]+)/)?.[1]
+                                            || src.match(/youtu\.be\/([^?&\/]+)/)?.[1]
+                                            || src.match(/embed\/([^?&\/]+)/)?.[1];
+                                        const thumbnail = video?.thumbnail || video?.image || video?.thumb
+                                            || (ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null);
+                                        const title = video?.title || video?.name || `Video ${index + 1}`;
+                                        const description = video?.description || video?.desc || '';
+                                        const isExpanded = expandedVideo === index;
 
-                                    return (
-                                        <motion.div
-                                            key={video.id || index}
-                                            className="flex gap-3 bg-white rounded-xl shadow-sm p-3 cursor-pointer hover:shadow-md transition-shadow"
-                                            initial={{ y: 100, opacity: 0 }}
-                                            whileInView={{ y: 0, opacity: 1 }}
-                                            transition={{ duration: 0.5, delay: index * 0.06, ease: "easeOut" }}
-                                            viewport={{ once: true, amount: 0.1 }}
-                                        >
-                                            {/* Thumbnail */}
-                                            <div className="relative w-28 h-18 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
-                                                {thumbnail ? (
-                                                    <img
-                                                        src={thumbnail}
-                                                        alt={title}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                                                        <svg className="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                                        return (
+                                            <motion.div
+                                                key={video.id || index}
+                                                className="flex gap-3 bg-white rounded-xl shadow-sm p-3 cursor-pointer hover:shadow-md transition-shadow"
+                                                initial={{ y: 100, opacity: 0 }}
+                                                whileInView={{ y: 0, opacity: 1 }}
+                                                transition={{ duration: 0.5, delay: index * 0.06, ease: "easeOut" }}
+                                                viewport={{ once: true, amount: 0.1 }}
+                                                onClick={() => setExpandedVideo(isExpanded ? null : index)}
+                                            >
+                                                {/* Thumbnail */}
+                                                <div className="relative w-28 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 self-start" style={{ height: '72px' }}>
+                                                    {thumbnail ? (
+                                                        <img
+                                                            src={thumbnail}
+                                                            alt={title}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                                                            <svg className="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                                                                <path d="M8 5v14l11-7z" />
+                                                            </svg>
+                                                        </div>
+                                                    )}
+                                                    <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                                                        <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                                                             <path d="M8 5v14l11-7z" />
                                                         </svg>
                                                     </div>
-                                                )}
-                                                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                                                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                                        <path d="M8 5v14l11-7z" />
-                                                    </svg>
                                                 </div>
-                                            </div>
 
-                                            {/* Text */}
-                                            <div className="flex flex-col justify-center min-w-0">
-                                                <p className="text-sm font-semibold text-gray-800 line-clamp-2 leading-snug">{title}</p>
-                                                {description && (
-                                                    <div
-                                                        className="text-xs text-gray-500 mt-1 line-clamp-2 leading-snug prose prose-xs max-w-none"
-                                                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(description) }}
-                                                    />
-                                                )}
-                                            </div>
-                                        </motion.div>
-                                    );
-                                })}
+                                                {/* Text */}
+                                                <div className="flex flex-col justify-start min-w-0 flex-1">
+                                                    <p className={`text-sm font-semibold text-gray-800 leading-snug transition-all duration-300 ${isExpanded ? '' : 'line-clamp-2'}`}>{title}</p>
+                                                    {description && (
+                                                        <motion.div
+                                                            initial={false}
+                                                            animate={{ height: isExpanded ? 'auto' : '2.5rem', opacity: 1 }}
+                                                            transition={{ duration: 0.3, ease: 'easeInOut' }}
+                                                            className="overflow-hidden"
+                                                        >
+                                                            <div
+                                                                className={`text-xs text-gray-500 leading-snug [&_*]:text-xs [&_p]:m-0 [&_p]:p-0 [&_ul]:m-0 [&_ol]:m-0 max-w-none ${isExpanded ? '' : 'line-clamp-2'}`}
+                                                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(description) }}
+                                                            />
+                                                        </motion.div>
+                                                    )}
+                                                </div>
+                                            </motion.div>
+                                        );
+                                    });
+                                })()}
                             </motion.div>
                         </div>
                     )}
 
-                    <ProgramSection program={programData?.aboutProgram} journey={programData?.keyHighlights} />
-                    <FeatureProgram features={programData?.features} />
                     <Faqs faqs={programData?.faqs} />
                 </div>
             </div>
+
+            {/* Free Trial Modal */}
+            {freeTrialOpen && freeTrialVideos.length > 0 && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+                    onClick={() => setFreeTrialOpen(false)}
+                >
+                    <div
+                        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-5 py-3 border-b">
+                            <div>
+                                <span className="text-xs font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full mr-2">FREE TRIAL</span>
+                                <span className="font-semibold text-gray-800 text-sm">
+                                    {freeTrialVideos[freeTrialIndex]?.title || `Video ${freeTrialIndex + 1}`}
+                                </span>
+                            </div>
+                            <button
+                                onClick={() => setFreeTrialOpen(false)}
+                                className="text-gray-400 hover:text-gray-700 text-xl font-bold leading-none"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        {/* Video player */}
+                        <div className="bg-black aspect-video w-full">
+                            <video
+                                key={freeTrialVideos[freeTrialIndex]?.url}
+                                src={freeTrialVideos[freeTrialIndex]?.url}
+                                controls
+                                autoPlay
+                                className="w-full h-full"
+                            />
+                        </div>
+
+                        {/* Description */}
+                        {freeTrialVideos[freeTrialIndex]?.description && (
+                            <div
+                                className="px-5 py-3 text-sm text-gray-600 prose prose-sm max-w-none"
+                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(freeTrialVideos[freeTrialIndex].description) }}
+                            />
+                        )}
+
+                        {/* Multi-video tabs (if more than one free trial video) */}
+                        {freeTrialVideos.length > 1 && (
+                            <div className="flex gap-2 px-5 pb-4 flex-wrap">
+                                {freeTrialVideos.map((v, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => setFreeTrialIndex(i)}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                                            i === freeTrialIndex
+                                                ? 'bg-[#C5703F] text-white border-[#C5703F]'
+                                                : 'border-gray-300 text-gray-600 hover:border-[#C5703F]'
+                                        }`}
+                                    >
+                                        {v.title || `Video ${i + 1}`}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
 
             <PilgrimGuide guides={programData?.guide[0]} />
 

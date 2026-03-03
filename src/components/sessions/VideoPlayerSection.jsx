@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { FiPlay } from "react-icons/fi";
-import ReactPlayer from "react-player";
 import DOMPurify from "dompurify";
 
 // Extract YouTube video ID from any YouTube URL format
@@ -63,14 +62,25 @@ export default function YouTubeVideoPlaylist({ videos = []}) {
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-10">
-            <div className="aspect-video rounded-xl overflow-hidden">
-                <ReactPlayer
-                    url={currentVideo?.src}
-                    controls
-                    width="100%"
-                    height="100%"
-                    className="rounded-xl"
-                />
+            <div className="aspect-video rounded-xl overflow-hidden bg-black">
+                {extractYouTubeId(currentVideo?.src) ? (
+                    <iframe
+                        key={currentVideo?.id}
+                        src={`https://www.youtube.com/embed/${extractYouTubeId(currentVideo?.src)}?autoplay=1`}
+                        title={currentVideo?.title || "Video"}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        className="w-full h-full rounded-xl"
+                    />
+                ) : (
+                    <video
+                        key={currentVideo?.id}
+                        src={currentVideo?.src}
+                        controls
+                        autoPlay
+                        className="w-full h-full rounded-xl"
+                    />
+                )}
             </div>
 
             {currentVideo?.title && (

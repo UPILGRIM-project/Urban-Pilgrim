@@ -1247,8 +1247,8 @@ async function sendBulkWhatsApp({
                 // Sanitize and only keep allowed keys ("1", "2", "3")
                 let variables = sanitizeVariablesObject(rawVars);
 
-                // Validate that required {{2}} is present and not empty
-                if (!variables["2"] || variables["2"].length === 0) {
+                // Validate {{2}} only if it was intentionally included in the payload
+                if ("2" in variables && (!variables["2"] || variables["2"].length === 0)) {
                     results.failed++;
                     results.errors.push(`Failed for ${name}: template variable {{2}} is empty or invalid`);
                     console.error(`❌ Invalid contentVariables for ${name}:`, variables);
@@ -5698,14 +5698,58 @@ async function sendWorkshopBookingEmails(bookingData, formData) {
     }
 }
 
+exports.whatsappWebhook = onRequest(async (req, res) => {
+    try {
+        const incomingMsg = (req.body.Body || "").trim().toLowerCase();
+        const from = req.body.From; // "whatsapp:+91XXXXXXXXXX"
+
+        if (incomingMsg === "yes" && from) {
+            const client = getTwilioClient();
+            if (!client) {
+                console.error("❌ whatsappWebhook: Twilio client not configured");
+                res.sendStatus(200);
+                return;
+            }
+
+            // Read the follow-up message set by admin before the blast
+            const settingsSnap = await admin
+                .firestore()
+                .doc("admin/whatsapp_settings")
+                .get();
+            const followUpMessage =
+                settingsSnap.data()?.followUpMessage ||
+                "Thank you for your interest! Here are the full details of our latest Urban Pilgrim offering. Visit https://urbanpilgrim.in to explore. — Urban Pilgrim Team";
+
+            const envFrom = process.env.TWILIO_WHATSAPP_FROM || "";
+            const senderNumber = envFrom
+                ? envFrom.startsWith("whatsapp:")
+                    ? envFrom
+                    : `whatsapp:${envFrom}`
+                : "whatsapp:+917888399232";
+
+            await client.messages.create({
+                from: senderNumber,
+                to: from,
+                body: followUpMessage,
+            });
+
+            console.log(`✅ whatsappWebhook: follow-up sent to ${from}`);
+        } else {
+            console.log(`ℹ️ whatsappWebhook: ignored reply "${incomingMsg}" from ${from}`);
+        }
+    } catch (err) {
+        console.error("❌ whatsappWebhook error:", err.message);
+    }
+
+    // Always 200 — Twilio retries on any other status
+    res.sendStatus(200);
+});
+
 // ========== WORKSHOP REQUEST SYSTEM ==========
-// Import workshop functions from separate file
 const workshopFunctions = require("./workshopRequests");
 
 // Export workshop functions
 exports.submitWorkshopRequest = workshopFunctions.submitWorkshopRequest;
-exports.handleWorkshopRequestResponse =
-    workshopFunctions.handleWorkshopRequestResponse;
+exports.handleWorkshopRequestResponse = workshopFunctions.handleWorkshopRequestResponse;
 exports.getWorkshopRequestStatus = workshopFunctions.getWorkshopRequestStatus;
-exports.getWorkshopRequestStatusByWorkshop =
-    workshopFunctions.getWorkshopRequestStatusByWorkshop;
+exports.getWorkshopRequestStatusByWorkshop = workshopFunctions.getWorkshopRequestStatusByWorkshop;

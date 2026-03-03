@@ -4,7 +4,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { X, Trash2, GripVertical, Edit2 } from "lucide-react";
 import { FaPlus, FaTimes } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import { deleteObject, getDownloadURL, ref, uploadBytes, uploadBytesResumable, } from "firebase/storage";
+import { deleteObject, getDownloadURL, ref, uploadBytesResumable, } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
 import { storage } from "../../../services/firebase";
 import { setRecordedSessions } from "../../../features/pilgrim_session/recordedSessionSlice";
@@ -84,24 +84,13 @@ export default function RecordedSession2() {
             shortDescription: "",
             points: [""],
         },
-        // New: One Time Subscription (price only)
         oneTimeSubscription: {
             price: "",
             images: [],
             videos: [],
-            description: "",
         },
-        // Replaces simple recordedProgramPrograms with richer programSchedule structure
-        programSchedule: [],
-        // New: features like pilgrim retreat form
-        features: [],
         faqs: [{ title: "", description: "" }],
         guide: [{ title: "", description: "", image: null }],
-        // New: Additional section with title and points
-        keyHighlights: {
-            title: "",
-            points: [""],
-        },
         slides: [],
     });
 
@@ -129,19 +118,20 @@ export default function RecordedSession2() {
     const [recordedVideoUploadProgress, setRecordedVideoUploadProgress] =
         useState({});
     const [isRecordedVideoUploading, setIsRecordedVideoUploading] = useState({});
+    const [recordedVideoThumbnailProgress, setRecordedVideoThumbnailProgress] = useState({});
+    const [isRecordedVideoThumbnailUploading, setIsRecordedVideoThumbnailUploading] = useState({});
     const [guideImageUploadProgress, setGuideImageUploadProgress] = useState(0);
     const [isGuideImageUploading, setIsGuideImageUploading] = useState(false);
 
     // Image Editor States
     const [isImageEditorOpen, setIsImageEditorOpen] = useState(false);
     const [editingImage, setEditingImage] = useState(null);
-    const [editingImageType, setEditingImageType] = useState(null); // 'thumbnail', 'guide', 'oneTime', 'feature'
+    const [editingImageType, setEditingImageType] = useState(null); // 'thumbnail', 'guide', 'oneTime'
     const [editingImageIndex, setEditingImageIndex] = useState(null); // for arrays
     const [isSavingEditedImage, setIsSavingEditedImage] = useState(false);
 
     // Refs for hidden file inputs
     const thumbnailInputRef = useRef(null);
-    const featureInputRefs = useRef({});
     const guideInputRef = useRef(null);
 
     const handleFieldChange = (section, field, value) => {
@@ -236,56 +226,6 @@ export default function RecordedSession2() {
         const updated = [...formData.faqs];
         updated.splice(index, 1);
         setFormData((prev) => ({ ...prev, faqs: updated }));
-    };
-
-    // Features (like retreat form)
-    const addFeature = () => {
-        setFormData((prev) => ({
-            ...prev,
-            features: [
-                ...prev.features,
-                { id: Date.now(), title: "", shortdescription: "", image: null },
-            ],
-        }));
-    };
-
-    const handleFeatureChange = (index, field, value) => {
-        const updated = [...formData.features];
-        updated[index] = { ...updated[index], [field]: value };
-        setFormData((prev) => ({ ...prev, features: updated }));
-    };
-
-    const handleFeatureImageChange = async (index, file) => {
-        if (!file) return;
-        try {
-            if (!file.type.startsWith("image/")) {
-                alert("Please upload an image file");
-                return;
-            }
-            const storageRef = ref(storage, `featureImages/${uuidv4()}_${file.name}`);
-            const uploadTask = uploadBytesResumable(storageRef, file);
-            uploadTask.on(
-                "state_changed",
-                () => { },
-                (error) => {
-                    console.error("Upload failed:", error);
-                },
-                async () => {
-                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                    const updated = [...formData.features];
-                    updated[index] = { ...updated[index], image: downloadURL };
-                    setFormData((prev) => ({ ...prev, features: updated }));
-                },
-            );
-        } catch (err) {
-            console.error("Error uploading file:", err);
-        }
-    };
-
-    const removeFeature = (index) => {
-        const updated = [...formData.features];
-        updated.splice(index, 1);
-        setFormData((prev) => ({ ...prev, features: updated }));
     };
 
     // One Time Purchase Image Functions
@@ -456,70 +396,6 @@ export default function RecordedSession2() {
         }
     };
 
-    // Program Schedule (richer structure like retreat form)
-    const addProgram = () => {
-        setFormData((prev) => ({
-            ...prev,
-            programSchedule: [
-                ...prev.programSchedule,
-                { title: "", points: [{ title: "", subpoints: [] }] },
-            ],
-        }));
-    };
-
-    const handleProgramChange = (index, field, value) => {
-        const updated = [...formData.programSchedule];
-        updated[index][field] = value;
-        setFormData((prev) => ({ ...prev, programSchedule: updated }));
-    };
-
-    const handleProgramPointChange = (programIndex, pointIndex, value) => {
-        const updated = [...formData.programSchedule];
-        updated[programIndex].points[pointIndex].title = value;
-        setFormData((prev) => ({ ...prev, programSchedule: updated }));
-    };
-
-    const handleProgramSubPointChange = (
-        programIndex,
-        pointIndex,
-        subIndex,
-        value,
-    ) => {
-        const updated = [...formData.programSchedule];
-        updated[programIndex].points[pointIndex].subpoints[subIndex] = value;
-        setFormData((prev) => ({ ...prev, programSchedule: updated }));
-    };
-
-    const addProgramPoint = (programIndex) => {
-        const updated = [...formData.programSchedule];
-        updated[programIndex].points.push({ title: "", subpoints: [] });
-        setFormData((prev) => ({ ...prev, programSchedule: updated }));
-    };
-
-    const removeProgramPoint = (programIndex, pointIndex) => {
-        const updated = [...formData.programSchedule];
-        updated[programIndex].points.splice(pointIndex, 1);
-        setFormData((prev) => ({ ...prev, programSchedule: updated }));
-    };
-
-    const addProgramSubPoint = (programIndex, pointIndex) => {
-        const updated = [...formData.programSchedule];
-        updated[programIndex].points[pointIndex].subpoints.push("");
-        setFormData((prev) => ({ ...prev, programSchedule: updated }));
-    };
-
-    const removeProgramSubPoint = (programIndex, pointIndex, subIndex) => {
-        const updated = [...formData.programSchedule];
-        updated[programIndex].points[pointIndex].subpoints.splice(subIndex, 1);
-        setFormData((prev) => ({ ...prev, programSchedule: updated }));
-    };
-
-    const removeProgram = (index) => {
-        const updated = [...formData.programSchedule];
-        updated.splice(index, 1);
-        setFormData((prev) => ({ ...prev, programSchedule: updated }));
-    };
-
     // Slides ordering & CRUD
     const moveSlide = async (from, to) => {
         try {
@@ -592,11 +468,6 @@ export default function RecordedSession2() {
                     ? slideToEdit.faqs
                     : [{ title: "", description: "" }],
             // Load richer schedule and features when present
-            programSchedule:
-                slideToEdit?.programSchedule?.length > 0
-                    ? slideToEdit.programSchedule
-                    : [],
-            features: slideToEdit?.features?.length > 0 ? slideToEdit.features : [],
             oneTimeSubscription: slideToEdit?.oneTimeSubscription
                 ? {
                     price: slideToEdit?.oneTimeSubscription?.price || "",
@@ -606,9 +477,8 @@ export default function RecordedSession2() {
                     videos: Array.isArray(slideToEdit?.oneTimeSubscription?.videos)
                         ? slideToEdit?.oneTimeSubscription?.videos
                         : [],
-                    description: slideToEdit?.oneTimeSubscription?.description || "",
                 }
-                : { price: "", images: [], videos: [], description: "" },
+                : { price: "", images: [], videos: [] },
             aboutProgram: slideToEdit?.aboutProgram
                 ? {
                     title: slideToEdit?.aboutProgram?.title || "",
@@ -620,16 +490,6 @@ export default function RecordedSession2() {
                             : [""],
                 }
                 : { title: "", shortDescription: "", points: [""] },
-            keyHighlights: slideToEdit?.keyHighlights
-                ? {
-                    title: slideToEdit?.keyHighlights?.title || "",
-                    points:
-                        Array.isArray(slideToEdit?.keyHighlights?.points) &&
-                            slideToEdit?.keyHighlights?.points.length > 0
-                            ? slideToEdit?.keyHighlights?.points
-                            : [""],
-                }
-                : { title: "", points: [""] },
             guide:
                 slideToEdit?.guide?.length > 0
                     ? slideToEdit.guide
@@ -661,17 +521,13 @@ export default function RecordedSession2() {
             },
             recordedVideo: [],
             aboutProgram: { title: "", shortDescription: "", points: [""] },
-            programSchedule: [],
-            features: [],
             oneTimeSubscription: {
                 price: "",
                 images: [],
                 videos: [],
-                description: "",
             },
             faqs: [{ title: "", description: "" }],
             guide: [{ title: "", description: "", image: null }],
-            keyHighlights: { title: "", points: [""] },
         }));
     };
 
@@ -680,49 +536,6 @@ export default function RecordedSession2() {
         if (newCategory && !categories.includes(newCategory)) {
             setCategories((prev) => [...prev, newCategory]);
         }
-    };
-
-    const validateFields = () => {
-        const newErrors = {};
-        const isPriceValid = (value) =>
-            /^\d+(\.\d{1,2})?$/.test((value || "").toString().trim());
-        if (!formData.recordedProgramCard.title)
-            newErrors.title = "Title is required";
-        if (!formData.recordedProgramCard.category)
-            newErrors.category = "Category required";
-        if (!isPriceValid(formData.recordedProgramCard.price))
-            newErrors.recordedPrice = "Invalid Price";
-        if (
-            !formData.recordedProgramCard.days ||
-            isNaN(formData.recordedProgramCard.days)
-        )
-            newErrors.days = "Number of days is required";
-        if (
-            !formData.recordedProgramCard.videos ||
-            isNaN(formData.recordedProgramCard.videos)
-        )
-            newErrors.videos = "Number of videos is required";
-        if (!isPriceValid(formData.recordedProgramCard.totalprice))
-            newErrors.totalprice = "Invalid Total Price";
-
-        formData.faqs.forEach((faq, i) => {
-            if (!faq.title || !faq.description) {
-                newErrors[`faq_${i}`] = "FAQ title and description are required";
-            }
-        });
-
-        // Validate program schedule
-        formData.programSchedule.forEach((program, i) => {
-            if (!program.title)
-                newErrors[`program_${i}`] = "Program day title is required";
-            program.points.forEach((pt, j) => {
-                if (!pt.title)
-                    newErrors[`program_${i}_point_${j}`] = "Point title is required";
-            });
-        });
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
     };
 
     useEffect(() => {
@@ -764,12 +577,8 @@ export default function RecordedSession2() {
             recordedProgramCard: { ...formData.recordedProgramCard },
             recordedVideo: [...formData.recordedVideo],
             faqs: [...formData.faqs],
-
-            programSchedule: [...formData.programSchedule],
-            features: [...formData.features],
             oneTimeSubscription: { ...formData.oneTimeSubscription },
             aboutProgram: { ...formData.aboutProgram },
-            keyHighlights: { ...formData.keyHighlights },
             guide: [...formData.guide],
             slides: [
                 {
@@ -823,17 +632,13 @@ export default function RecordedSession2() {
                 },
                 recordedVideo: [],
                 aboutProgram: { title: "", shortDescription: "", points: [""] },
-                programSchedule: [],
-                features: [],
                 oneTimeSubscription: {
                     price: "",
                     images: [],
                     videos: [],
-                    description: "",
                 },
                 faqs: [{ title: "", description: "" }],
                 guide: [{ title: "", description: "", image: null }],
-                keyHighlights: { title: "", points: [""] },
                 slides: [],
             });
 
@@ -1012,10 +817,18 @@ export default function RecordedSession2() {
     };
 
     const handleRecordedVideoChange = (index, field, value) => {
-        const updatedVideos = [...formData.recordedVideo];
-        const current = { ...(updatedVideos[index] || {}) };
-        current[field] = value;
-        updatedVideos[index] = current;
+        let updatedVideos = [...formData.recordedVideo];
+        // Only one video can be marked as Free Trial at a time
+        if (field === "isFreeTrail" && value === true) {
+            updatedVideos = updatedVideos.map((v, i) => ({
+                ...v,
+                isFreeTrail: i === index ? true : false,
+            }));
+        } else {
+            const current = { ...(updatedVideos[index] || {}) };
+            current[field] = value;
+            updatedVideos[index] = current;
+        }
         setFormData((prev) => ({ ...prev, recordedVideo: updatedVideos }));
     };
 
@@ -1079,6 +892,55 @@ export default function RecordedSession2() {
             setFormData((prev) => ({ ...prev, recordedVideo: updatedVideos }));
         } catch (error) {
             console.error("Error removing video:", error);
+        }
+    };
+
+    const handleRecordedVideoThumbnailUpload = async (index, file) => {
+        if (!file) return;
+        try {
+            if (!file.type.startsWith("image/")) {
+                alert("Please upload an image file");
+                return;
+            }
+            setIsRecordedVideoThumbnailUploading((prev) => ({ ...prev, [index]: true }));
+            setRecordedVideoThumbnailProgress((prev) => ({ ...prev, [index]: 0 }));
+            const filePath = `pilgrim_sessions/recorded_thumbnails/${uuidv4()}_${file.name}`;
+            const storageRef = ref(storage, filePath);
+            const uploadTask = uploadBytesResumable(storageRef, file);
+            uploadTask.on(
+                "state_changed",
+                (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    setRecordedVideoThumbnailProgress((prev) => ({ ...prev, [index]: Math.round(progress) }));
+                },
+                (error) => {
+                    console.error("Error uploading thumbnail:", error);
+                    setIsRecordedVideoThumbnailUploading((prev) => ({ ...prev, [index]: false }));
+                },
+                async () => {
+                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                    handleRecordedVideoChange(index, "thumbnail", downloadURL);
+                    setIsRecordedVideoThumbnailUploading((prev) => ({ ...prev, [index]: false }));
+                    setRecordedVideoThumbnailProgress((prev) => ({ ...prev, [index]: 0 }));
+                },
+            );
+        } catch (error) {
+            console.error("Error uploading thumbnail:", error);
+            setIsRecordedVideoThumbnailUploading((prev) => ({ ...prev, [index]: false }));
+        }
+    };
+
+    const removeRecordedVideoThumbnail = async (index) => {
+        try {
+            const video = formData.recordedVideo[index];
+            if (video.thumbnail) {
+                const thumbRef = ref(storage, video.thumbnail);
+                await deleteObject(thumbRef).catch(() => {});
+            }
+            handleRecordedVideoChange(index, "thumbnail", "");
+        } catch (error) {
+            console.error("Error removing thumbnail:", error);
+            handleRecordedVideoChange(index, "thumbnail", "");
         }
     };
 
@@ -1499,27 +1361,6 @@ export default function RecordedSession2() {
                         />
                     </div>
 
-                    {/* description */}
-                    <div>
-                        <label className="block text-md font-semibold text-gray-700 mb-2">
-                            Description
-                        </label>
-                        <RichTextEditor
-                            value={formData.oneTimeSubscription.description}
-                            onChange={(value) =>
-                                setFormData((prev) => ({
-                                    ...prev,
-                                    oneTimeSubscription: {
-                                        ...prev.oneTimeSubscription,
-                                        description: value,
-                                    },
-                                }))
-                            }
-                            placeholder="Enter description"
-                            rows={3}
-                        />
-                    </div>
-
                     {/* Images (match RetreatsForm style) */}
                     <label className="block font-semibold mb-2">Images (Max 5)</label>
                     <div className="mb-4">
@@ -1771,6 +1612,57 @@ export default function RecordedSession2() {
 
                                     <div>
                                         <label className="block font-semibold mb-2">
+                                            Video Thumbnail
+                                        </label>
+                                        <div className="mb-4">
+                                            {!video.thumbnail && !isRecordedVideoThumbnailUploading[index] && (
+                                                <label className="w-40 h-28 border-2 border-dashed border-gray-300 rounded flex flex-col items-center justify-center text-gray-500 cursor-pointer hover:bg-gray-50">
+                                                    <img src="/assets/admin/upload.svg" alt="Upload" className="w-8 h-8 mb-1" />
+                                                    <span className="text-xs">Upload Thumbnail</span>
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={(e) => handleRecordedVideoThumbnailUpload(index, e.target.files[0])}
+                                                        className="hidden"
+                                                    />
+                                                </label>
+                                            )}
+                                            {isRecordedVideoThumbnailUploading[index] && (
+                                                <div className="w-40 h-28 border-2 border-dashed border-gray-300 rounded flex flex-col items-center justify-center">
+                                                    <div className="relative w-10 h-10 mb-2">
+                                                        <div className="absolute inset-0 border-4 border-gray-200 rounded-full"></div>
+                                                        <div
+                                                            className="absolute inset-0 border-4 border-[#2F6288] rounded-full border-t-transparent animate-spin"
+                                                            style={{ background: `conic-gradient(from 0deg, #2F6288 ${(recordedVideoThumbnailProgress[index] || 0) * 3.6}deg, transparent ${(recordedVideoThumbnailProgress[index] || 0) * 3.6}deg)` }}
+                                                        ></div>
+                                                        <div className="absolute inset-0 flex items-center justify-center">
+                                                            <span className="text-xs font-semibold text-[#2F6288]">{recordedVideoThumbnailProgress[index] || 0}%</span>
+                                                        </div>
+                                                    </div>
+                                                    <p className="text-xs text-[#2F6288] font-medium">Uploading...</p>
+                                                </div>
+                                            )}
+                                            {video.thumbnail && (
+                                                <div className="relative w-40 h-28">
+                                                    <img
+                                                        src={video.thumbnail}
+                                                        alt="thumbnail"
+                                                        className="w-full h-full object-cover rounded shadow"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeRecordedVideoThumbnail(index)}
+                                                        className="absolute top-1 right-1 bg-white border border-gray-300 rounded-full p-1 hover:bg-gray-200"
+                                                    >
+                                                        <FaTimes size={12} />
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block font-semibold mb-2">
                                             Upload Video
                                         </label>
                                         <div className="mb-4">
@@ -1847,6 +1739,33 @@ export default function RecordedSession2() {
                                                 </div>
                                             )}
                                         </div>
+                                    </div>
+
+                                    {/* Free Trial toggle */}
+                                    <div className="flex items-center gap-3 pt-2 border-t border-gray-200">
+                                        <label className="flex items-center gap-2 cursor-pointer select-none">
+                                            <input
+                                                type="radio"
+                                                name="freeTrailVideo"
+                                                checked={!!video.isFreeTrail}
+                                                onChange={(e) =>
+                                                    handleRecordedVideoChange(
+                                                        index,
+                                                        "isFreeTrail",
+                                                        e.target.checked,
+                                                    )
+                                                }
+                                                className="w-4 h-4 accent-[#2F6288] cursor-pointer"
+                                            />
+                                            <span className="text-sm font-semibold text-[#2F6288]">
+                                                Mark as Free Trial
+                                            </span>
+                                        </label>
+                                        {video.isFreeTrail && (
+                                            <span className="text-xs bg-green-100 text-green-700 font-medium px-2 py-0.5 rounded-full">
+                                                Free Trial
+                                            </span>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -1973,390 +1892,6 @@ export default function RecordedSession2() {
                                 <FaPlus className="w-3 h-3" /> Add Point
                             </button>
                         </div>
-                    </div>
-                </div>
-
-                {/* Program Schedule (Richer) */}
-                <div className="mb-8">
-                    <h2 className="sm:text-2xl font-bold text-[#2F6288] text-xl mb-6">
-                        {isEditing ? "Edit Program Schedule" : "Program Schedule"}{" "}
-                        <span className="bg-[#2F6288] mt-1 w-20 h-1 block"></span>
-                    </h2>
-                    <div className="space-y-6">
-                        {formData?.programSchedule &&
-                            formData?.programSchedule.map((program, programIndex) => (
-                                <div
-                                    key={programIndex}
-                                    className="p-6 bg-gray-50 rounded-lg border border-gray-200 relative"
-                                >
-                                    <button
-                                        onClick={() => removeProgram(programIndex)}
-                                        className="absolute top-4 right-4 text-red-500 hover:text-red-700 p-1"
-                                        title="Delete Program"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
-
-                                    <div className="mb-4">
-                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                            Day {programIndex + 1} Title
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={program?.title}
-                                            placeholder="Enter title"
-                                            onChange={(e) =>
-                                                handleProgramChange(
-                                                    programIndex,
-                                                    "title",
-                                                    e.target.value,
-                                                )
-                                            }
-                                            className="w-full border border-gray-300 p-3 rounded-lg"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                            Description Points
-                                        </label>
-
-                                        {program?.points &&
-                                            program?.points.map((point, pointIndex) => (
-                                                <div key={pointIndex} className="mb-4 relative">
-                                                    <div className="mb-3">
-                                                        <label className="block text-sm text-gray-700 mb-2">
-                                                            Point {pointIndex + 1} Title
-                                                        </label>
-                                                        <div className="flex items-center gap-2">
-                                                            <input
-                                                                type="text"
-                                                                value={point?.title}
-                                                                placeholder={`Point ${pointIndex + 1}`}
-                                                                onChange={(e) =>
-                                                                    handleProgramPointChange(
-                                                                        programIndex,
-                                                                        pointIndex,
-                                                                        e.target.value,
-                                                                    )
-                                                                }
-                                                                className="w-full border border-gray-300 p-3 rounded-lg"
-                                                            />
-
-                                                            {program?.points.length > 1 && (
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() =>
-                                                                        removeProgramPoint(programIndex, pointIndex)
-                                                                    }
-                                                                    className="text-red-500 hover:text-red-700"
-                                                                >
-                                                                    <Trash2 className="w-4 h-4" />
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    </div>
-
-                                                    <div>
-                                                        <div className="flex flex-col items-start justify-between">
-                                                            <label className="block text-sm text-gray-700 mb-2">
-                                                                Sub Points (Optional)
-                                                            </label>
-                                                        </div>
-
-                                                        {point?.subpoints &&
-                                                            point?.subpoints.length > 0 && (
-                                                                <div className="space-y-3 mb-3">
-                                                                    {point.subpoints.map((subpoint, subIndex) => (
-                                                                        <div
-                                                                            key={subIndex}
-                                                                            className="flex items-center gap-2"
-                                                                        >
-                                                                            <input
-                                                                                type="text"
-                                                                                value={subpoint}
-                                                                                placeholder={`Sub Point ${subIndex + 1}`}
-                                                                                onChange={(e) =>
-                                                                                    handleProgramSubPointChange(
-                                                                                        programIndex,
-                                                                                        pointIndex,
-                                                                                        subIndex,
-                                                                                        e.target.value,
-                                                                                    )
-                                                                                }
-                                                                                className="w-full border border-gray-300 p-3 rounded-lg"
-                                                                            />
-                                                                            <button
-                                                                                type="button"
-                                                                                onClick={() =>
-                                                                                    removeProgramSubPoint(
-                                                                                        programIndex,
-                                                                                        pointIndex,
-                                                                                        subIndex,
-                                                                                    )
-                                                                                }
-                                                                                className="text-red-500 hover:text-red-700"
-                                                                            >
-                                                                                <FaTimes className="w-4 h-4" />
-                                                                            </button>
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
-                                                            )}
-                                                        <button
-                                                            type="button"
-                                                            onClick={() =>
-                                                                addProgramSubPoint(programIndex, pointIndex)
-                                                            }
-                                                            className="w-full px-4 py-3 bg-[#2F6288] text-white rounded-lg transition-colors flex items-center justify-center gap-2"
-                                                        >
-                                                            <FaPlus className="w-3 h-3" /> Add Sub Point
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            ))}
-
-                                        <button
-                                            type="button"
-                                            onClick={() => addProgramPoint(programIndex)}
-                                            className="w-full px-4 py-3 bg-[#2F6288] text-white rounded-lg transition-colors flex items-center justify-center gap-2"
-                                        >
-                                            <FaPlus className="w-3 h-3" /> Add Point
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-
-                        <button
-                            onClick={addProgram}
-                            className="w-full px-4 py-3 bg-[#2F6288] text-white rounded-lg transition-colors flex items-center justify-center gap-2"
-                        >
-                            <FaPlus className="w-5 h-5" />
-                            Add Program Day
-                        </button>
-                    </div>
-                </div>
-
-                {/* Key Highlights */}
-                <div className="mb-8">
-                    <h2 className="sm:text-2xl font-bold text-[#2F6288] text-xl mb-6">
-                        Key Highlights{" "}
-                        <span className="bg-[#2F6288] mt-1 w-20 h-1 block"></span>
-                    </h2>
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-md font-semibold text-gray-700 mb-2">
-                                Title
-                            </label>
-                            <input
-                                type="text"
-                                value={formData.keyHighlights.title}
-                                placeholder="Enter title"
-                                onChange={(e) =>
-                                    setFormData((prev) => ({
-                                        ...prev,
-                                        keyHighlights: {
-                                            ...prev.keyHighlights,
-                                            title: e.target.value,
-                                        },
-                                    }))
-                                }
-                                className="text-sm w-full border border-gray-300 p-3 rounded-lg"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-md font-semibold text-gray-700 mb-2">
-                                Points
-                            </label>
-                            <div className="space-y-3">
-                                {formData.keyHighlights.points.map((pt, idx) => (
-                                    <div key={idx} className="flex items-center gap-2">
-                                        <input
-                                            type="text"
-                                            value={pt}
-                                            placeholder={`Point ${idx + 1}`}
-                                            onChange={(e) => {
-                                                const updated = [...formData.keyHighlights.points];
-                                                updated[idx] = e.target.value;
-                                                setFormData((prev) => ({
-                                                    ...prev,
-                                                    keyHighlights: {
-                                                        ...prev.keyHighlights,
-                                                        points: updated,
-                                                    },
-                                                }));
-                                            }}
-                                            className="w-full border border-gray-300 p-3 rounded-lg"
-                                        />
-                                        {formData.keyHighlights.points.length > 1 && (
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    const updated = [...formData.keyHighlights.points];
-                                                    updated.splice(idx, 1);
-                                                    setFormData((prev) => ({
-                                                        ...prev,
-                                                        keyHighlights: {
-                                                            ...prev.keyHighlights,
-                                                            points: updated,
-                                                        },
-                                                    }));
-                                                }}
-                                                className="text-red-500 hover:text-red-700"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    setFormData((prev) => ({
-                                        ...prev,
-                                        keyHighlights: {
-                                            ...prev.keyHighlights,
-                                            points: [...prev.keyHighlights.points, ""],
-                                        },
-                                    }))
-                                }
-                                className="w-full mt-3 px-4 py-3 bg-[#2F6288] text-white rounded-lg transition-colors flex items-center justify-center gap-2"
-                            >
-                                <FaPlus className="w-3 h-3" /> Add Point
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Features (like retreat form) */}
-                <div className="mb-8">
-                    <h2 className="sm:text-2xl font-bold text-[#2F6288] text-xl mb-6">
-                        Features<span className="bg-[#2F6288] mt-1 w-20 h-1 block"></span>
-                    </h2>
-
-                    <div className="space-y-6">
-                        {formData?.features &&
-                            formData?.features.map((feature, index) => (
-                                <div
-                                    key={index}
-                                    className="p-6 bg-gray-50 rounded-lg border border-gray-200 relative"
-                                >
-                                    <button
-                                        onClick={() => removeFeature(index)}
-                                        className="absolute top-4 right-4 text-red-500 hover:text-red-700 p-1"
-                                        title="Delete Feature"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
-
-                                    <div className="mb-4">
-                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                            Feature Icon
-                                        </label>
-                                        {feature.image ? (
-                                            <div className="relative inline-block mb-4">
-                                                <img
-                                                    src={feature?.image}
-                                                    alt="Preview"
-                                                    className="w-32 h-32 object-contain rounded"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        openImageEditor(feature.image, 'feature', index);
-                                                    }}
-                                                    className="absolute top-1 left-1 bg-blue-500 text-white rounded px-2 py-1 hover:bg-blue-600 text-xs"
-                                                    title="Edit Image"
-                                                >
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    onClick={() =>
-                                                        handleFeatureChange(index, "image", null)
-                                                    }
-                                                    className="absolute top-1 right-1 bg-white border border-gray-300 rounded-full p-1 hover:bg-gray-200"
-                                                >
-                                                    <FaTimes size={12} />
-                                                </button>
-                                            </div>
-                                        ) : (
-                                            <div className="mb-4">
-                                                <div
-                                                    className="w-full h-40 border-2 border-dashed border-gray-300 rounded flex flex-col items-center justify-center text-gray-500 cursor-pointer hover:bg-gray-50"
-                                                    onClick={() =>
-                                                        featureInputRefs.current[index]?.click()
-                                                    }
-                                                >
-                                                    <img
-                                                        src="/assets/admin/upload.svg"
-                                                        alt="Upload Icon"
-                                                        className="w-12 h-12 mb-2"
-                                                    />
-                                                    <span>Click to upload feature icon</span>
-                                                    <input
-                                                        type="file"
-                                                        accept="image/*"
-                                                        className="hidden"
-                                                        ref={(el) => {
-                                                            featureInputRefs.current[index] = el;
-                                                        }}
-                                                        onChange={(e) => {
-                                                            const file = e.target.files?.[0];
-                                                            if (file) handleFeatureImageChange(index, file);
-                                                            // allow re-selecting the same file
-                                                            e.target.value = null;
-                                                        }}
-                                                    />
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div className="mb-4">
-                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                            Title
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={feature?.title}
-                                            placeholder="Enter title"
-                                            onChange={(e) =>
-                                                handleFeatureChange(index, "title", e.target.value)
-                                            }
-                                            className="w-full border border-gray-300 p-3 rounded-lg"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                            Description
-                                        </label>
-                                        <textarea
-                                            rows={3}
-                                            value={feature?.shortdescription}
-                                            placeholder="Enter short description"
-                                            onChange={(e) =>
-                                                handleFeatureChange(
-                                                    index,
-                                                    "shortdescription",
-                                                    e.target.value,
-                                                )
-                                            }
-                                            className="w-full border border-gray-300 p-3 rounded-lg"
-                                        />
-                                    </div>
-                                </div>
-                            ))}
-
-                        <button
-                            onClick={addFeature}
-                            className="w-full px-4 py-3 bg-[#2F6288] text-white rounded-lg transition-colors flex items-center justify-center gap-2"
-                        >
-                            <FaPlus className="w-5 h-5" />
-                            Add Feature
-                        </button>
                     </div>
                 </div>
 
