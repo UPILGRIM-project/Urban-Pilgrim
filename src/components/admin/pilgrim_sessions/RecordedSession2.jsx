@@ -603,7 +603,12 @@ export default function RecordedSession2() {
                 editIndex >= 0 &&
                 editIndex < base.length
             ) {
-                base[editIndex] = newCard;
+                // Preserve purchasedUsers so payment records are never wiped on edit
+                const existingPurchasedUsers = base[editIndex]?.purchasedUsers || [];
+                base[editIndex] = {
+                    ...newCard,
+                    purchasedUsers: existingPurchasedUsers,
+                };
                 updatedPrograms = base;
             } else {
                 updatedPrograms = [...base, newCard];

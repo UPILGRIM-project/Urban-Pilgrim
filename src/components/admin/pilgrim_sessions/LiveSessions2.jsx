@@ -1136,7 +1136,8 @@ export default function LiveSession2() {
       let updatedPrograms;
       if (isEditing && editIndex !== null) {
         updatedPrograms = [...allData];
-        updatedPrograms[editIndex] = newCard;
+        const existingPurchasedUsers = updatedPrograms[editIndex]?.purchasedUsers || [];
+        updatedPrograms[editIndex] = { ...newCard, purchasedUsers: existingPurchasedUsers };
       } else {
         updatedPrograms = [...allData, newCard];
       }
