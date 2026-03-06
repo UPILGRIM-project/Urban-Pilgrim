@@ -1,20 +1,16 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
-import ProgramSchedule from "../../components/pilgrim_retreats/ProgramSchedule";
 import Faqs from "../../components/Faqs";
 import PilgrimGuide from "../../components/pilgrim_retreats/Pilgrim_Guide";
 import SEO from "../../components/SEO.jsx";
 import PersondetailsCard from "../../components/persondetails_card";
-import FeatureProgram from "../../components/pilgrim_sessions/FeatureProgram";
 import ImageGallery from "../../components/pilgrim_retreats/ImageGallery.jsx";
 import SubscriptionCard from "../../components/pilgrim_sessions/SubscriptionCard";
-import ProgramSection from "../../components/pilgrim_sessions/ProgramSection";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../../features/cartSlice.js"
 import { showSuccess } from "../../utils/toast.js"
- // import BundlesPopup from "../../components/pilgrim_retreats/BundlesPopup.jsx";
 import { fetchAllEvents } from "../../utils/fetchEvents";
 import { getProgramButtonConfig } from "../../utils/userProgramUtils";
 import DOMPurify from "dompurify";
@@ -297,8 +293,41 @@ export default function ProgramDetails() {
                         );
                     })()}
 
+                    {/* About the Program */}
+                    {(programData?.aboutProgram?.title || programData?.aboutProgram?.shortDescription || (Array.isArray(programData?.aboutProgram?.points) && programData.aboutProgram.points.filter(Boolean).length > 0)) && (
+                        <div className="mt-6 mb-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                            <h3 className="text-2xl font-bold text-[#2F6288]">
+                                {programData.aboutProgram.title || "About the Program"}
+                            </h3>
+                            <span className="block w-16 h-[3px] bg-[#2F6288] mt-1 mb-5 rounded"></span>
+
+                            {programData.aboutProgram.shortDescription && (
+                                <div
+                                    className="text-sm text-gray-700 prose prose-sm max-w-none mb-4
+                                        [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1
+                                        [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:space-y-1
+                                        [&_li]:text-gray-700"
+                                    dangerouslySetInnerHTML={{ __html: programData.aboutProgram.shortDescription }}
+                                />
+                            )}
+
+                            {Array.isArray(programData.aboutProgram.points) && programData.aboutProgram.points.filter(Boolean).length > 0 && (
+                                <ul className="mt-3 space-y-2">
+                                    {programData.aboutProgram.points.filter(Boolean).map((point, i) => (
+                                        <li key={i} className="flex items-start gap-3 text-sm text-gray-700">
+                                            <span className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full bg-[#2F6288] text-white flex items-center justify-center text-xs font-bold">
+                                                {i + 1}
+                                            </span>
+                                            {point}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                    )}
+
                     {programData?.recordedVideo && programData.recordedVideo.length > 0 && (
-                        <div className="flex flex-col mt-4">
+                        <div className="flex flex-col my-4">
                             <p className="text-lg font-semibold text-gray-800 mb-4">
                                 Program Videos
                             </p>
@@ -505,7 +534,6 @@ export default function ProgramDetails() {
                     )}
                 </motion.div>
             </div>
-
         </>
     );
 }
