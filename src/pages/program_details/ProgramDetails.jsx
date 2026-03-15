@@ -27,7 +27,7 @@ export default function ProgramDetails() {
     // const [showBundlesPopup, setShowBundlesPopup] = useState(false);
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    
+
     // Get user programs from Redux
     const userPrograms = useSelector((state) => state.userProgram);
 
@@ -153,17 +153,17 @@ export default function ProgramDetails() {
             </SEO>
 
             {/* Main content */}
-            <div className="xl:max-w-7xl lg:max-w-4xl md:max-w-[700px] mx-auto p-6 bg-gradient-to-b from-[#FAF4F0] to-white rounded-2xl shadow-lg grid gap-6 md:mt-[100px] mt-[80px] px-4">
+            <div className="xl:max-w-7xl lg:max-w-4xl md:max-w-[700px] mx-auto p-6 bg-gradient-to-b from-[#FAF4F0] to-white shadow-lg grid gap-6 md:mt-[100px] mt-[80px] px-4">
                 {/* image gallery */}
                 <div className="space-y-4">
                     <h2 className="md:text-2xl font-bold text-xl">
                         {programData?.recordedProgramCard?.title || "Retreat Title"}
                     </h2>
-                    <ImageGallery 
-                        images={programData?.oneTimeSubscription?.images || []} 
-                        videos={programData?.oneTimeSubscription?.videos || []} 
+                    <ImageGallery
+                        images={programData?.oneTimeSubscription?.images || []}
+                        videos={programData?.oneTimeSubscription?.videos || []}
                     />
-                    
+
                 </div>
 
                 <div className="flex flex-col justify-between">
@@ -226,7 +226,7 @@ export default function ProgramDetails() {
 
                         {programData?.recordedProgramCard?.description && (
                             <div
-                                className="text-sm text-gray-700 prose prose-sm max-w-none mt-4"
+                                className="md:text-sm text-xs text-gray-700 max-w-none mt-4"
                                 dangerouslySetInnerHTML={{
                                     __html: programData.recordedProgramCard.description,
                                 }}
@@ -237,16 +237,16 @@ export default function ProgramDetails() {
                     {(() => {
                         // Get button configuration based on user ownership
                         const buttonConfig = getProgramButtonConfig(
-                            userPrograms, 
-                            programData?.recordedProgramCard?.title, 
+                            userPrograms,
+                            programData?.recordedProgramCard?.title,
                             'program'
                         );
-                        
+
                         if (buttonConfig.action === 'view') {
                             // User already owns this program - show view button
                             return (
                                 <div className="space-y-4 mt-5">
-                                    
+
                                     {/* Program Owned Card */}
                                     <div className="w-full md:inline-block md:max-w-[280px] border border-gray-300 rounded-lg p-4 bg-white">
                                         <div className="flex items-center justify-center gap-3 mb-2">
@@ -256,7 +256,7 @@ export default function ProgramDetails() {
                                             ₹{getNumericPrice()?.toLocaleString() || '0'}
                                         </div>
                                         <p className="text-gray-500 text-sm mb-4 text-center">Purchased</p>
-                                        
+
                                         {/* View Program Button */}
                                         <div className="flex justify-center">
                                             <button
@@ -278,7 +278,7 @@ export default function ProgramDetails() {
                                 </div>
                             );
                         }
-                        
+
                         // User doesn't own the program - show subscription card
                         return (
                             <SubscriptionCard
@@ -295,7 +295,7 @@ export default function ProgramDetails() {
 
                     {/* About the Program */}
                     {(programData?.aboutProgram?.title || programData?.aboutProgram?.shortDescription || (Array.isArray(programData?.aboutProgram?.points) && programData.aboutProgram.points.filter(Boolean).length > 0)) && (
-                        <div className="mt-6 mb-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                        <div className="md:mt-6 mt-4 mb-2 bg-white rounded-2xl border border-gray-100 shadow-sm md:p-6 p-4">
                             <h3 className="text-2xl font-bold text-[#2F6288]">
                                 {programData.aboutProgram.title || "About the Program"}
                             </h3>
@@ -388,12 +388,12 @@ export default function ProgramDetails() {
                                                     {description && (
                                                         <motion.div
                                                             initial={false}
-                                                            animate={{ height: isExpanded ? 'auto' : '2.5rem', opacity: 1 }}
+                                                            animate={{ height: isExpanded ? 'auto' : '2.7rem', opacity: 1 }}
                                                             transition={{ duration: 0.3, ease: 'easeInOut' }}
                                                             className="overflow-hidden"
                                                         >
                                                             <div
-                                                                className={`text-xs text-gray-500 leading-snug [&_*]:text-xs [&_p]:m-0 [&_p]:p-0 [&_ul]:m-0 [&_ol]:m-0 max-w-none ${isExpanded ? '' : 'line-clamp-2'}`}
+                                                                className={`text-sm text-gray-500 leading-snug [&_*]:text-sm [&_p]:m-0 [&_p]:p-0 [&_ul]:m-0 [&_ol]:m-0 max-w-none ${isExpanded ? '' : 'line-clamp-2'}`}
                                                                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(description) }}
                                                             />
                                                         </motion.div>
@@ -406,8 +406,18 @@ export default function ProgramDetails() {
                             </motion.div>
                         </div>
                     )}
+                    
+                    {/* FAQ's */}
+                    {programData?.faqs && programData.faqs.length > 0 && (
+                        <div className="md:mt-6 mt-4 mb-2 bg-white rounded-2xl border border-gray-100 shadow-sm md:p-6 p-4">
+                            <h3 className="text-2xl font-bold text-[#2F6288]">
+                                FAQ's
+                            </h3>
+                            <span className="block w-16 h-[3px] bg-[#2F6288] mb-5 rounded"></span>
 
-                    <Faqs faqs={programData?.faqs} />
+                            <Faqs faqs={programData?.faqs} />
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -463,11 +473,10 @@ export default function ProgramDetails() {
                                     <button
                                         key={i}
                                         onClick={() => setFreeTrialIndex(i)}
-                                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
-                                            i === freeTrialIndex
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${i === freeTrialIndex
                                                 ? 'bg-[#C5703F] text-white border-[#C5703F]'
                                                 : 'border-gray-300 text-gray-600 hover:border-[#C5703F]'
-                                        }`}
+                                            }`}
                                     >
                                         {v.title || `Video ${i + 1}`}
                                     </button>
@@ -481,16 +490,16 @@ export default function ProgramDetails() {
             <PilgrimGuide guides={programData?.guide[0]} />
 
             {/* You may also like */}
-            <div className="max-w-7xl mx-auto p-6 bg-white rounded-2xl grid gap-6 px-4">
-                <h2 className="text-3xl text-[#2F6288] font-bold mb-6">
+            <div className="max-w-7xl mx-auto pt-4 bg-white rounded-2xl grid px-4">
+                <h2 className="text-3xl text-[#2F6288] font-bold ">
                     You May Also Like
                 </h2>
 
-                <motion.div 
-                    className="md:grid flex flex-col mx-auto lg:mx-0 md:grid-cols-2 lg:grid-cols-3 gap-6"  
-                    initial={{ y: 100, opacity: 0 }} 
-                    whileInView={{ y: 0, opacity: 1 }} 
-                    transition={{ duration: 0.5, ease: "easeOut" }} 
+                <motion.div
+                    className="md:grid flex flex-col mx-auto lg:mx-0 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                    initial={{ y: 100, opacity: 0 }}
+                    whileInView={{ y: 0, opacity: 1 }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
                     viewport={{ once: true, amount: 0.1 }}
                 >
                     {allEvents && Object.keys(allEvents).length > 0 ? (
@@ -515,7 +524,7 @@ export default function ProgramDetails() {
                             }
 
                             return pick.map(([id, data]) => (
-                                <PersondetailsCard 
+                                <PersondetailsCard
                                     key={id}
                                     image={data?.upcomingSessionCard?.image || '/assets/default-event.png'}
                                     title={data?.upcomingSessionCard?.title || 'Event'}

@@ -1153,6 +1153,8 @@ async function createWhatsAppReminderDocs({
 }
 
 // Sanitize a single content variable: remove newlines/tabs, collapse spaces, trim
+// NOTE: Twilio Error 21656 means content variables CANNOT contain \n \r \t.
+// Newlines must be baked into the Twilio template body itself, not passed as variables.
 function sanitizeVariable(input) {
     if (input === null || input === undefined) return "";
     let s = String(input);

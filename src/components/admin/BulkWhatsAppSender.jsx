@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import { sendBulkWhatsApp, validatePhoneNumbers } from '../../services/whatsappService';
-import { collectionGroup, getDocs, doc, setDoc } from 'firebase/firestore';
+import { collectionGroup, getDocs } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../../services/firebase';
 
 // Hardcoded template SIDs
-const TEMPLATE_NO_MEDIA   = 'HX12e2193907d8fda6066b2387c3821d81';  // {{1}} name, {{2}} message
-const TEMPLATE_WITH_MEDIA = 'HX122046fd28126270220d4d536c48cf73'; // {{1}} name, {{2}} message, {{3}} media var
-const TEMPLATE_QUICK_REPLY = 'HX700dc966d8e30f63646b30ea183ba535'; // {{1}} name only — users reply YES to opt in
+const TEMPLATE_NO_MEDIA = 'HX12e2193907d8fda6066b2387c3821d81';  // {{1}} name, {{2}} message
+const TEMPLATE_WITH_MEDIA = 'HX8dc32625f3350c8e5db74e3490745727'; // {{1}} name, {{2}} message, {{3}} media var
+// const TEMPLATE_QUICK_REPLY = 'HX700dc966d8e30f63646b30ea183ba535'; // {{1}} name only — users reply YES to opt in
 
 const extractMediaVar = (downloadUrl) => {
     try {
@@ -34,9 +34,7 @@ const BulkWhatsAppSender = () => {
     const [fetchLoading, setFetchLoading] = useState(true);
     const [result, setResult] = useState(null);
     // Campaign type: 'promotional' | 'quickReply'
-    const [campaignType, setCampaignType] = useState('promotional');
     const [message, setMessage] = useState('');
-    const [followUpMessage, setFollowUpMessage] = useState('');
     // Media upload state
     const [mediaFile, setMediaFile] = useState(null);       // File object chosen by admin
     const [mediaPreview, setMediaPreview] = useState(null); // local object URL for preview
@@ -186,6 +184,7 @@ const BulkWhatsAppSender = () => {
         if (allImportedSelected) setSelectedImportedPhones(new Set());
         else setSelectedImportedPhones(new Set(importedUsers.map(u => u.phone)));
     };
+    
     const toggleOneImported = (phone) => {
         setSelectedImportedPhones(prev => {
             const next = new Set(prev);
@@ -243,6 +242,55 @@ const BulkWhatsAppSender = () => {
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
+    const formatForWhatsApp = (text = '') => {
+        let formatted = text;
+
+        // Normalize line breaks
+        formatted = formatted.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+        // Convert dash bullets to WhatsApp bullet
+        formatted = formatted.replace(/^\s*[-–—]\s/gm, '• ');
+
+        // Remove HTML tags if pasted from rich editors
+        formatted = formatted.replace(/<[^>]*>/g, '');
+
+        return formatted.trim();
+    };
+
+    const handleMessageChange = (e) => {
+        setMessage(e.target.value);
+    };
+
+    const handlePaste = (e) => {
+        // Prevent default so we can control exactly what gets inserted
+        e.preventDefault();
+
+        // Try to get plain text first (preserves line breaks from WhatsApp / any source)
+        const pastedText = e.clipboardData.getData('text/plain') || e.clipboardData.getData('text');
+        if (!pastedText) return;
+
+        const cleaned = formatForWhatsApp(pastedText);
+
+        const textarea = e.target;
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+
+        // Build the new value by inserting cleaned text at cursor position
+        const before = message.substring(0, start);
+        const after = message.substring(end);
+        const newValue = before + cleaned + after;
+
+        setMessage(newValue);
+
+        // Restore cursor position after React re-renders
+        const cursorPos = start + cleaned.length;
+        requestAnimationFrame(() => {
+            textarea.selectionStart = cursorPos;
+            textarea.selectionEnd = cursorPos;
+            textarea.focus();
+        });
+    };
+
     const sendMessages = async () => {
         setLoading(true);
         setResult(null);
@@ -257,28 +305,9 @@ const BulkWhatsAppSender = () => {
             if (invalid.length > 0) console.warn('Invalid numbers:', invalid);
             if (valid.length === 0) throw new Error('No valid phone numbers found');
 
-            if (campaignType === 'quickReply') {
-                // ── Quick Reply flow ──────────────────────────────────────────
-                // 1. Save the follow-up message to Firestore so the webhook can read it
-                if (!followUpMessage.trim()) throw new Error('Please enter the follow-up message to send after users reply YES.');
-                await setDoc(doc(db, 'admin', 'whatsapp_settings'), {
-                    followUpMessage: followUpMessage.trim(),
-                    updatedAt: new Date().toISOString()
-                }, { merge: true });
-
-                // 2. Send Quick Reply template — only {{1}} = name
-                const res = await sendBulkWhatsApp(valid, { contentVariables: {} }, {
-                    useTemplate: true,
-                    contentSid: TEMPLATE_QUICK_REPLY
-                });
-                setResult({
-                    type: 'success',
-                    message: `✅ Quick Reply sent: ${res.success}, ❌ Failed: ${res.failed}, ⚠️ Invalid: ${invalid.length}`,
-                    details: res
-                });
-            } else if (!mediaVar) {
+            if (!mediaVar) {
                 // No media → without_media template ({{1}} name, {{2}} message)
-                const messageText = message || 'Welcome to Urban Pilgrim! 🧘‍♀️';
+                const messageText = formatForWhatsApp(message || 'Welcome to Urban Pilgrim!');
                 const res = await sendBulkWhatsApp(valid, messageText, {
                     useTemplate: true,
                     contentSid: TEMPLATE_NO_MEDIA
@@ -292,7 +321,7 @@ const BulkWhatsAppSender = () => {
                 // Media uploaded → with_media template ({{1}} name, {{2}} message, {{3}} media var)
                 const messageDataObj = {
                     contentVariables: {
-                        '2': message || '',
+                        '2': formatForWhatsApp(message || 'Welcome to Urban Pilgrim!'),
                         '3': mediaVar
                     }
                 };
@@ -321,56 +350,19 @@ const BulkWhatsAppSender = () => {
         <div className="p-6 max-w-4xl mx-auto">
             <h2 className="text-2xl font-bold mb-6">Bulk WhatsApp Sender</h2>
 
-            {/* Campaign Type */}
-            <div className="mb-5">
-                <label className="block mb-2 font-semibold">Campaign Type</label>
-                <div className="flex md:flex-row flex-col gap-2">
-                    {[
-                        { id: 'promotional', label: 'Promotional', desc: 'Send message directly (with or without media)' },
-                        { id: 'quickReply',  label: 'Quick Reply', desc: 'Send opt-in ping → reply YES → you send details' },
-                    ].map(({ id, label, desc }) => (
-                        <button key={id} type="button"
-                            onClick={() => setCampaignType(id)}
-                            className={`flex-1 px-4 py-3 rounded-xl border text-left transition-colors ${
-                                campaignType === id
-                                    ? 'bg-[#C5703F] text-white border-[#C5703F]'
-                                    : 'bg-white text-gray-600 border-gray-300 hover:border-[#C5703F]'
-                            }`}
-                        >
-                            <span className="font-semibold text-sm block">{label}</span>
-                            <span className={`text-xs ${campaignType === id ? 'text-orange-100' : 'text-gray-400'}`}>{desc}</span>
-                        </button>
-                    ))}
-                </div>
+            {/* message */}
+            <div className="mb-4">
+                <label className="block mb-2 font-semibold">Message</label>
+                <textarea
+                    className="w-full p-3 border rounded-lg whitespace-pre-wrap"
+                    rows="8"
+                    value={message}
+                    onChange={handleMessageChange}
+                    placeholder="Welcome to Urban Pilgrim!"
+                    onPaste={handlePaste}
+                    style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
+                />
             </div>
-
-            {campaignType === 'quickReply' ? (
-                /* ── Quick Reply: follow-up message only ── */
-                <div className="mb-4 border rounded-xl p-4 bg-amber-50 border-amber-200">
-                    <label className="block mb-1.5 font-semibold text-sm">Follow-up message </label>
-                    <textarea
-                        className="w-full p-3 border border-amber-300 rounded-lg text-sm bg-white"
-                        rows="4"
-                        value={followUpMessage}
-                        onChange={(e) => setFollowUpMessage(e.target.value)}
-                        placeholder="e.g. Thank you! Here are the details of our upcoming retreat: https://urbanpilgrim.in/retreat — Urban Pilgrim Team"
-                    />
-                    <p className="mt-1.5 text-xs text-amber-600">This message is saved to Firestore and sent automatically when a user replies YES.</p>
-                </div>
-            ) : (
-                /* ── Promotional: message + media ── */
-                <>
-                    {/* Message Input */}
-                    <div className="mb-4">
-                        <label className="block mb-2 font-semibold">Message</label>
-                        <textarea
-                            className="w-full p-3 border rounded-lg"
-                            rows="3"
-                            value={message}
-                            onChange={(e) => setMessage(e.target.value)}
-                            placeholder="Welcome to Urban Pilgrim!"
-                        />
-                    </div>
 
             {/* Media upload */}
             <div className="mb-6 border rounded-xl p-4 bg-gray-50">
@@ -445,9 +437,6 @@ const BulkWhatsAppSender = () => {
                 />
             </div>
 
-                </>
-            )}
-
             {/* Recipients — mode toggle + list */}
             <div className="mb-6">
                 {/* Mode tabs */}
@@ -457,11 +446,10 @@ const BulkWhatsAppSender = () => {
                             key={mode}
                             type="button"
                             onClick={() => setRecipientMode(mode)}
-                            className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-colors ${
-                                recipientMode === mode
-                                    ? 'bg-[#C5703F] text-white border-[#C5703F]'
-                                    : 'bg-white text-gray-600 border-gray-300 hover:border-[#C5703F] hover:text-[#C5703F]'
-                            }`}
+                            className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-colors ${recipientMode === mode
+                                ? 'bg-[#C5703F] text-white border-[#C5703F]'
+                                : 'bg-white text-gray-600 border-gray-300 hover:border-[#C5703F] hover:text-[#C5703F]'
+                                }`}
                         >
                             {mode === 'database' ? 'Database Users' : 'Import from Excel'}
                         </button>
@@ -506,9 +494,8 @@ const BulkWhatsAppSender = () => {
                                         style={{ gridTemplateColumns: '32px 32px 1fr 1fr 1fr' }}>
                                         <button
                                             onClick={toggleAll}
-                                            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                                                allFilteredSelected ? 'bg-green-500 border-green-500' : 'border-gray-400 hover:border-green-400'
-                                            }`}
+                                            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${allFilteredSelected ? 'bg-green-500 border-green-500' : 'border-gray-400 hover:border-green-400'
+                                                }`}
                                             title={allFilteredSelected ? 'Deselect all' : 'Select all'}
                                         >
                                             {allFilteredSelected && <span className="w-2 h-2 rounded-full bg-white block" />}
@@ -520,16 +507,14 @@ const BulkWhatsAppSender = () => {
                                             const isSelected = selectedPhones.has(u.phone);
                                             return (
                                                 <div key={u.phone}
-                                                    className={`grid px-4 py-2.5 text-sm cursor-pointer ${
-                                                        isSelected ? 'bg-green-50 hover:bg-green-100' : 'hover:bg-gray-50'
-                                                    }`}
+                                                    className={`grid px-4 py-2.5 text-sm cursor-pointer ${isSelected ? 'bg-green-50 hover:bg-green-100' : 'hover:bg-gray-50'
+                                                        }`}
                                                     style={{ gridTemplateColumns: '32px 32px 1fr 1fr 1fr' }}
                                                     onClick={() => toggleOne(u.phone)}
                                                 >
                                                     <span className="flex items-center">
-                                                        <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                                                            isSelected ? 'bg-green-500 border-green-500' : 'border-gray-300'
-                                                        }`}>
+                                                        <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${isSelected ? 'bg-green-500 border-green-500' : 'border-gray-300'
+                                                            }`}>
                                                             {isSelected && <span className="w-2 h-2 rounded-full bg-white block" />}
                                                         </span>
                                                     </span>
@@ -586,9 +571,8 @@ const BulkWhatsAppSender = () => {
                                     style={{ gridTemplateColumns: '32px 32px 1fr 1fr' }}>
                                     <button
                                         onClick={toggleAllImported}
-                                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                                            allImportedSelected ? 'bg-green-500 border-green-500' : 'border-gray-400 hover:border-green-400'
-                                        }`}
+                                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${allImportedSelected ? 'bg-green-500 border-green-500' : 'border-gray-400 hover:border-green-400'
+                                            }`}
                                         title={allImportedSelected ? 'Deselect all' : 'Select all'}
                                     >
                                         {allImportedSelected && <span className="w-2 h-2 rounded-full bg-white block" />}
@@ -600,16 +584,14 @@ const BulkWhatsAppSender = () => {
                                         const isSelected = selectedImportedPhones.has(u.phone);
                                         return (
                                             <div key={u.phone}
-                                                className={`grid px-4 py-2.5 text-sm cursor-pointer ${
-                                                    isSelected ? 'bg-green-50 hover:bg-green-100' : 'hover:bg-gray-50'
-                                                }`}
+                                                className={`grid px-4 py-2.5 text-sm cursor-pointer ${isSelected ? 'bg-green-50 hover:bg-green-100' : 'hover:bg-gray-50'
+                                                    }`}
                                                 style={{ gridTemplateColumns: '32px 32px 1fr 1fr' }}
                                                 onClick={() => toggleOneImported(u.phone)}
                                             >
                                                 <span className="flex items-center">
-                                                    <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                                                        isSelected ? 'bg-green-500 border-green-500' : 'border-gray-300'
-                                                    }`}>
+                                                    <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${isSelected ? 'bg-green-500 border-green-500' : 'border-gray-300'
+                                                        }`}>
                                                         {isSelected && <span className="w-2 h-2 rounded-full bg-white block" />}
                                                     </span>
                                                 </span>
@@ -635,25 +617,23 @@ const BulkWhatsAppSender = () => {
                     onClick={sendMessages}
                     disabled={
                         loading || uploadLoading ||
-                        (campaignType === 'quickReply' && !followUpMessage.trim()) ||
                         (recipientMode === 'database' && (fetchLoading || users.length === 0)) ||
                         (recipientMode === 'excel' && importedUsers.length === 0)
                     }
                     className="bg-[#C5703F] text-white px-6 py-3 rounded-lg hover:bg-green-700 disabled:opacity-50"
                 >
-                    {loading ? 'Sending…'
-                        : uploadLoading ? 'Uploading media…'
-                        : campaignType === 'quickReply'
-                            ? recipientMode === 'excel'
-                                ? `Send Quick Reply to ${selectedImportedPhones.size || importedUsers.length}`
-                                : `Send Quick Reply to ${selectedPhones.size || users.length} User${(selectedPhones.size || users.length) !== 1 ? 's' : ''}`
-                        : recipientMode === 'excel'
-                            ? selectedImportedPhones.size > 0
-                                ? `Send to ${selectedImportedPhones.size} Selected`
-                                : `Send to All ${importedUsers.length} Imported`
-                            : selectedPhones.size > 0
-                                ? `Send to ${selectedPhones.size} Selected User${selectedPhones.size !== 1 ? 's' : ''}`
-                                : `Send to All ${users.length} User${users.length !== 1 ? 's' : ''}`
+                    {
+                        loading
+                            ? 'Sending…'
+                            : uploadLoading
+                                ? 'Uploading media…'
+                                : recipientMode === 'excel'
+                                    ? selectedImportedPhones.size > 0
+                                        ? `Send to ${selectedImportedPhones.size} Selected`
+                                        : `Send to All ${importedUsers.length} Imported`
+                                    : selectedPhones.size > 0
+                                        ? `Send to ${selectedPhones.size} Selected User${selectedPhones.size !== 1 ? 's' : ''}`
+                                        : `Send to All ${users.length} User${users.length !== 1 ? 's' : ''}`
                     }
                 </button>
             </div>

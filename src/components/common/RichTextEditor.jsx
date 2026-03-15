@@ -20,27 +20,36 @@ export default function RichTextEditor({ value = '', onChange, placeholder = 'En
         editorRef.current.focus();
     };
 
+    // Helper to wrap content in font-size:16px if not already
+    const ensureFontSize16 = (html) => {
+        // If already wrapped, skip
+        if (/^<div[^>]*style=["'][^"']*font-size\s*:\s*16px/i.test(html)) return html;
+        // Otherwise, wrap
+        return `<div style="font-size:16px;">${html}</div>`;
+    };
+
     // Handle content change
     const handleInput = () => {
         if (editorRef.current) {
-            const content = editorRef.current.innerHTML;
+            let content = editorRef.current.innerHTML;
+            content = ensureFontSize16(content);
             onChange(content);
         }
     };
 
-    // Handle paste - strip unwanted formatting but keep basic formatting
-    // Handle paste: preserve formatting, remove unsafe HTML
+    // Handle paste: preserve formatting, remove unsafe HTML, and force font-size:16px
     const handlePaste = (e) => {
         e.preventDefault();
         let pastedData = e.clipboardData.getData('text/html') 
                         || e.clipboardData.getData('text/plain');
 
         // Sanitize while keeping formatting (Word styles included)
-        const cleanHTML = DOMPurify.sanitize(pastedData, {
+        let cleanHTML = DOMPurify.sanitize(pastedData, {
             ALLOWED_ATTR: ['style', 'class'], // Keep Word styling
             KEEP_CONTENT: true
         });
-
+        // Force font-size:16px
+        cleanHTML = `<div style="font-size:16px;">${cleanHTML}</div>`;
         document.execCommand('insertHTML', false, cleanHTML);
     };
 
