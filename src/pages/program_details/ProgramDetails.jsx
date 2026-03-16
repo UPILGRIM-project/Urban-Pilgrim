@@ -20,6 +20,7 @@ import { db } from "../../services/firebase";
 export default function ProgramDetails() {
     const params = useParams();
     const [programData, setProgramData] = useState(null);
+    const [loading, setLoading] = useState(true);
     const programId = params.programId;
     const [persons, setPersons] = useState(1);
     const [freeTrialOpen, setFreeTrialOpen] = useState(false);
@@ -65,6 +66,7 @@ export default function ProgramDetails() {
     useEffect(() => {
         const fetchRecordedProgram = async () => {
             try {
+                setLoading(true);
                 const recordedRef = doc(db, 'pilgrim_sessions/pilgrim_sessions/sessions/recordedSession');
                 const snapshot = await getDoc(recordedRef);
 
@@ -80,6 +82,8 @@ export default function ProgramDetails() {
                 }
             } catch (error) {
                 console.error("Error fetching recorded program:", error);
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -131,8 +135,78 @@ export default function ProgramDetails() {
 
     return (
         <>
-            <SEO
-                title={`${programData?.recordedProgramCard?.title} | Urban Pilgrim`}
+            {loading ? (
+                // Skeleton Loader
+                <>
+                    <SEO
+                        title="Loading Program Details | Urban Pilgrim"
+                        description="Loading recorded program details..."
+                        keywords="recorded program, wellness, urban pilgrim"
+                        canonicalUrl={`/program_details?id=${programId}`}
+                        ogType="product"
+                    />
+                    
+                    {/* Main content skeleton */}
+                    <div className="xl:max-w-7xl lg:max-w-4xl md:max-w-[700px] mx-auto p-6 bg-gradient-to-b from-[#FAF4F0] to-white shadow-lg grid gap-6 md:mt-[100px] mt-[80px] px-4">
+                        {/* Image gallery skeleton */}
+                        <div className="space-y-4">
+                            <div className="h-8 bg-gray-300 rounded w-64 animate-pulse"></div>
+                            <div className="aspect-video bg-gray-300 rounded-lg animate-pulse"></div>
+                        </div>
+
+                        <div className="flex flex-col justify-between">
+                            {/* Program details skeleton */}
+                            <div className="space-y-4 text-gray-700">
+                                <div className="h-6 bg-gray-300 rounded w-48 animate-pulse"></div>
+                                <div className="h-5 bg-gray-300 rounded w-32 animate-pulse"></div>
+                                <div className="h-5 bg-gray-300 rounded w-40 animate-pulse"></div>
+                                <div className="space-y-2">
+                                    <div className="h-4 bg-gray-300 rounded w-full animate-pulse"></div>
+                                    <div className="h-4 bg-gray-300 rounded w-5/6 animate-pulse"></div>
+                                    <div className="h-4 bg-gray-300 rounded w-4/5 animate-pulse"></div>
+                                </div>
+                            </div>
+
+                            {/* Subscription card skeleton */}
+                            <div className="mt-6 p-6 bg-white rounded-lg shadow-sm">
+                                <div className="h-6 bg-gray-300 rounded w-32 mb-4 animate-pulse"></div>
+                                <div className="h-10 bg-gray-300 rounded w-full animate-pulse"></div>
+                            </div>
+
+                            {/* About program skeleton */}
+                            <div className="mt-6 p-6 bg-white rounded-lg shadow-sm">
+                                <div className="h-6 bg-gray-300 rounded w-40 mb-4 animate-pulse"></div>
+                                <div className="space-y-2">
+                                    <div className="h-4 bg-gray-300 rounded w-full animate-pulse"></div>
+                                    <div className="h-4 bg-gray-300 rounded w-3/4 animate-pulse"></div>
+                                </div>
+                            </div>
+
+                            {/* Videos skeleton */}
+                            <div className="mt-6">
+                                <div className="h-6 bg-gray-300 rounded w-32 mb-4 animate-pulse"></div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {[...Array(4)].map((_, i) => (
+                                        <div key={i} className="bg-white rounded-lg shadow-sm p-4">
+                                            <div className="flex gap-3">
+                                                <div className="w-20 h-16 bg-gray-300 rounded animate-pulse"></div>
+                                                <div className="flex-1 space-y-2">
+                                                    <div className="h-4 bg-gray-300 rounded w-3/4 animate-pulse"></div>
+                                                    <div className="h-3 bg-gray-300 rounded w-1/2 animate-pulse"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            ) : programData ? (
+                // Full content when data is loaded
+                <>
+                    <SEO
+                        title={`${programData?.recordedProgramCard?.title} | Urban Pilgrim`}
                 description={programData?.recordedProgramCard?.description}
                 keywords={`${programData?.recordedProgramCard?.instructor}, wellness program, ${programData?.recordedProgramCard?.duration}, urban pilgrim, self-discovery, meditation, yoga`}
                 canonicalUrl={`/program_details?id=${encodeURIComponent(
@@ -357,8 +431,8 @@ export default function ProgramDetails() {
                                     return programData.recordedVideo.map((video, index) => {
                                         const src = video?.src || video?.url || video?.video || video?.link || '';
                                         const ytId = src.match(/[?&]v=([^&]+)/)?.[1]
-                                            || src.match(/youtu\.be\/([^?&\/]+)/)?.[1]
-                                            || src.match(/embed\/([^?&\/]+)/)?.[1];
+                                            || src.match(/youtu\.be\/([^?&/]+)/)?.[1]
+                                            || src.match(/embed\/([^?&/]+)/)?.[1];
                                         const thumbnail = video?.thumbnail || video?.image || video?.thumb
                                             || (ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : null);
                                         const title = video?.title || video?.name || `Video ${index + 1}`;
@@ -558,6 +632,28 @@ export default function ProgramDetails() {
                     )}
                 </motion.div>
             </div>
+        </>
+            ) : (
+                // Program not found
+                <>
+                    <SEO
+                        title="Program Not Found | Urban Pilgrim"
+                        description="The requested recorded program could not be found."
+                        keywords="recorded program, urban pilgrim"
+                        canonicalUrl={`/program_details?id=${programId}`}
+                    />
+                    <div className="flex flex-col items-center justify-center bg-gradient-to-b from-[#FAF4F0] to-white px-4 pb-4 max-w-7xl mx-auto z-10 relative mt-[100px] min-h-[50vh]">
+                        <div className="text-center">
+                            <div className="text-6xl mb-4">🎥</div>
+                            <h1 className="text-2xl font-bold text-[#2F6288] mb-2">Program Not Found</h1>
+                            <p className="text-gray-600 mb-6">The recorded program you're looking for doesn't exist or has been removed.</p>
+                            <a href="/pilgrim_sessions" className="inline-block px-6 py-3 bg-[#2F6288] text-white rounded-lg hover:bg-[#224b66] transition-colors">
+                                Browse Programs
+                            </a>
+                        </div>
+                    </div>
+                </>
+            )}
         </>
     );
 }

@@ -57,76 +57,147 @@ const SessionDescription = () => {
 
     return (
         <div className=" bg-gradient-to-b from-[#FAF4F0] to-white mt-[100px]">
-            <SEO
-                title={`${programCard?.title || "Recorded Program"} | Urban Pilgrim`}
-                description={programCard?.description || "Watch recorded program sessions designed to help you on your wellness journey."}
-                keywords={`recorded program, wellness videos, ${programCard?.category}, ${programCard?.title}, urban pilgrim`}
-                canonicalUrl={`/program/${programId}/slots`}
-                ogType="video"
-            />
-            <div className="relative w-full ">
-                <img
-                    src="/retreats.svg"
-                    alt="Program Header"
-                    className="absolute inset-0 w-full h-full object-cover z-0 border-b-2 border-[#ffffff33]"
-                />
-                <div className="relative z-10 px-6 pt-10 pb-4 flex justify-between max-w-7xl mx-auto">
-                    <div className="flex flex-col gap-2">
-                        <p className="text-3xl text-[#2F6288] font-bold">
-                            {programCard?.title || "Recorded Program"} 
-                            <span className="bg-[#2F6288] mt-4 w-1/3 min-w-20 h-1 block"></span>
-                        </p>
-                        {programCard?.category && (
-                            <span className="text-sm bg-[#2F6288] text-white px-3 py-1 rounded-full w-fit">
-                                {programCard.category}
-                            </span>
-                        )}
-                        {programCard?.days && (
-                            <p className="text-lg text-[#2F6288] font-medium">
-                                {programCard.days} Days Program • {programCard?.videos || videos.length} Videos
-                            </p>
-                        )}
+            {loading ? (
+                // Skeleton Loader
+                <>
+                    <SEO
+                        title="Loading Recorded Program | Urban Pilgrim"
+                        description="Loading recorded program details..."
+                        keywords="recorded program, wellness videos, urban pilgrim"
+                        canonicalUrl={`/program/${programId}/slots`}
+                        ogType="video"
+                    />
+                    <div className="relative w-full">
+                        <img
+                            src="/retreats.svg"
+                            alt="Program Header"
+                            className="absolute inset-0 w-full h-full object-cover z-0 border-b-2 border-[#ffffff33]"
+                        />
+                        <div className="relative z-10 px-6 pt-10 pb-4 flex justify-between max-w-7xl mx-auto">
+                            <div className="flex flex-col gap-2">
+                                <div className="h-8 bg-gray-300 rounded w-64 animate-pulse"></div>
+                                <div className="h-6 bg-gray-300 rounded w-32 animate-pulse"></div>
+                                <div className="h-6 bg-gray-300 rounded w-48 animate-pulse"></div>
+                            </div>
+                        </div>
+                        <div className="bg-gradient-to-b from-white/10 via-white/60 to-[#FAF4F0] absolute -bottom-4 z-8 h-24 w-full"></div>
                     </div>
-                </div>
-                <div className="bg-gradient-to-b from-white/10 via-white/60 to-[#FAF4F0] absolute -bottom-4 z-8 h-24 w-full"></div>
-            </div>
-            
-            <div className="flex flex-col items-center justify-center bg-gradient-to-b from-[#FAF4F0] to-white px-4 pb-4 max-w-7xl mx-auto z-10 relative">
-                {loading ? (
-                    <div className="flex justify-center items-center py-12">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2F6288]"></div>
-                        <span className="ml-3 text-gray-600">Loading videos...</span>
-                    </div>
-                ) : (
-                    <div className="w-full">
-                        {/* Program Description */}
-                        {programCard?.description && (
+                    
+                    <div className="flex flex-col items-center justify-center bg-gradient-to-b from-[#FAF4F0] to-white px-4 pb-4 max-w-7xl mx-auto z-10 relative">
+                        <div className="w-full space-y-6">
+                            {/* Skeleton for program description */}
                             <div className="mb-8 p-6 bg-white rounded-lg shadow-sm">
-                                <h2 className="text-xl font-semibold text-[#2F6288] mb-3">About This Program</h2>
-                                <div className="text-gray-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(programCard.description) }} />
-                                {programCard?.price && (
-                                    <div className="mt-4 flex items-center gap-4">
-                                        <span className="text-2xl font-bold text-[#2F6288]">₹{Number(programCard.price).toLocaleString()}</span>
-                                        {programCard?.totalprice && programCard.totalprice !== programCard.price && (
-                                            <span className="text-lg text-gray-500 line-through">₹{Number(programCard.totalprice).toLocaleString()}</span>
-                                        )}
+                                <div className="h-6 bg-gray-300 rounded w-48 mb-3 animate-pulse"></div>
+                                <div className="space-y-2">
+                                    <div className="h-4 bg-gray-300 rounded w-full animate-pulse"></div>
+                                    <div className="h-4 bg-gray-300 rounded w-5/6 animate-pulse"></div>
+                                    <div className="h-4 bg-gray-300 rounded w-4/5 animate-pulse"></div>
+                                </div>
+                            </div>
+                            
+                            {/* Skeleton for videos */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {[...Array(6)].map((_, i) => (
+                                    <div key={i} className="bg-white rounded-lg shadow-sm overflow-hidden">
+                                        <div className="aspect-video bg-gray-300 animate-pulse"></div>
+                                        <div className="p-4 space-y-2">
+                                            <div className="h-4 bg-gray-300 rounded w-3/4 animate-pulse"></div>
+                                            <div className="h-3 bg-gray-300 rounded w-1/2 animate-pulse"></div>
+                                        </div>
                                     </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </>
+            ) : programData ? (
+                // Full content when data is loaded
+                <>
+                    <SEO
+                        title={`${programCard?.title || "Recorded Program"} | Urban Pilgrim`}
+                        description={programCard?.description || "Watch recorded program sessions designed to help you on your wellness journey."}
+                        keywords={`recorded program, wellness videos, ${programCard?.category}, ${programCard?.title}, urban pilgrim`}
+                        canonicalUrl={`/program/${programId}/slots`}
+                        ogType="video"
+                    />
+                    <div className="relative w-full ">
+                        <img
+                            src="/retreats.svg"
+                            alt="Program Header"
+                            className="absolute inset-0 w-full h-full object-cover z-0 border-b-2 border-[#ffffff33]"
+                        />
+                        <div className="relative z-10 px-6 pt-10 pb-4 flex justify-between max-w-7xl mx-auto">
+                            <div className="flex flex-col gap-2">
+                                <p className="text-3xl text-[#2F6288] font-bold">
+                                    {programCard?.title || "Recorded Program"} 
+                                    <span className="bg-[#2F6288] mt-4 w-1/3 min-w-20 h-1 block"></span>
+                                </p>
+                                {programCard?.category && (
+                                    <span className="text-sm bg-[#2F6288] text-white px-3 py-1 rounded-full w-fit">
+                                        {programCard.category}
+                                    </span>
+                                )}
+                                {programCard?.days && (
+                                    <p className="text-lg text-[#2F6288] font-medium">
+                                        {programCard.days} Days Program • {programCard?.videos || videos.length} Videos
+                                    </p>
                                 )}
                             </div>
-                        )}
-
-                        {/* Videos Section */}
-                        {videos.length === 0 ? (
-                            <div className="text-center py-12">
-                                <p className="text-gray-600 text-lg font-medium">No videos available</p>
-                                <p className="text-gray-500 text-sm mt-1">Check back later for new content</p>
-                            </div>
-                        ) : (
-                            <YouTubeVideoPlaylist videos={videos} programData={programData} />
-                        )}
+                        </div>
+                        <div className="bg-gradient-to-b from-white/10 via-white/60 to-[#FAF4F0] absolute -bottom-4 z-8 h-24 w-full"></div>
                     </div>
-                )}
-            </div>
+                    
+                    <div className="flex flex-col items-center justify-center bg-gradient-to-b from-[#FAF4F0] to-white px-4 pb-4 max-w-7xl mx-auto z-10 relative">
+                        <div className="w-full">
+                            {/* Program Description */}
+                            {programCard?.description && (
+                                <div className="mb-8 p-6 bg-white rounded-lg shadow-sm">
+                                    <h2 className="text-xl font-semibold text-[#2F6288] mb-3">About This Program</h2>
+                                    <div className="text-gray-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(programCard.description) }} />
+                                    {programCard?.price && (
+                                        <div className="mt-4 flex items-center gap-4">
+                                            <span className="text-2xl font-bold text-[#2F6288]">₹{Number(programCard.price).toLocaleString()}</span>
+                                            {programCard?.totalprice && programCard.totalprice !== programCard.price && (
+                                                <span className="text-lg text-gray-500 line-through">₹{Number(programCard.totalprice).toLocaleString()}</span>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Videos Section */}
+                            {videos.length === 0 ? (
+                                <div className="text-center py-12">
+                                    <p className="text-gray-600 text-lg font-medium">No videos available</p>
+                                    <p className="text-gray-500 text-sm mt-1">Check back later for new content</p>
+                                </div>
+                            ) : (
+                                <YouTubeVideoPlaylist videos={videos} programData={programData} />
+                            )}
+                        </div>
+                    </div>
+                </>
+            ) : (
+                // Program not found
+                <>
+                    <SEO
+                        title="Program Not Found | Urban Pilgrim"
+                        description="The requested recorded program could not be found."
+                        keywords="recorded program, urban pilgrim"
+                        canonicalUrl={`/program/${programId}/slots`}
+                    />
+                    <div className="flex flex-col items-center justify-center bg-gradient-to-b from-[#FAF4F0] to-white px-4 pb-4 max-w-7xl mx-auto z-10 relative mt-[100px] min-h-[50vh]">
+                        <div className="text-center">
+                            <div className="text-6xl mb-4">📹</div>
+                            <h1 className="text-2xl font-bold text-[#2F6288] mb-2">Program Not Found</h1>
+                            <p className="text-gray-600 mb-6">The recorded program you're looking for doesn't exist or has been removed.</p>
+                            <a href="/pilgrim_sessions" className="inline-block px-6 py-3 bg-[#2F6288] text-white rounded-lg hover:bg-[#224b66] transition-colors">
+                                Browse Programs
+                            </a>
+                        </div>
+                    </div>
+                </>
+            )}
         </div>
     )
 }
