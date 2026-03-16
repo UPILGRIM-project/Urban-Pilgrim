@@ -1,33 +1,73 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/urban_pilgrim_logo.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Urban Pilgrim - Authentic wellness experiences with trusted guides. Book yoga, meditation, retreats, and holistic wellness sessions." />
-    <meta name="keywords" content="urban pilgrim, wellness, yoga, meditation, retreats, sessions, holistic health, mindfulness" />
-    <meta name="author" content="Urban Pilgrim" />
-    <meta name="theme-color" content="#FAF4F0" />
-    
-    <!-- Default Open Graph tags (will be replaced by React Helmet on specific pages) -->
-    <meta property="og:title" content="Urban Pilgrim | Wellness Events & Retreats" />
-    <meta property="og:description" content="Discover authentic wellness experiences with Urban Pilgrim. Book yoga, meditation, and holistic wellness sessions with trusted guides." />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://urban-pilgrim-coral.vercel.app" />
-    <meta property="og:image" content="https://urban-pilgrim-coral.vercel.app/urban_pilgrim_logo.png" />
-    
-    <!-- Twitter Card data (will be replaced by React Helmet on specific pages) -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Urban Pilgrim | Wellness Events & Retreats" />
-    <meta name="twitter:description" content="Discover authentic wellness experiences with Urban Pilgrim." />
-    <meta name="twitter:image" content="https://urban-pilgrim-coral.vercel.app/urban_pilgrim_logo.png" />
-    
-    <link rel="canonical" href="https://urban-pilgrim-coral.vercel.app" />
-    <title>Urban Pilgrim</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-  </body>
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" type="image/png" href="/urban_pilgrim_logo.png" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content="Urban Pilgrim - Authentic wellness experiences with trusted guides. Book yoga, meditation, retreats, and holistic wellness sessions." />
+        <meta name="keywords" content="urban pilgrim, wellness, yoga, meditation, retreats, sessions, holistic health, mindfulness" />
+        <meta name="author" content="Urban Pilgrim" />
+        <meta name="theme-color" content="#FAF4F0" />
+
+        <!-- Default Open Graph tags (will be replaced by React Helmet on specific pages) -->
+        <meta property="og:title" content="Urban Pilgrim | Wellness Events & Retreats" />
+        <meta property="og:description" content="Discover authentic wellness experiences with Urban Pilgrim. Book yoga, meditation, and holistic wellness sessions with trusted guides." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://urban-pilgrim-coral.vercel.app" />
+        <meta property="og:image" content="https://urban-pilgrim-coral.vercel.app/urban_pilgrim_logo.png" />
+
+        <!-- Twitter Card data (will be replaced by React Helmet on specific pages) -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Urban Pilgrim | Wellness Events & Retreats" />
+        <meta name="twitter:description" content="Discover authentic wellness experiences with Urban Pilgrim." />
+        <meta name="twitter:image" content="https://urban-pilgrim-coral.vercel.app/urban_pilgrim_logo.png" />
+
+        <link rel="canonical" href="https://urban-pilgrim-coral.vercel.app" />
+        <title>Urban Pilgrim</title>
+        
+        <!-- Meta Pixel Code -->
+        <script>
+            !(function (f, b, e, v, n, t, s) {
+                if (f.fbq) return;
+                n = f.fbq = function () {
+                    n.callMethod
+                        ? n.callMethod.apply(n, arguments)
+                        : n.queue.push(arguments);
+                };
+                if (!f._fbq) f._fbq = n;
+                n.push = n;
+                n.loaded = !0;
+                n.version = "2.0";
+                n.queue = [];
+                t = b.createElement(e);
+                t.async = !0;
+                t.src = v;
+                s = b.getElementsByTagName(e)[0];
+                s.parentNode.insertBefore(t, s);
+            })(
+                window,
+                document,
+                "script",
+                "https://connect.facebook.net/en_US/fbevents.js",
+            );
+            fbq("init", "25798893456478047");
+            fbq("track", "PageView");
+        </script>
+        <!-- End Meta Pixel Code -->
+    </head>
+    <body>
+        <div id="root"></div>
+        <script type="module" src="/src/main.jsx"></script>
+        
+        <noscript>
+          <img
+                height="1"
+                width="1"
+                style="display: none"
+                src="https://www.facebook.com/tr?id=25798893456478047&ev=PageView&noscript=1"
+          />
+        </noscript>
+        
+        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    </body>
 </html>
