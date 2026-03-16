@@ -14,6 +14,8 @@ import { showSuccess } from "../../utils/toast.js"
 import { fetchAllEvents } from "../../utils/fetchEvents";
 import { getProgramButtonConfig } from "../../utils/userProgramUtils";
 import DOMPurify from "dompurify";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../services/firebase";
 
 export default function ProgramDetails() {
     const params = useParams();
@@ -35,7 +37,6 @@ export default function ProgramDetails() {
         window.scrollTo(0, 0);
     }, [programId]);
 
-    const Data = useSelector((state) => state?.pilgrimRecordedSession?.recordedSessions);
     const { allEvents } = useSelector((state) => state.allEvents);
 
     // Fetch all events if not already loaded
@@ -62,14 +63,28 @@ export default function ProgramDetails() {
     }
 
     useEffect(() => {
-        if (Data && programId) {
-            const pg = Data.find(
-                (program) =>
-                    normalizeSlug(program?.recordedProgramCard?.title) === normalizeSlug(programId)
-            );
-            setProgramData(pg || null);
-        }
-    }, [Data, programId]);
+        const fetchRecordedProgram = async () => {
+            try {
+                const recordedRef = doc(db, 'pilgrim_sessions/pilgrim_sessions/sessions/recordedSession');
+                const snapshot = await getDoc(recordedRef);
+
+                if (snapshot.exists()) {
+                    const data = snapshot.data();
+                    const slidesArray = Object.values(data.slides || {});
+
+                    const found = slidesArray.find(
+                        (program) => normalizeSlug(program?.recordedProgramCard?.title) === normalizeSlug(programId)
+                    );
+
+                    setProgramData(found || null);
+                }
+            } catch (error) {
+                console.error("Error fetching recorded program:", error);
+            }
+        };
+
+        if (programId) fetchRecordedProgram();
+    }, [programId]);
 
     const increment = () => setPersons((prev) => prev + 1);
     const decrement = () => setPersons((prev) => (prev > 1 ? prev - 1 : 1));

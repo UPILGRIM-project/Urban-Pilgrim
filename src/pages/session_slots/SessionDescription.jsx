@@ -3,7 +3,8 @@ import DOMPurify from 'dompurify';
 import SEO from "../../components/SEO.jsx";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../services/firebase";
 
 const SessionDescription = () => {
     const params = useParams();
@@ -11,8 +12,6 @@ const SessionDescription = () => {
     const [programData, setProgramData] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Get recorded program data from Redux store
-    const Data = useSelector((state) => state.pilgrimRecordedSession.recordedSessions);
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
@@ -25,17 +24,30 @@ const SessionDescription = () => {
     }
 
     useEffect(() => {
-        if (Data && programId) {
-            const program = Data.find(
-                (program) =>
-                    normalizeSlug(program?.recordedProgramCard?.title) === normalizeSlug(programId)
-            );
-            setProgramData(program || null);
-            setLoading(false);
-        } else {
-            setLoading(false)
-        }
-    }, [Data, programId]);
+        const fetchRecordedProgram = async () => {
+            try {
+                const recordedRef = doc(db, 'pilgrim_sessions/pilgrim_sessions/sessions/recordedSession');
+                const snapshot = await getDoc(recordedRef);
+
+                if (snapshot.exists()) {
+                    const data = snapshot.data();
+                    const slidesArray = Object.values(data.slides || {});
+
+                    const found = slidesArray.find(
+                        (program) => normalizeSlug(program?.recordedProgramCard?.title) === normalizeSlug(programId)
+                    );
+
+                    setProgramData(found || null);
+                }
+            } catch (error) {
+                console.error("Error fetching recorded program:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (programId) fetchRecordedProgram();
+    }, [programId]);
 
     // Get videos from recordedVideo array (new data structure)
     const videos = programData?.recordedVideo || [];

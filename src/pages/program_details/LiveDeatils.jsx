@@ -17,8 +17,10 @@ import { showSuccess, showError } from "../../utils/toast.js";
 import BundlesPopup from "../../components/pilgrim_retreats/BundlesPopup.jsx";
 import { fetchAllEvents } from "../../utils/fetchEvents";
 import LiveCalendarModal from "../../components/pilgrim_sessions/LiveCalendarModal";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../services/firebase";
 
-export default function LiveDetails() {
+export default function LiveDetails() {``
     const params = useParams();
     const [programData, setProgramData] = useState(null);
     const sessionId = params.sessionId;
@@ -80,7 +82,6 @@ export default function LiveDetails() {
         window.scrollTo(0, 0);
     }, [sessionId]);
 
-    const Data = useSelector((state) => state.pilgrimLiveSession.LiveSession);
     const cartItems = useSelector((state) => state.cart.items || []);
     const userPrograms = useSelector((state) => state.userProgram);
 
@@ -101,15 +102,28 @@ export default function LiveDetails() {
     }
 
     useEffect(() => {
-        if (Data && sessionId) {
-            const pg = Data.find(
-                (program) =>
-                    normalizeSlug(program?.liveSessionCard?.title) ===
-                    normalizeSlug(sessionId),
-            );
-            setProgramData(pg || null);
-        }
-    }, [Data, sessionId]);
+        const fetchLiveSession = async () => {
+            try {
+                const liveSessionsRef = doc(db, 'pilgrim_sessions/pilgrim_sessions/sessions/liveSession');
+                const snapshot = await getDoc(liveSessionsRef);
+
+                if (snapshot.exists()) {
+                    const data = snapshot.data();
+                    const slidesArray = Object.values(data.slides || {});
+
+                    const found = slidesArray.find(
+                        (session) => normalizeSlug(session?.liveSessionCard?.title) === normalizeSlug(sessionId)
+                    );
+
+                    setProgramData(found || null);
+                }
+            } catch (error) {
+                console.error("Error fetching live session:", error);
+            }
+        };
+
+        if (sessionId) fetchLiveSession();
+    }, [sessionId]);
 
     // Fetch all events if not already loaded
     useEffect(() => {

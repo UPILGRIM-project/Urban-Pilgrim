@@ -4,6 +4,8 @@ import SEO from "../../components/SEO.jsx";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../services/firebase";
 
 const SessionSlots = () => {
     const params = useParams();
@@ -15,7 +17,6 @@ const SessionSlots = () => {
     const [consumed, setConsumed] = useState({}); // { slotKey: true }
     
     // Get live session data from Redux store
-    const Data = useSelector((state) => state.pilgrimLiveSession.LiveSession);
     const currentUser = useSelector((state) => state.auth.user);
 
     useEffect(() => {
@@ -36,21 +37,37 @@ const SessionSlots = () => {
     }
 
     useEffect(() => {
-        // Priority: use program passed via navigation state, fallback to Redux store lookup
+        // Priority: use program passed via navigation state, fallback to direct DB fetch
         if (programFromState) {
             setSessionData(programFromState);
             setLoading(false);
             return;
         }
-        if (Data && sessionId) {
-            const session = Data.find(
-                (program) =>
-                    normalizeSlug(program?.liveSessionCard?.title) === normalizeSlug(sessionId)
-            );
-            setSessionData(session || null);
-            setLoading(false);
-        }
-    }, [Data, sessionId, programFromState]);
+
+        const fetchLiveSession = async () => {
+            try {
+                const liveSessionsRef = doc(db, 'pilgrim_sessions/pilgrim_sessions/sessions/liveSession');
+                const snapshot = await getDoc(liveSessionsRef);
+
+                if (snapshot.exists()) {
+                    const data = snapshot.data();
+                    const slidesArray = Object.values(data.slides || {});
+
+                    const found = slidesArray.find(
+                        (session) => normalizeSlug(session?.liveSessionCard?.title) === normalizeSlug(sessionId)
+                    );
+
+                    setSessionData(found || null);
+                }
+            } catch (error) {
+                console.error("Error fetching live session:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (sessionId) fetchLiveSession();
+    }, [sessionId, programFromState]);
 
     // Build booked slots view when navigated from dashboard
     const toHHMM = (val) => {
