@@ -167,7 +167,7 @@ export default function GiftCardDetails() {
 
             // Initialize Razorpay payment
             const options = {
-                key: 'rzp_test_wmtuzkmUZiFvtM', // Replace with your Razorpay key
+                key: 'rzp_live_3NlFfPs6Z3NcoM', // Replace with your Razorpay key
                 amount: order.amount,
                 currency: order.currency,
                 name: 'Urban Pilgrim',
@@ -384,8 +384,8 @@ export default function GiftCardDetails() {
                                             key={index}
                                             onClick={() => setSelectedPrice(option)}
                                             className={`border-2 rounded-lg p-4 cursor-pointer transition-all duration-200 ${selectedPrice?.value === option.value
-                                                    ? 'border-[rgb(197,112,63)] bg-gradient-to-r from-orange-50 to-red-50'
-                                                    : 'border-gray-200 hover:border-[rgb(197,112,63)]/50 hover:bg-gradient-to-r hover:from-orange-25 hover:to-red-25'
+                                                ? 'border-[rgb(197,112,63)] bg-gradient-to-r from-orange-50 to-red-50'
+                                                : 'border-gray-200 hover:border-[rgb(197,112,63)]/50 hover:bg-gradient-to-r hover:from-orange-25 hover:to-red-25'
                                                 }`}
                                         >
                                             <div className="flex justify-between items-center">

@@ -1,7 +1,7 @@
 export const WHATSAPP_TEMPLATES = {
     // Booking & Reservations
     BOOKING_CONFIRMATION: {
-        sid: "HX2fc305c30b505cdc240844f65ebb3f7f",
+        sid: "HX142acb9807b604071eb5dd0fba816a01",
         name: "Booking Confirmation",
         variables: ["name", "program", "date", "amount", "paymentId"],
         category: "UTILITY",

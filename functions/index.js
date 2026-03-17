@@ -951,7 +951,7 @@ async function sendWhatsApp(toE164, body, useTemplate = false) {
 
         if (useTemplate) {
             // send template
-            params.contentSid = "HX2fc305c30b505cdc240844f65ebb3f7f"; // your template SID
+            params.contentSid = "HX142acb9807b604071eb5dd0fba816a01"; // your template SID
             params.contentVariables = JSON.stringify({
                 1: body.name || "user",
                 2: body.titles || "wellness",

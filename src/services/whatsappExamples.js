@@ -127,7 +127,7 @@ export const sendWithTemplate = async (users) => {
             templateData,
             {
                 useTemplate: true,
-                contentSid: "HX2fc305c30b505cdc240844f65ebb3f7f", // Your template SID
+                contentSid: "HX142acb9807b604071eb5dd0fba816a01", // Your template SID
                 batchSize: 10,
                 delayMs: 1000
             }
