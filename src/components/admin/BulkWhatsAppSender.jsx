@@ -6,8 +6,8 @@ import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../../services/firebase';
 
 // Hardcoded template SIDs
-const TEMPLATE_NO_MEDIA = 'HX12e2193907d8fda6066b2387c3821d81';  // {{1}} name, {{2}} message
-const TEMPLATE_WITH_MEDIA = 'HX8dc32625f3350c8e5db74e3490745727'; // {{1}} name, {{2}} message, {{3}} media var
+const TEMPLATE_NO_MEDIA = 'HX12e2193907d8fda6066b2387c3821d81';  // {{1}} name, {{2}} message, {{3}} extra paragraph
+const TEMPLATE_WITH_MEDIA = 'HXdebf62e123cd7bda1b6301bd3fcd9bb8'; // {{1}} name, {{2}} message, {{3}} extra paragraph, {{4}} media var
 // const TEMPLATE_QUICK_REPLY = 'HX700dc966d8e30f63646b30ea183ba535'; // {{1}} name only — users reply YES to opt in
 
 const extractMediaVar = (downloadUrl) => {
@@ -35,6 +35,7 @@ const BulkWhatsAppSender = () => {
     const [result, setResult] = useState(null);
     // Campaign type: 'promotional' | 'quickReply'
     const [message, setMessage] = useState('');
+    const [extraParagraph, setExtraParagraph] = useState('');
     // Media upload state
     const [mediaFile, setMediaFile] = useState(null);       // File object chosen by admin
     const [mediaPreview, setMediaPreview] = useState(null); // local object URL for preview
@@ -306,11 +307,16 @@ const BulkWhatsAppSender = () => {
             if (valid.length === 0) throw new Error('No valid phone numbers found');
 
             if (!mediaVar) {
-                // No media → without_media template ({{1}} name, {{2}} message)
+                // No media → without_media template ({{1}} name, {{2}} message, {{3}} extra paragraph)
                 const messageText = formatForWhatsApp(message || 'Welcome to Urban Pilgrim!');
+                const extraText = formatForWhatsApp(extraParagraph || '');
                 const res = await sendBulkWhatsApp(valid, messageText, {
                     useTemplate: true,
-                    contentSid: TEMPLATE_NO_MEDIA
+                    contentSid: TEMPLATE_NO_MEDIA,
+                    contentVariables: {
+                        '2': messageText,
+                        '3': extraText
+                    }
                 });
                 setResult({
                     type: 'success',
@@ -318,11 +324,12 @@ const BulkWhatsAppSender = () => {
                     details: res
                 });
             } else {
-                // Media uploaded → with_media template ({{1}} name, {{2}} message, {{3}} media var)
+                // Media uploaded → with_media template ({{1}} name, {{2}} message, {{3}} extra paragraph, {{4}} media var)
                 const messageDataObj = {
                     contentVariables: {
                         '2': formatForWhatsApp(message || 'Welcome to Urban Pilgrim!'),
-                        '3': mediaVar
+                        '3': formatForWhatsApp(extraParagraph || ''),
+                        '4': mediaVar
                     }
                 };
                 const res = await sendBulkWhatsApp(valid, messageDataObj, {
@@ -359,6 +366,20 @@ const BulkWhatsAppSender = () => {
                     value={message}
                     onChange={handleMessageChange}
                     placeholder="Welcome to Urban Pilgrim!"
+                    onPaste={handlePaste}
+                    style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
+                />
+            </div>
+
+            {/* Extra Paragraph */}
+            <div className="mb-4">
+                <label className="block mb-2 font-semibold">Extra Paragraph</label>
+                <textarea
+                    className="w-full p-3 border rounded-lg whitespace-pre-wrap"
+                    rows="4"
+                    value={extraParagraph}
+                    onChange={(e) => setExtraParagraph(e.target.value)}
+                    placeholder="Additional closing paragraph or call-to-action..."
                     onPaste={handlePaste}
                     style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
                 />

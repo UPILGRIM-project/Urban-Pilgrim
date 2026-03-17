@@ -1169,7 +1169,7 @@ function sanitizeVariable(input) {
 
 // Keep only allowed template variable keys and sanitize their values
 function sanitizeVariablesObject(vars) {
-    const allowed = ["1", "2", "3"]; // "3" used by bulk_message_with_media template
+    const allowed = ["1", "2", "3", "4"]; // "1"=name, "2"=message, "3"=extra paragraph, "4"=media var
     const out = {};
     if (!vars || typeof vars !== 'object') return out;
     for (const k of allowed) {
@@ -1184,6 +1184,7 @@ async function sendBulkWhatsApp({
     users = [],
     messageText = "",
     contentSid = null,
+    extraParagraph = "",
     batchSize = 10,
     delayMs = 1000
 }) {
@@ -1289,7 +1290,7 @@ async function sendBulkWhatsApp({
 // Exported Cloud Function for bulk WhatsApp messaging
 exports.sendBulkWhatsAppMessages = functions.https.onCall(async (request) => {
     try {
-        const { users, messageText, contentSid } = request.data;
+        const { users, messageText, contentSid, extraParagraph = "" } = request.data;
 
         if (!users || !Array.isArray(users) || users.length === 0) {
             throw new functions.https.HttpsError(
@@ -1301,7 +1302,8 @@ exports.sendBulkWhatsAppMessages = functions.https.onCall(async (request) => {
         const result = await sendBulkWhatsApp({
             users,
             messageText,
-            contentSid
+            contentSid,
+            extraParagraph
         });
 
         return { success: true, ...result };
@@ -3716,19 +3718,8 @@ exports.confirmPayment = functions.https.onCall(async (data, context) => {
                             }
                             
                             <!-- Next Steps -->
-                            <div style="background: linear-gradient(135deg, #2F6288, #C5703F); border-radius: 12px; padding: 20px; margin: 25px 0; text-align: center;">
-                                <h3 style="color: #ffffff; margin: 0 0 10px 0; font-size: 18px;">🚀 What's Next?</h3>
-                                <p style="color: #ffffff; margin: 0; opacity: 0.9; font-size: 14px;">
-                                    ${
-                                        cartData.some(
-                                            (p) =>
-                                                p.selectedSlots &&
-                                                p.selectedSlots.length > 0
-                                        )
-                                            ? "Calendar invites have been sent for all your sessions. Check your email and calendar for session details."
-                                            : "You'll receive separate emails with session details and calendar invites for your programs."
-                                    }
-                                </p>
+                            <div style="text-align: center; margin: 25px 0;">
+                                <a href="https://urbanpilgrim.in/userdashboard" style="display: inline-block; background: linear-gradient(135deg, #2F6288, #C5703F); color: #ffffff; padding: 14px 40px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 16px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(47, 98, 136, 0.3);">View Your Dashboard</a>
                             </div>
                             
                             <div style="text-align: center; margin: 30px 0;">
