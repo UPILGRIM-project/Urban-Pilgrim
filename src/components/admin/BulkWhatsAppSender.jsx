@@ -262,7 +262,7 @@ const BulkWhatsAppSender = () => {
         setMessage(e.target.value);
     };
 
-    const handlePaste = (e) => {
+    const handlePaste = (e, currentValue, setter) => {
         // Prevent default so we can control exactly what gets inserted
         e.preventDefault();
 
@@ -277,11 +277,11 @@ const BulkWhatsAppSender = () => {
         const end = textarea.selectionEnd;
 
         // Build the new value by inserting cleaned text at cursor position
-        const before = message.substring(0, start);
-        const after = message.substring(end);
+        const before = currentValue.substring(0, start);
+        const after = currentValue.substring(end);
         const newValue = before + cleaned + after;
 
-        setMessage(newValue);
+        setter(newValue);
 
         // Restore cursor position after React re-renders
         const cursorPos = start + cleaned.length;
@@ -366,7 +366,7 @@ const BulkWhatsAppSender = () => {
                     value={message}
                     onChange={handleMessageChange}
                     placeholder="Welcome to Urban Pilgrim!"
-                    onPaste={handlePaste}
+                    onPaste={(e) => handlePaste(e, message, setMessage)}
                     style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
                 />
             </div>
@@ -380,7 +380,7 @@ const BulkWhatsAppSender = () => {
                     value={extraParagraph}
                     onChange={(e) => setExtraParagraph(e.target.value)}
                     placeholder="Additional closing paragraph or call-to-action..."
-                    onPaste={handlePaste}
+                    onPaste={(e) => handlePaste(e, extraParagraph, setExtraParagraph)}
                     style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
                 />
             </div>
