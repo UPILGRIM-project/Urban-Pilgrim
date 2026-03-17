@@ -50,31 +50,31 @@ export default function CartPage() {
 		)
 			return acc;
 
-        // Try these fields in order; prefer Firestore slides -> (mode) -> monthly -> discount
-        // Support both slides[0] and slides direct object just in case
-        const modeKey = String(item?.mode || '').toLowerCase(); // 'online' | 'offline'
-        const rawPercent =
-            item?.monthly?.discount ??
-            item?.discountPercent ??
-            item?.discount_percentage ??
-            item?.discountPercentage ??
-            item?.discount;
+		// Try these fields in order; prefer Firestore slides -> (mode) -> monthly -> discount
+		// Support both slides[0] and slides direct object just in case
+		const modeKey = String(item?.mode || '').toLowerCase(); // 'online' | 'offline'
+		const rawPercent =
+			item?.monthly?.discount ??
+			item?.discountPercent ??
+			item?.discount_percentage ??
+			item?.discountPercentage ??
+			item?.discount;
 
-        const percent = Number(rawPercent);
-        if (!percent || isNaN(percent) || percent <= 0) return acc;
+		const percent = Number(rawPercent);
+		if (!percent || isNaN(percent) || percent <= 0) return acc;
 
-        const lineTotal =
-            item.price *
-            (item.persons ?? 1) *
-            (item.quantity ?? 1) *
-            (item.duration ?? 1);
+		const lineTotal =
+			item.price *
+			(item.persons ?? 1) *
+			(item.quantity ?? 1) *
+			(item.duration ?? 1);
 
 		const lineDiscount = Math.round(lineTotal * (percent / 100));
 		return acc + lineDiscount;
 	}, 0);
 	const couponDiscount = appliedCoupon ? appliedCoupon.discount : 0;
 	const totalDiscount = monthlyDiscount + couponDiscount;
-	
+
 	// Calculate GST for each item and round up
 	const gstAmount = cartData.reduce((acc, item) => {
 		const lineTotal =
@@ -82,19 +82,19 @@ export default function CartPage() {
 			(item.persons ?? 1) *
 			(item.quantity ?? 1) *
 			(item.duration ?? 1);
-		
+
 		// Get GST rate from item (default to 0 if not set)
 		const gstRate = Number(item.gst || 0);
-		
+
 		// Calculate GST amount for this item
 		const itemGst = (lineTotal * gstRate) / 100;
-		
+
 		return acc + itemGst;
 	}, 0);
-	
+
 	// Round up GST to nearest integer (23.7 becomes 24)
 	const roundedGst = Math.ceil(gstAmount);
-	
+
 	const total = subtotal - totalDiscount + roundedGst;
 
 	const handleRemoveItem = (id) => {
@@ -134,43 +134,43 @@ export default function CartPage() {
 	};
 
 	const verifyOtp = async (email, otp, whatsappNumber) => {
-        try {
-            const verifyOtpFn = httpsCallable(functions, "verifyOtp");
-            const res = await verifyOtpFn({ email, otp });
-            // Sign in using custom token
-            const result = await signInWithCustomToken(auth, res.data.token);
-            const user = result.user;
+		try {
+			const verifyOtpFn = httpsCallable(functions, "verifyOtp");
+			const res = await verifyOtpFn({ email, otp });
+			// Sign in using custom token
+			const result = await signInWithCustomToken(auth, res.data.token);
+			const user = result.user;
 
-            // Ensure user doc exists and update WhatsApp number if changed
-            const userRef = doc(db, "users", user.uid, "info", "details");
-            const userSnap = await getDoc(userRef);
-            if (!userSnap.exists()) {
-                await setDoc(userRef, {
-                    uid: user.uid,
-                    email: user.email,
-                    whatsappNumber: whatsappNumber ?? "",
-                    createdAt: new Date(),
-                });
-            } else {
-                const existingData = userSnap.data();
-                if (typeof whatsappNumber !== 'undefined' && existingData.whatsappNumber !== whatsappNumber) {
-                    await setDoc(userRef, { whatsappNumber }, { merge: true });
-                }
-            }
+			// Ensure user doc exists and update WhatsApp number if changed
+			const userRef = doc(db, "users", user.uid, "info", "details");
+			const userSnap = await getDoc(userRef);
+			if (!userSnap.exists()) {
+				await setDoc(userRef, {
+					uid: user.uid,
+					email: user.email,
+					whatsappNumber: whatsappNumber ?? "",
+					createdAt: new Date(),
+				});
+			} else {
+				const existingData = userSnap.data();
+				if (typeof whatsappNumber !== 'undefined' && existingData.whatsappNumber !== whatsappNumber) {
+					await setDoc(userRef, { whatsappNumber }, { merge: true });
+				}
+			}
 
-            // Update Redux auth user (align format with SignIn.jsx)
-            dispatch(setUser({
-                uid: user.uid,
-                email: user.email,
-                whatsappNumber: whatsappNumber ?? (userSnap?.data()?.whatsappNumber ?? ""),
-            }));
+			// Update Redux auth user (align format with SignIn.jsx)
+			dispatch(setUser({
+				uid: user.uid,
+				email: user.email,
+				whatsappNumber: whatsappNumber ?? (userSnap?.data()?.whatsappNumber ?? ""),
+			}));
 
-            return true;
-        } catch (err) {
-            console.error("Cart verifyOtp failed:", err);
-            return false;
-        }
-    };
+			return true;
+		} catch (err) {
+			console.error("Cart verifyOtp failed:", err);
+			return false;
+		}
+	};
 
 	const handleConfirmCheckout = async (formData) => {
 		try {
@@ -192,7 +192,7 @@ export default function CartPage() {
 
 			// 2️⃣ Open Razorpay popup
 			const options = {
-				key: "rzp_live_3NlFfPs6Z3NcoM",
+				key: "rzp_test_wmtuzkmUZiFvtM",
 				amount: order.amount,
 				currency: order.currency,
 				name: "Urban Pilgrim",
@@ -220,7 +220,7 @@ export default function CartPage() {
 							originalCartData: checkoutData.originalCartData // Original bundles for reference
 						});
 
-						if(dataContent?.data?.status === "error"){
+						if (dataContent?.data?.status === "error") {
 							toast.error("Payment failed !");
 							return;
 						}
@@ -339,7 +339,7 @@ export default function CartPage() {
 			const { data: order } = await createGiftOrder({ amount: giftAmount });
 
 			const options = {
-				key: 'rzp_live_3NlFfPs6Z3NcoM',
+				key: 'rzp_test_wmtuzkmUZiFvtM',
 				amount: order.amount,
 				currency: order.currency,
 				name: 'Urban Pilgrim',
@@ -431,7 +431,7 @@ export default function CartPage() {
 							<span>Subtotal</span>
 							<span>₹ {subtotal.toLocaleString()}</span>
 						</div>
-						
+
 						{monthlyDiscount > 0 && (
 							<div className="flex justify-between text-sm mb-2">
 								<span>Monthly Discount</span>
@@ -443,7 +443,7 @@ export default function CartPage() {
 							<span>GST</span>
 							<span>₹ {roundedGst.toLocaleString()}</span>
 						</div>
-						
+
 						{/* Coupon Section */}
 						<div className="mt-4 mb-4">
 							{!appliedCoupon ? (
@@ -467,29 +467,29 @@ export default function CartPage() {
 										</div>
 									</div>
 								</div>
-							                            ) : (
-                                <div className="bg-green-50 border border-green-200 rounded-md p-3">
-                                    <div className="flex justify-between items-center">
-                                        <div className="text-sm font-medium text-green-800">
-                                            Coupon Applied: {appliedCoupon.code}
-                                        </div>
-                                        <div className="text-xs text-green-600">
-                                            {appliedCoupon.discountType === 'percentage'
-                                                ? `${appliedCoupon.discountValue}% off`
-                                                : `₹${appliedCoupon.discountValue} off`}
-                                        </div>
-                                        <button
-                                            onClick={handleRemoveCoupon}
-                                            className="text-red-600 hover:text-red-800 text-sm"
-                                        >
-                                            Remove
-                                        </button>
-                                    </div>
-                                    <div className="flex justify-between text-sm mt-2">
-                                        <span>Coupon Discount</span>
-                                        <span className="text-green-600">−₹ {couponDiscount.toLocaleString()}</span>
-                                    </div>
-                                </div>
+							) : (
+								<div className="bg-green-50 border border-green-200 rounded-md p-3">
+									<div className="flex justify-between items-center">
+										<div className="text-sm font-medium text-green-800">
+											Coupon Applied: {appliedCoupon.code}
+										</div>
+										<div className="text-xs text-green-600">
+											{appliedCoupon.discountType === 'percentage'
+												? `${appliedCoupon.discountValue}% off`
+												: `₹${appliedCoupon.discountValue} off`}
+										</div>
+										<button
+											onClick={handleRemoveCoupon}
+											className="text-red-600 hover:text-red-800 text-sm"
+										>
+											Remove
+										</button>
+									</div>
+									<div className="flex justify-between text-sm mt-2">
+										<span>Coupon Discount</span>
+										<span className="text-green-600">−₹ {couponDiscount.toLocaleString()}</span>
+									</div>
+								</div>
 							)}
 						</div>
 
@@ -497,7 +497,7 @@ export default function CartPage() {
 							<span>Total</span>
 							<span>₹ {total.toLocaleString()}</span>
 						</div>
-						
+
 						<button onClick={handleCheckout} className="w-full bg-gradient-to-r from-[#C5703F] to-[#C16A00] text-white py-2 rounded-full font-semibold hover:opacity-90 transition-opacity">
 							Go to Checkout →
 						</button>

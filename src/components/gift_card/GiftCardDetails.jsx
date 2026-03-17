@@ -32,17 +32,17 @@ export default function GiftCardDetails() {
                 setLoading(true);
                 const giftCardRef = doc(db, 'giftCards', id);
                 const giftCardSnap = await getDoc(giftCardRef);
-                
+
                 if (giftCardSnap.exists()) {
                     const data = giftCardSnap.data();
-                    
+
                     // Transform Firestore data to match component structure
                     const transformedGiftCard = {
                         id: giftCardSnap.id,
                         title: data.title || 'Untitled Gift Card',
                         description: data.description || '',
                         priceOptions: data.pricingOptions?.map(opt => ({
-                            value: Math.round(opt.amount - (opt.amount * (opt.discount/100))),
+                            value: Math.round(opt.amount - (opt.amount * (opt.discount / 100))),
                             originalValue: opt.amount,
                             discount: opt.discount
                         })) || [],
@@ -64,13 +64,13 @@ export default function GiftCardDetails() {
                             'Non-refundable and cannot be exchanged for cash'
                         ]
                     };
-                    
+
                     setGiftCard(transformedGiftCard);
-                    
+
                     // Set initial selected media
                     setSelectedMedia(transformedGiftCard.thumbnail);
                     setSelectedMediaType(getMediaType(transformedGiftCard.thumbnail));
-                    
+
                     if (transformedGiftCard.priceOptions && transformedGiftCard.priceOptions.length > 0) {
                         setSelectedPrice(transformedGiftCard.priceOptions[0]);
                     }
@@ -130,11 +130,11 @@ export default function GiftCardDetails() {
         const userRef = doc(db, "users", user.uid, "info", "details");
         const userSnap = await getDoc(userRef);
         if (!userSnap.exists()) {
-            await setDoc(userRef, { 
-                uid: user.uid, 
-                email: user.email, 
+            await setDoc(userRef, {
+                uid: user.uid,
+                email: user.email,
                 whatsappNumber: whatsappNumber || '',
-                createdAt: new Date() 
+                createdAt: new Date()
             });
             dispatch(setUser({ uid: user.uid, email: user.email, whatsappNumber: whatsappNumber || '' }));
         } else {
@@ -156,10 +156,10 @@ export default function GiftCardDetails() {
 
             setPurchaseLoading(true);
             setShowUserDetails(false);
-            
+
             // Create order using new gift card program function
             const createOrder = httpsCallable(functions, 'createGiftCardProgramOrder');
-            const { data: order } = await createOrder({ 
+            const { data: order } = await createOrder({
                 amount: selectedPrice.value,
                 giftCardType: giftCard.category,
                 quantity: quantity
@@ -167,7 +167,7 @@ export default function GiftCardDetails() {
 
             // Initialize Razorpay payment
             const options = {
-                key: 'rzp_live_3NlFfPs6Z3NcoM', // Replace with your Razorpay key
+                key: 'rzp_test_wmtuzkmUZiFvtM', // Replace with your Razorpay key
                 amount: order.amount,
                 currency: order.currency,
                 name: 'Urban Pilgrim',
@@ -177,7 +177,7 @@ export default function GiftCardDetails() {
                     try {
                         // Show processing loader
                         setProcessingPayment(true);
-                        
+
                         // Confirm payment and generate coupon
                         const confirmPayment = httpsCallable(functions, 'confirmGiftCardProgramPayment');
                         await confirmPayment({
@@ -190,17 +190,17 @@ export default function GiftCardDetails() {
                             paymentResponse: response,
                             billingDetails: formData  // Include full form data
                         });
-                        
+
                         // Hide processing loader
                         setProcessingPayment(false);
-                        
+
                         showSuccess(`🎉 Gift card purchased successfully`);
-                        
+
                         // Navigate back to gift cards list after success
                         setTimeout(() => {
                             navigate('/retreats#gift-cards');
                         }, 2000);
-                        
+
                     } catch (err) {
                         console.error('Payment confirmation error:', err);
                         setProcessingPayment(false);
@@ -218,7 +218,7 @@ export default function GiftCardDetails() {
 
             const rzp = new window.Razorpay(options);
             rzp.open();
-            
+
         } catch (error) {
             console.error('Gift card purchase error:', error);
             showError('Failed to initiate gift card purchase');
@@ -300,14 +300,13 @@ export default function GiftCardDetails() {
                             {giftCard.gallery.map((media, index) => {
                                 const mediaType = getMediaType(media);
                                 const isSelected = selectedMedia === media;
-                                
+
                                 return (
                                     <div
                                         key={index}
                                         onClick={() => handleMediaSelect(media)}
-                                        className={`relative cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${
-                                            isSelected ? 'border-[#2F6288] shadow-lg' : 'border-gray-200 hover:border-[#2F6288]/50'
-                                        }`}
+                                        className={`relative cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${isSelected ? 'border-[#2F6288] shadow-lg' : 'border-gray-200 hover:border-[#2F6288]/50'
+                                            }`}
                                     >
                                         {mediaType === 'video' ? (
                                             <div className="relative">
@@ -317,7 +316,7 @@ export default function GiftCardDetails() {
                                                 />
                                                 <div className="absolute inset-0 flex items-center justify-center bg-black/20">
                                                     <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+                                                        <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
                                                     </svg>
                                                 </div>
                                             </div>
@@ -365,7 +364,7 @@ export default function GiftCardDetails() {
                             {giftCard.features.map((feature, index) => (
                                 <li key={index} className="flex items-start gap-3">
                                     <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                     </svg>
                                     <span className="text-gray-700">{feature}</span>
                                 </li>
@@ -384,11 +383,10 @@ export default function GiftCardDetails() {
                                         <div
                                             key={index}
                                             onClick={() => setSelectedPrice(option)}
-                                            className={`border-2 rounded-lg p-4 cursor-pointer transition-all duration-200 ${
-                                                selectedPrice?.value === option.value
+                                            className={`border-2 rounded-lg p-4 cursor-pointer transition-all duration-200 ${selectedPrice?.value === option.value
                                                     ? 'border-[rgb(197,112,63)] bg-gradient-to-r from-orange-50 to-red-50'
                                                     : 'border-gray-200 hover:border-[rgb(197,112,63)]/50 hover:bg-gradient-to-r hover:from-orange-25 hover:to-red-25'
-                                            }`}
+                                                }`}
                                         >
                                             <div className="flex justify-between items-center">
                                                 <div>
@@ -432,7 +430,7 @@ export default function GiftCardDetails() {
                                 </button>
                             </div>
                         </div>
-                        
+
                         {/* Buttons */}
                         <div className="space-y-3">
                             <button
