@@ -7,11 +7,10 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { setUser } from "../features/authSlice";
 import { setUserPrograms } from "../features/userProgramsSlice";
 import { showError, showSuccess } from "../utils/toast";
-import store from "../redux/store";
 import Loader2 from "../components/Loader2"
 import { useNavigate } from "react-router-dom";
 
-export default function SignIn({ onClose }) {
+export default function SignIn({ onClose, onSuccess }) {
     const [email, setEmail] = useState("");
     const [whatsappNumber, setWhatsappNumber] = useState("");
     const [otp, setOtp] = useState("");
@@ -116,7 +115,15 @@ export default function SignIn({ onClose }) {
             }
 
             showSuccess("Signed in successfully!");
-            onClose();
+            if (typeof onSuccess === "function") {
+                onSuccess({
+                    uid: user.uid,
+                    email: user.email,
+                    whatsappNumber: whatsappNumber
+                });
+            } else if (typeof onClose === "function") {
+                onClose();
+            }
         } catch (err) {
             console.error(err);
             showError("Invalid OTP");

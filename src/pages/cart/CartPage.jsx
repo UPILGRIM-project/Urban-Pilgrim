@@ -15,11 +15,13 @@ import { addUserPrograms } from "../../features/userProgramsSlice.js";
 import { prepareCheckoutData, prepareUserProgramsData } from "../../utils/cartUtils.js";
 import { reserveLiveSlotsAfterPayment } from "../../utils/liveBookingUtils";
 import { validateCoupon } from "../../utils/couponUtils.js";
+import { useNavigate } from "react-router-dom";
 
 export default function CartPage() {
 	const cartData = useSelector((state) => state.cart.items);
 	const user = useSelector((state) => state.auth.user);
 	const dispatch = useDispatch();
+	const navigate = useNavigate();
 	const [showCheckout, setShowCheckout] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [couponCode, setCouponCode] = useState('');
@@ -174,14 +176,20 @@ export default function CartPage() {
 
 	const handleConfirmCheckout = async (formData) => {
 		try {
+			const activeUser = user ?? (auth.currentUser ? {
+				uid: auth.currentUser.uid,
+				email: auth.currentUser.email,
+				whatsappNumber: auth.currentUser.phoneNumber || formData.whatsappNumber || "",
+			} : null);
+
 			// After OTP verification, user will be signed in. Guard just in case.
-			if (!user) {
+			if (!activeUser) {
 				toast.error("Please verify your email to continue");
 				return;
 			}
 
 			// Prepare checkout data with expanded bundles and coupon info
-			const checkoutData = prepareCheckoutData(cartData, formData, user);
+			const checkoutData = prepareCheckoutData(cartData, formData, activeUser);
 			if (appliedCoupon) {
 				checkoutData.coupon = appliedCoupon;
 			}
@@ -221,6 +229,7 @@ export default function CartPage() {
 						});
 
 						if (dataContent?.data?.status === "error") {
+							setLoading(false);
 							toast.error("Payment failed !");
 							return;
 						}
@@ -249,10 +258,12 @@ export default function CartPage() {
 						dispatch(addUserPrograms(userPrograms));
 
 						dispatch(clearCart());
+						setShowCheckout(false);
 
 						// Hide loader just before showing the toast so it is visible immediately
 						setLoading(false);
 						toast.success("Payment successful! Programs saved.");
+						navigate("/userdashboard", { replace: true });
 					} catch (err) {
 						console.error(err);
 						// Hide loader before showing error toast
@@ -264,8 +275,8 @@ export default function CartPage() {
 				},
 				prefill: {
 					name: `${formData.firstName} ${formData.lastName}`,
-					email: user?.email || formData.email,
-					contact: formData.whatsapp || "9999999999",
+					email: activeUser.email || formData.email,
+					contact: formData.whatsappNumber || activeUser.whatsappNumber || "9999999999",
 				},
 				theme: { color: "#2F5D82" },
 			};

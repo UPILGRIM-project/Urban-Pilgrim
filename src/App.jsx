@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { CartProvider } from "./context/CartContext";
-import Lenis from '@studio-freight/lenis'
 import NavBar from "./components/navbar/NavBar";
 import Loader from "./components/Loader";
 import Home from "./pages/home";
@@ -25,7 +24,7 @@ import GiftCardDetails from "./components/gift_card/GiftCardDetails";
 import Admin from "./pages/admin/Admin";
 import AdminGiftCards from "./pages/admin/GiftCards";
 import ProgramDetails from "./pages/program_details/ProgramDetails";
-import UserDashboard from "./components/UserDashboard";
+import UserDashboardRoute from "./components/UserDashboardRoute";
 import PrivacyPolicy from "./pages/privacy_policy/PrivacyPolicy";
 import YogaDesc from "./components/YogaDesc";
 import EventDetails from "./components/upcoming_events/EventDetails";
@@ -133,7 +132,7 @@ function App() {
                             <Route path="/admin" element={<Admin />} />
                             <Route path="/admin/giftcards" element={<AdminGiftCards />} />
                             <Route path="/admin/whatsapp" element={<BulkWhatsAppSender />} />
-                            <Route path="/userdashboard" element={<UserDashboard />} />
+                            <Route path="/userdashboard" element={<UserDashboardRoute />} />
                             <Route path="/organizer" element={<Organizer />} />
                             <Route path="/organizer/users" element={<OrganizerUsers />} />
                             <Route path="*" element={<Home replace={'/'} />} />
