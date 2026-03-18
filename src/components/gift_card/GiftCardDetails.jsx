@@ -167,7 +167,7 @@ export default function GiftCardDetails() {
 
             // Initialize Razorpay payment
             const options = {
-                key: 'rzp_live_3NlFfPs6Z3NcoM', // Replace with your Razorpay key
+                key: 'rzp_test_5Qxb0fQ1nBKqtZ', // Replace with your Razorpay key
                 amount: order.amount,
                 currency: order.currency,
                 name: 'Urban Pilgrim',
