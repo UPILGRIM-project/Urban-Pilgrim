@@ -44,14 +44,15 @@
             'https://connect.facebook.net/en_US/fbevents.js');
         fbq('init', '25798893456478047');
         fbq('track', 'PageView');
+        fbq('track', 'AddPaymentInfo');
+        fbq('track', 'AddToCart');
+        fbq('track', 'InitiateCheckout');
+        fbq('track', 'Purchase', {value: 0.00, currency: 'GBP'});
+        fbq('track', 'Search');
+        fbq('track', 'ViewContent');    
+        fbq('track', 'Lead');
+        
     </script>
-
-    <!-- End Meta Pixel Code -->
-</head>
-
-<body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
     <noscript>
         <img 
             height="1" 
@@ -60,6 +61,14 @@
             src="https://www.facebook.com/tr?id=25798893456478047&ev=PageView&noscript=1" 
         />
     </noscript>
+
+    <!-- End Meta Pixel Code -->
+</head>
+
+<body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+    
 
 
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
