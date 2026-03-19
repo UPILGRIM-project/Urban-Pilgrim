@@ -128,6 +128,18 @@ export default function ProgramDetails() {
         };
 
         dispatch(addToCart(cartItem));
+        // Meta Pixel: AddToCart
+        try {
+            trackEvent("AddToCart", {
+                content_name: cartItem.title,
+                content_type: cartItem.type,
+                content_ids: [programData?.recordedProgramCard?.title || programId],
+                value: cartItem.price,
+                currency: "INR",
+            });
+        } catch (e) {
+            console.warn("Meta Pixel trackEvent failed:", e);
+        }
         showSuccess("Added to cart!");
     };
 

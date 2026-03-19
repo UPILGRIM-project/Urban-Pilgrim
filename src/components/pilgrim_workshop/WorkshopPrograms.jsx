@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../../features/cartSlice";
 import { showSuccess, showError } from "../../utils/toast";
+import { trackEvent } from "../../utils/metaPixel";
 
 export default function WorkshopPrograms() {
     const navigate = useNavigate();
@@ -32,6 +33,17 @@ export default function WorkshopPrograms() {
             };
             
             dispatch(addToCart(cartItem));
+            try {
+                trackEvent("AddToCart", {
+                    content_name: cartItem.title,
+                    content_type: cartItem.type,
+                    content_ids: [cartItem.id],
+                    value: cartItem.price,
+                    currency: "INR",
+                });
+            } catch (e) {
+                console.warn("Meta Pixel trackEvent failed:", e);
+            }
             showSuccess(`${workshop.title} added to cart!`);
         } catch (error) {
             console.error('Add to cart error:', error);

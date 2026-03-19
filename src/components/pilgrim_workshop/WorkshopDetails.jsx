@@ -261,7 +261,15 @@ export default function WorkshopDetails() {
             };
 
             dispatch(addToCart(cartItem));
+            trackEvent("AddToCart", {
+                content_name: cartItem.title,
+                content_type: cartItem.type,
+                content_ids: [workshop.id],
+                value: cartItem.price,
+                currency: "INR"
+            });
             showSuccess(`${workshop.title} added to cart!`);
+
         } catch (error) {
             console.error("Add to cart error:", error);
             showError("Failed to add workshop to cart");

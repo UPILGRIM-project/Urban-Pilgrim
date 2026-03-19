@@ -4,6 +4,7 @@ import { FiChevronLeft, FiChevronRight, FiX } from "react-icons/fi";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../../features/cartSlice.js";
 import { showSuccess, showError } from "../../utils/toast.js";
+import { trackEvent } from "../../utils/metaPixel";
 
 export default function MonthlyCalendarModal({
 	isOpen,
@@ -822,6 +823,19 @@ export default function MonthlyCalendarModal({
 					await onAddToCart(cartItem);
 				} else {
 					dispatch(addToCart(cartItem));
+				}
+
+				// Meta Pixel: AddToCart for monthly subscription
+				try {
+					trackEvent("AddToCart", {
+						content_name: cartItem.title,
+						content_type: cartItem.type,
+						content_ids: [cartItem.id],
+						value: cartItem.price,
+						currency: "INR",
+					});
+				} catch (e) {
+					console.warn("Meta Pixel trackEvent failed:", e);
 				}
 
 				const slotCount = finalSlots.length;

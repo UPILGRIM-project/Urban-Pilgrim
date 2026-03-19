@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, ShoppingCart, Package, ArrowLeft, ArrowRight } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../../features/cartSlice";
+import { trackEvent } from "../../utils/metaPixel";
 import { fetchAllBundles } from "../../services/bundleService";
 import "./BundlesPopup.css";
 
@@ -66,6 +67,17 @@ export default function BundlesPopup({ isOpen, onClose, retreatData, selectedOcc
         };
         
         dispatch(addToCart(cartItem));
+        try {
+            trackEvent("AddToCart", {
+                content_name: cartItem.title,
+                content_type: cartItem.type,
+                content_ids: [cartItem.id],
+                value: cartItem.price,
+                currency: "INR",
+            });
+        } catch (e) {
+            console.warn("Meta Pixel trackEvent failed:", e);
+        }
         onClose();
     };
 

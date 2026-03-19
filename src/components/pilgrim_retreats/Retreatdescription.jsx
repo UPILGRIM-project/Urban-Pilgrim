@@ -311,6 +311,18 @@ export default function Retreatdescription() {
                                 };
 
                                 dispatch(addToCart(cartItem));
+                                // Meta Pixel: AddToCart
+                                try {
+                                    trackEvent("AddToCart", {
+                                        content_name: cartItem.title,
+                                        content_type: cartItem.type,
+                                        content_ids: [retreatData?.pilgrimRetreatCard?.title || retreatName],
+                                        value: cartItem.price,
+                                        currency: "INR",
+                                    });
+                                } catch (e) {
+                                    console.warn("Meta Pixel trackEvent failed:", e);
+                                }
                                 showSuccess("Item added to cart");
                             }}
                             className={buttonConfig.className}

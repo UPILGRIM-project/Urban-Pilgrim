@@ -9,6 +9,7 @@ import {
 import { useDispatch } from "react-redux";
 import { addToCart } from "../../features/cartSlice.js";
 import { showSuccess } from "../../utils/toast.js";
+import { trackEvent } from "../../utils/metaPixel";
 
 export default function CalendarModal({
   isOpen,
@@ -146,10 +147,23 @@ export default function CalendarModal({
       };
 
       // Use parent onAddToCart if provided, otherwise dispatch
-      if (typeof onAddToCart === "function") {
-        onAddToCart(cartItem);
-      } else {
-        dispatch(addToCart(cartItem));
+      try {
+        if (typeof onAddToCart === "function") {
+          onAddToCart(cartItem);
+        } else {
+          dispatch(addToCart(cartItem));
+        }
+
+        // Meta Pixel: AddToCart (fire for each added item)
+        trackEvent("AddToCart", {
+          content_name: cartItem.title,
+          content_type: cartItem.type,
+          content_ids: [cartItem.id],
+          value: cartItem.price,
+          currency: "INR",
+        });
+      } catch (e) {
+        console.warn("Meta Pixel trackEvent failed:", e);
       }
     });
 
@@ -211,6 +225,17 @@ export default function CalendarModal({
       timestamp: new Date().toISOString(),
     };
     dispatch(addToCart(cartItem));
+    try {
+      trackEvent("AddToCart", {
+        content_name: cartItem.title,
+        content_type: cartItem.type,
+        content_ids: [cartItem.id],
+        value: cartItem.price,
+        currency: "INR",
+      });
+    } catch (e) {
+      console.warn("Meta Pixel trackEvent failed:", e);
+    }
 
     showSuccess(
       `${selectedSlotsMulti.length} session(s) scheduled and added to cart!`,

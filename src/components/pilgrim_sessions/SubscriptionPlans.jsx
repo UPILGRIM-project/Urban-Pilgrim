@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../../features/cartSlice";
+import { trackEvent } from "../../utils/metaPixel";
 import { fetchAllBundles } from "../../services/bundleService";
 import SubscriptionCard from "./SubscriptionCard";
 import { Package, ChevronLeft, ChevronRight } from "lucide-react";
@@ -47,6 +48,17 @@ export default function SubscriptionPlans() {
     };
     
     dispatch(addToCart(cartItem));
+    try {
+      trackEvent("AddToCart", {
+        content_name: cartItem.title,
+        content_type: cartItem.type,
+        content_ids: [cartItem.id],
+        value: cartItem.price,
+        currency: "INR",
+      });
+    } catch (e) {
+      console.warn("Meta Pixel trackEvent failed:", e);
+    }
     toast.success(`${bundle.name} added to cart!`);
   };
 
