@@ -5,6 +5,9 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../services/firebase";
+import { trackEvent } from "../utils/metaPixel";
+
+
 
 export default function SearchBar({ onClose }) {
     const [searchQuery, setSearchQuery] = useState("");
@@ -225,10 +228,16 @@ export default function SearchBar({ onClose }) {
     // Handle result click
     const handleResultClick = (result) => {
         // Add search query to recent searches
+        trackEvent("Search", { 
+            search_string: searchQuery,
+            content_name: result.title,
+            content_type: result.type
+        });
         addToRecentSearches(searchQuery);
         navigate(result.link);
         onClose();
     };
+
 
     // Handle recent search click
     const handleRecentSearchClick = (searchTerm) => {
@@ -285,9 +294,13 @@ export default function SearchBar({ onClose }) {
     const handleSearchSubmit = (e) => {
         e.preventDefault();
         if (searchQuery.trim()) {
+            trackEvent("Search", { 
+                search_string: searchQuery 
+            });
             addToRecentSearches(searchQuery);
         }
     };
+
 
     return (
         <motion.div

@@ -80,7 +80,15 @@ export default function LiveCalendarModal({ isOpen, onClose, sessionData, select
             slots_count: selectedSlotsMulti.length
         });
 
+        trackEvent("AddToCart", { 
+            content_name: sessionData?.guideCard?.title,
+            content_type: "session",
+            num_items: selectedSlotsMulti.length,
+            currency: "INR"
+        });
+
         selectedSlotsMulti.forEach((slot) => {
+
 
             const cartItem = {
                 id: `${sessionData?.guideCard?.title}-${slot.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -117,7 +125,15 @@ export default function LiveCalendarModal({ isOpen, onClose, sessionData, select
             plan: "monthly"
         });
 
+        trackEvent("AddToCart", { 
+            content_name: sessionData?.guideCard?.title,
+            content_type: "subscription",
+            plan: "monthly",
+            currency: "INR"
+        });
+
         const modeKey = mode?.toLowerCase();
+
 
         const subscriptionKey = selectedPlan; // 'monthly'
         const price = sessionData[modeKey]?.[subscriptionKey]?.price;
@@ -359,7 +375,15 @@ export default function LiveCalendarModal({ isOpen, onClose, sessionData, select
             return;
         }
 
+        trackEvent("AddToCart", { 
+            content_name: sessionData?.guideCard?.title,
+            content_type: "session",
+            content_ids: [selectedSlot.id],
+            currency: "INR"
+        });
+
         // Get the price based on mode and subscription type
+
         const modeKey = mode?.toLowerCase(); // "online" or "offline"
         const subscriptionKey = selectedPlan; // "monthly", "quarterly", "oneTime"
         const price = sessionData[modeKey]?.[subscriptionKey]?.price;

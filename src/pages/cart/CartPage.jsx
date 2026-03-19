@@ -271,13 +271,25 @@ export default function CartPage() {
 						// Hide loader just before showing the toast so it is visible immediately
 						setLoading(false);
 						
-						// Track Purchase event
+						// Track Purchase and Subscribe events
 						import("../../utils/metaPixel").then(({ trackEvent }) => {
 							trackEvent("Purchase", {
 								value: total,
 								currency: "INR"
 							});
+
+							const hasSubscription = checkoutData.expandedCartData.some(
+								item => item.type === "bundle" || item.subscriptionType === "monthly" || item.subscriptionType === "quarterly"
+							);
+
+							if (hasSubscription) {
+								trackEvent("Subscribe", {
+									value: total,
+									currency: "INR"
+								});
+							}
 						});
+
 
 						toast.success("Payment successful! Programs saved.");
 						navigate("/userdashboard", { replace: true });

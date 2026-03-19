@@ -155,12 +155,17 @@ export default function LiveDetails() {
     };
 
     const handleFreeTrialClick = () => {
-
         // If there is a free trial asset on the program, open it; else show message
         const trial = programData?.freeTrialVideo || programData?.freeTrialLink;
         if (trial && typeof trial === "string") {
+            trackEvent("StartTrial", { 
+                content_name: programData?.liveSessionCard?.title,
+                currency: "INR",
+                value: 0
+            });
             window.open(trial, "_blank");
         } else {
+
             showError("Free trial is not available for this program");
         }
     };
