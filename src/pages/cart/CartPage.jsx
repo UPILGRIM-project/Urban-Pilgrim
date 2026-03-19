@@ -1,5 +1,7 @@
 import { useSelector, useDispatch } from "react-redux";
+import { trackEvent } from "../../utils/metaPixel";
 import { clearCart, removeFromCart, updatePersons, updateQuantity } from "../../features/cartSlice";
+
 import CartItem from "../../components/ui/CartItem";
 import SEO from "../../components/SEO.jsx";
 import toast from "react-hot-toast";
@@ -272,23 +274,22 @@ export default function CartPage() {
 						setLoading(false);
 						
 						// Track Purchase and Subscribe events
-						import("../../utils/metaPixel").then(({ trackEvent }) => {
-							trackEvent("Purchase", {
+						trackEvent("Purchase", {
+							value: total,
+							currency: "INR"
+						});
+
+						const hasSubscription = checkoutData.expandedCartData.some(
+							item => item.type === "bundle" || item.subscriptionType === "monthly" || item.subscriptionType === "quarterly"
+						);
+
+						if (hasSubscription) {
+							trackEvent("Subscribe", {
 								value: total,
 								currency: "INR"
 							});
+						}
 
-							const hasSubscription = checkoutData.expandedCartData.some(
-								item => item.type === "bundle" || item.subscriptionType === "monthly" || item.subscriptionType === "quarterly"
-							);
-
-							if (hasSubscription) {
-								trackEvent("Subscribe", {
-									value: total,
-									currency: "INR"
-								});
-							}
-						});
 
 
 						toast.success("Payment successful! Programs saved.");

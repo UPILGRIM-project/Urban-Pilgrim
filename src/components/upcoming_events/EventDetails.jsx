@@ -11,8 +11,10 @@ import Faqs from "../Faqs";
 import PilgrimGuide from "../pilgrim_retreats/Pilgrim_Guide";
 import PersondetailsCard from "../../components/persondetails_card";
 import { motion } from "framer-motion"
+import { trackEvent } from "../../utils/metaPixel";
 
 export default function EventDetails() {
+
     const [mode, setMode] = useState(null);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [quantity, setQuantity] = useState(1);
@@ -65,6 +67,19 @@ export default function EventDetails() {
     }, [formattedTitle]);
 
     useEffect(() => {
+        if (eventData?.upcomingSessionCard) {
+            trackEvent("ViewContent", {
+                content_name: eventData.upcomingSessionCard.title,
+                content_type: "event",
+                content_ids: [eventName],
+                value: eventData.upcomingSessionCard.price || 0,
+                currency: "INR"
+            });
+        }
+    }, [eventData, eventName]);
+
+    useEffect(() => {
+
         window.scrollTo(0,0);
     },[eventName])
 

@@ -27,8 +27,10 @@ import { useNavigate } from "react-router-dom";
 import FreeTrailModal from "../modals/FreeTrailModal";
 import { showError, showSuccess } from "../../utils/toast";
 import PilgrimGuide from "../pilgrim_retreats/Pilgrim_Guide";
+import { trackEvent } from "../../utils/metaPixel";
 
 export default function GuideClassDetails() {
+
     const dispatch = useDispatch();
     const [mode, setMode] = useState(null);
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -647,6 +649,19 @@ export default function GuideClassDetails() {
     }, [formattedTitle, uid]);
 
     useEffect(() => {
+        if (sessionData?.guideCard) {
+            trackEvent("ViewContent", {
+                content_name: sessionData.guideCard.title,
+                content_type: "guide",
+                content_ids: [guideClassName],
+                value: sessionData.guideCard.price || 0,
+                currency: "INR"
+            });
+        }
+    }, [sessionData, guideClassName]);
+
+    useEffect(() => {
+
 
         if (!sessionData?.guideCard?.subCategory) return;
 

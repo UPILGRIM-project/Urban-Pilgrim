@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { trackEvent } from "../utils/metaPixel";
 
 export default function YogaDesc() {
     const location = useLocation();
@@ -9,7 +10,16 @@ export default function YogaDesc() {
 
     useEffect(() => {   
         window.scrollTo(0, 0);
-    }, []);
+        if (title) {
+            trackEvent("ViewContent", {
+                content_name: title,
+                content_type: "yoga",
+                value: 0, // Yoga pages seem to be informational/lead-gen
+                currency: "INR"
+            });
+        }
+    }, [title]);
+
 
     return (
         <section className="relative max-w-7xl mt-20 mx-auto xl:px-0 lg:px-20 px-8 lg:py-10 py-3">

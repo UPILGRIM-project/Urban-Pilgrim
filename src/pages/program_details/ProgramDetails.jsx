@@ -16,8 +16,10 @@ import { getProgramButtonConfig } from "../../utils/userProgramUtils";
 import DOMPurify from "dompurify";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../services/firebase";
+import { trackEvent } from "../../utils/metaPixel";
 
 export default function ProgramDetails() {
+
     const params = useParams();
     const [programData, setProgramData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -89,6 +91,19 @@ export default function ProgramDetails() {
 
         if (programId) fetchRecordedProgram();
     }, [programId]);
+
+    useEffect(() => {
+        if (programData?.recordedProgramCard) {
+            trackEvent("ViewContent", {
+                content_name: programData.recordedProgramCard.title,
+                content_type: "recorded",
+                content_ids: [programId],
+                value: getNumericPrice() || 0,
+                currency: "INR"
+            });
+        }
+    }, [programData, programId]);
+
 
     const increment = () => setPersons((prev) => prev + 1);
     const decrement = () => setPersons((prev) => (prev > 1 ? prev - 1 : 1));

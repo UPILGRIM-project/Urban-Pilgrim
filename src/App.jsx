@@ -34,8 +34,10 @@ import WhatsAppFloatingButton from "./components/WhatsAppFloatingButton.jsx";
 import Organizer from "./pages/organizer/Organizer.jsx";
 import OrganizerUsers from "./pages/organizer/Users.jsx";
 import BulkWhatsAppSender from "./components/admin/BulkWhatsAppSender.jsx";
+import { trackEvent } from "./utils/metaPixel";
 
 function App() {
+
     const [loading, setLoading] = useState(true);
     const location = useLocation();
     const isAdminRoute = location.pathname === "/admin" ||
@@ -61,10 +63,11 @@ function App() {
 
     // Track Meta Pixel ViewContent on route change
     useEffect(() => {
-        import("./utils/metaPixel").then(({ trackEvent }) => {
-            trackEvent("ViewContent", { page: location.pathname });
-        }).catch(err => console.error("Failed to load metaPixel", err));
+        trackEvent("ViewContent", { 
+            page: location.pathname 
+        });
     }, [location.pathname]);
+
 
     return (
         <CartProvider>

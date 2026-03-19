@@ -63,7 +63,21 @@ export default function LiveDetails() {
             setOccupancyType(availableTypes[0]);
         }
     }, [programData, availableTypes.join(",")]);
+
+    useEffect(() => {
+        if (programData?.liveSessionCard) {
+            trackEvent("ViewContent", {
+                content_name: programData.liveSessionCard.title,
+                content_type: "session",
+                content_ids: [sessionId],
+                value: programData.liveSessionCard.price || 0,
+                currency: "INR"
+            });
+        }
+    }, [programData, sessionId]);
+
     // Group slots by date to support multiple time ranges per date
+
     const groupedByDate = (slots || []).reduce((acc, s) => {
         if (!s?.date) return acc;
         if (!acc[s.date]) acc[s.date] = [];

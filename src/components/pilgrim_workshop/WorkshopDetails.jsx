@@ -6,8 +6,10 @@ import { showSuccess, showError } from "../../utils/toast";
 import { httpsCallable } from "firebase/functions";
 import { functions, db } from "../../services/firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
+import { trackEvent } from "../../utils/metaPixel";
 
 export default function WorkshopDetails() {
+
     const { title } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -69,6 +71,19 @@ export default function WorkshopDetails() {
 
         fetchWorkshopByTitle();
     }, [title, user]);
+
+    useEffect(() => {
+        if (workshop) {
+            trackEvent("ViewContent", {
+                content_name: workshop.title,
+                content_type: "workshop",
+                content_ids: [title],
+                value: workshop.price || 0,
+                currency: "INR"
+            });
+        }
+    }, [workshop, title]);
+
 
     const checkRequestStatusFromDB = async (workshopId, userId) => {
         try {

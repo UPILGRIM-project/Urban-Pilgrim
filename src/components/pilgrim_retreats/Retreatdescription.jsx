@@ -25,8 +25,10 @@ import { showSuccess, showError } from "../../utils/toast";
 import { getProgramButtonConfig } from "../../utils/userProgramUtils";
 import { useNavigate } from "react-router-dom";
 import { Package } from "lucide-react";
+import { trackEvent } from "../../utils/metaPixel";
 
 export default function Retreatdescription() {
+
 
     const { retreatName } = useParams();
     const formattedTitle = retreatName.replace(/-/g, " ");
@@ -100,7 +102,20 @@ export default function Retreatdescription() {
         if (retreatName && uid) fetchRetreat();
     }, [retreatName, formattedTitle]);
 
+    useEffect(() => {
+        if (retreatData?.pilgrimRetreatCard) {
+            trackEvent("ViewContent", {
+                content_name: retreatData.pilgrimRetreatCard.title,
+                content_type: "retreat",
+                content_ids: [retreatName],
+                value: retreatData.pilgrimRetreatCard.price || 0,
+                currency: "INR"
+            });
+        }
+    }, [retreatData, retreatName]);
+
     // Fetch all events if not already loaded
+
     useEffect(() => {
         const loadEvents = async () => {
             if (!allEvents || Object.keys(allEvents).length === 0) {
