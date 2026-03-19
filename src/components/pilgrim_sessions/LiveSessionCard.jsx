@@ -1,12 +1,18 @@
 import { FaInfoCircle } from "react-icons/fa";
 import { BsFillCameraVideoFill } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
+import { trackEvent } from "../../utils/metaPixel";
 
 export default function LiveSessionCard({ image, category, title, price }) {
   const navigate = useNavigate();
   const handleCardClick = () => {
+    trackEvent("Lead", { 
+      button: "Book Now",
+      program: title 
+    });
     navigate(`/session/${title.trim().replace(/\s+/g, '-').toLowerCase()}/details`);
   };
+
   return (
     <div className="rounded-xl overflow-hidden shadow-md bg-white flex flex-col max-w-[300px] sm:max-w-xs" onClick={handleCardClick}>
       <img src={image} alt={title} className="w-full aspect-[5/4] object-cover object-top" />

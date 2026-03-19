@@ -113,6 +113,9 @@ export default function CartPage() {
 	}, []);
 
 	const handleCheckout = () => {
+		import("../../utils/metaPixel").then(({ trackEvent }) => {
+			trackEvent("InitiateCheckout");
+		});
 		setShowCheckout(true);
 	};
 
@@ -194,6 +197,11 @@ export default function CartPage() {
 				checkoutData.coupon = appliedCoupon;
 			}
 
+			// Track AddPaymentInfo event
+			import("../../utils/metaPixel").then(({ trackEvent }) => {
+				trackEvent("AddPaymentInfo");
+			});
+
 			// 1️⃣ Create Razorpay order
 			const createOrder = httpsCallable(functions, "createOrder");
 			const { data: order } = await createOrder({ amount: total });
@@ -262,6 +270,15 @@ export default function CartPage() {
 
 						// Hide loader just before showing the toast so it is visible immediately
 						setLoading(false);
+						
+						// Track Purchase event
+						import("../../utils/metaPixel").then(({ trackEvent }) => {
+							trackEvent("Purchase", {
+								value: total,
+								currency: "INR"
+							});
+						});
+
 						toast.success("Payment successful! Programs saved.");
 						navigate("/userdashboard", { replace: true });
 					} catch (err) {

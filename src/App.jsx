@@ -58,27 +58,13 @@ function App() {
             if (isAdminRoute) setLoading(false);
         }
     }, [isAdminRoute]);
-    
-    // useEffect(() => {
-    //     const lenis = new Lenis({
-    //         duration: 1.2,
-    //         smooth: true,
-    //     });
 
-    //     let rafId;
-
-    //     function raf(time) {
-    //         lenis.raf(time);
-    //         rafId = requestAnimationFrame(raf);
-    //     }
-
-    //     rafId = requestAnimationFrame(raf);
-
-    //     return () => {
-    //         cancelAnimationFrame(rafId);
-    //         lenis.destroy();
-    //     };
-    // }, []);
+    // Track Meta Pixel ViewContent on route change
+    useEffect(() => {
+        import("./utils/metaPixel").then(({ trackEvent }) => {
+            trackEvent("ViewContent", { page: location.pathname });
+        }).catch(err => console.error("Failed to load metaPixel", err));
+    }, [location.pathname]);
 
     return (
         <CartProvider>

@@ -1,6 +1,7 @@
 import { FaInfoCircle, FaUsers } from "react-icons/fa";
 // import { MdWorkshop } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
+import { trackEvent } from "../../utils/metaPixel";
 
 export default function WorkshopCard({ 
     id, 
@@ -26,9 +27,14 @@ export default function WorkshopCard({
 
     const handleBookNow = (e) => {
         e.stopPropagation();
+        trackEvent("Lead", { 
+            button: "Book Now",
+            program: title 
+        });
         // Add to cart or direct booking logic
         navigate(`/workshop/${title.trim().replace(/\s+/g, '-').toLowerCase()}/details`);
     };
+
 
     // Helper function to determine media type
     const getMediaType = (url) => {

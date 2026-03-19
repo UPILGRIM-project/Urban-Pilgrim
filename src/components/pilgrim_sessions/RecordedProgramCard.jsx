@@ -1,11 +1,17 @@
 import { FaInfoCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { trackEvent } from "../../utils/metaPixel";
 
 export default function RecordedProgramCard({ image, category, title, days, videos, price }) {
     const navigate = useNavigate();
     const handleCardClick = () => {
+        trackEvent("Lead", { 
+            button: "Purchase/Details",
+            program: title 
+        });
         navigate(`/program/${title.trim().replace(/\s+/g, '-').toLowerCase()}/details`);
     };
+
 
     const isVideo = (url) => {
         if (!url) return false;

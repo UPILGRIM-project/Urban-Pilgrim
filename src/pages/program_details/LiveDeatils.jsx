@@ -20,7 +20,9 @@ import LiveCalendarModal from "../../components/pilgrim_sessions/LiveCalendarMod
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../services/firebase";
 
-export default function LiveDetails() {``
+import { trackEvent } from "../../utils/metaPixel";
+
+export default function LiveDetails() {
     const params = useParams();
     const [programData, setProgramData] = useState(null);
     const sessionId = params.sessionId;
@@ -145,10 +147,15 @@ export default function LiveDetails() {``
 
     const handleSubscriptionClick = () => {
         // Open calendar modal for slot selection for one-time live sessions
+        trackEvent("Lead", { 
+            button: "Book Now",
+            program: programData?.liveSessionCard?.title 
+        });
         setShowCalendar(true);
     };
 
     const handleFreeTrialClick = () => {
+
         // If there is a free trial asset on the program, open it; else show message
         const trial = programData?.freeTrialVideo || programData?.freeTrialLink;
         if (trial && typeof trial === "string") {

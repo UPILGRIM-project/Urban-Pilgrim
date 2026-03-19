@@ -63,6 +63,10 @@ export default function ContactForm() {
                 message: formData.message
             });
 
+            import("../../utils/metaPixel").then(({ trackEvent }) => {
+                trackEvent("Lead", { source: "Contact Form" });
+            });
+
             setSubmitStatus({ type: "success", message: "Message sent successfully! We'll get back to you soon." });
             
             // Reset form

@@ -114,6 +114,11 @@ export default function SignIn({ onClose, onSuccess }) {
                 dispatch(setUserPrograms([]));
             }
 
+            // Track CompleteRegistration event
+            import("../utils/metaPixel").then(({ trackEvent }) => {
+                trackEvent("CompleteRegistration");
+            });
+
             showSuccess("Signed in successfully!");
             if (typeof onSuccess === "function") {
                 onSuccess({

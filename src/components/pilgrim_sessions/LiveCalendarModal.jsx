@@ -4,6 +4,8 @@ import { FiChevronLeft, FiChevronRight, FiX, FiArrowLeft } from "react-icons/fi"
 import { useDispatch } from "react-redux";
 import { addToCart } from "../../features/cartSlice.js";
 import { showSuccess } from "../../utils/toast.js";
+import { trackEvent } from "../../utils/metaPixel";
+
 
 export default function LiveCalendarModal({ isOpen, onClose, sessionData, selectedPlan, mode,availableSlots = [],personsPerBooking = 1,occupancyType = '',capacityMax = 0}) {
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -72,7 +74,14 @@ export default function LiveCalendarModal({ isOpen, onClose, sessionData, select
     const handleAddMultipleToCart = () => {
         if (!sessionData || selectedSlotsMulti.length === 0) return;
 
+        trackEvent("Schedule", { 
+            platform: "Urban Pilgrim",
+            program: sessionData?.guideCard?.title,
+            slots_count: selectedSlotsMulti.length
+        });
+
         selectedSlotsMulti.forEach((slot) => {
+
             const cartItem = {
                 id: `${sessionData?.guideCard?.title}-${slot.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                 title: sessionData?.guideCard?.title,
@@ -101,7 +110,15 @@ export default function LiveCalendarModal({ isOpen, onClose, sessionData, select
     const handleAddMonthlyToCart = () => {
         if (!sessionData || selectedSlotsMulti.length === 0) return;
 
+        trackEvent("Schedule", { 
+            platform: "Urban Pilgrim",
+            program: sessionData?.guideCard?.title,
+            sessions_count: selectedSlotsMulti.length,
+            plan: "monthly"
+        });
+
         const modeKey = mode?.toLowerCase();
+
         const subscriptionKey = selectedPlan; // 'monthly'
         const price = sessionData[modeKey]?.[subscriptionKey]?.price;
 
