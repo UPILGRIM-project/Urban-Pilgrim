@@ -61,13 +61,6 @@ function App() {
         }
     }, [isAdminRoute]);
 
-    // Track Meta Pixel ViewContent on route change
-    useEffect(() => {
-        trackEvent("ViewContent", { 
-            page: location.pathname 
-        });
-    }, [location.pathname]);
-
 
     return (
         <CartProvider>
