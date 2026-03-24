@@ -21,6 +21,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../services/firebase";
 
 import { trackEvent } from "../../utils/metaPixel";
+import { gtmViewItem } from "../../utils/gtm";
 
 export default function LiveDetails() {
     const params = useParams();
@@ -66,12 +67,24 @@ export default function LiveDetails() {
 
     useEffect(() => {
         if (programData?.liveSessionCard) {
+            let numericPrice = programData.liveSessionCard.price;
+            if (typeof numericPrice === 'string') {
+                numericPrice = Number(numericPrice.replace(/,/g, "")) || 0;
+            }
+
             trackEvent("ViewContent", {
                 content_name: programData.liveSessionCard.title,
                 content_type: "session",
                 content_ids: [sessionId],
-                value: programData.liveSessionCard.price || 0,
+                value: numericPrice,
                 currency: "INR"
+            });
+
+            gtmViewItem({
+                id: sessionId,
+                title: programData.liveSessionCard.title,
+                price: numericPrice,
+                type: "session"
             });
         }
     }, [programData, sessionId]);

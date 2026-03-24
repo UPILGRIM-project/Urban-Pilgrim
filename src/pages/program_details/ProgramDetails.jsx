@@ -17,6 +17,7 @@ import DOMPurify from "dompurify";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../services/firebase";
 import { trackEvent } from "../../utils/metaPixel";
+import { gtmViewItem, gtmAddToCart } from "../../utils/gtm";
 
 export default function ProgramDetails() {
 
@@ -101,6 +102,12 @@ export default function ProgramDetails() {
                 value: getNumericPrice() || 0,
                 currency: "INR"
             });
+            gtmViewItem({
+                id: programId,
+                title: programData.recordedProgramCard.title,
+                price: getNumericPrice() || 0,
+                type: "recorded"
+            });
         }
     }, [programData, programId]);
 
@@ -128,6 +135,7 @@ export default function ProgramDetails() {
         };
 
         dispatch(addToCart(cartItem));
+        gtmAddToCart(cartItem);
         // Meta Pixel: AddToCart
         try {
             trackEvent("AddToCart", {

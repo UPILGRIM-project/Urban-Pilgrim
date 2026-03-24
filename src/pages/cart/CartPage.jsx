@@ -18,6 +18,7 @@ import { prepareCheckoutData, prepareUserProgramsData } from "../../utils/cartUt
 import { reserveLiveSlotsAfterPayment } from "../../utils/liveBookingUtils";
 import { validateCoupon } from "../../utils/couponUtils.js";
 import { useNavigate } from "react-router-dom";
+import { gtmBeginCheckout, gtmPurchase } from "../../utils/gtm.js";
 
 export default function CartPage() {
 	const cartData = useSelector((state) => state.cart.items);
@@ -118,6 +119,7 @@ export default function CartPage() {
 		import("../../utils/metaPixel").then(({ trackEvent }) => {
 			trackEvent("InitiateCheckout");
 		});
+		gtmBeginCheckout(total, "INR", cartData);
 		setShowCheckout(true);
 	};
 
@@ -278,6 +280,8 @@ export default function CartPage() {
 							value: total,
 							currency: "INR"
 						});
+
+						gtmPurchase(paymentId, total, "INR", checkoutData.expandedCartData);
 
 						const hasSubscription = checkoutData.expandedCartData.some(
 							item => item.type === "bundle" || item.subscriptionType === "monthly" || item.subscriptionType === "quarterly"

@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../../features/cartSlice";
 import { showSuccess, showError } from "../../utils/toast";
 import { trackEvent } from "../../utils/metaPixel";
+import { gtmAddToCart } from "../../utils/gtm";
 
 export default function WorkshopPrograms() {
     const navigate = useNavigate();
@@ -33,6 +34,7 @@ export default function WorkshopPrograms() {
             };
             
             dispatch(addToCart(cartItem));
+            gtmAddToCart(cartItem);
             try {
                 trackEvent("AddToCart", {
                     content_name: cartItem.title,

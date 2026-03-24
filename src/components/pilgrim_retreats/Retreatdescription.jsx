@@ -26,6 +26,7 @@ import { getProgramButtonConfig } from "../../utils/userProgramUtils";
 import { useNavigate } from "react-router-dom";
 import { Package } from "lucide-react";
 import { trackEvent } from "../../utils/metaPixel";
+import { gtmViewItem, gtmAddToCart } from "../../utils/gtm";
 
 export default function Retreatdescription() {
 
@@ -104,12 +105,24 @@ export default function Retreatdescription() {
 
     useEffect(() => {
         if (retreatData?.pilgrimRetreatCard) {
+            let numericPrice = retreatData.pilgrimRetreatCard.price;
+            if (typeof numericPrice === 'string') {
+                numericPrice = Number(numericPrice.replace(/,/g, "")) || 0;
+            }
+
             trackEvent("ViewContent", {
                 content_name: retreatData.pilgrimRetreatCard.title,
                 content_type: "retreat",
                 content_ids: [retreatName],
-                value: retreatData.pilgrimRetreatCard.price || 0,
+                value: numericPrice,
                 currency: "INR"
+            });
+
+            gtmViewItem({
+                id: retreatName,
+                title: retreatData.pilgrimRetreatCard.title,
+                price: numericPrice,
+                type: "retreat"
             });
         }
     }, [retreatData, retreatName]);
@@ -311,6 +324,7 @@ export default function Retreatdescription() {
                                 };
 
                                 dispatch(addToCart(cartItem));
+                                gtmAddToCart(cartItem);
                                 // Meta Pixel: AddToCart
                                 try {
                                     trackEvent("AddToCart", {

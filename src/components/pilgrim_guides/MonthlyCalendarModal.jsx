@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import { addToCart } from "../../features/cartSlice.js";
 import { showSuccess, showError } from "../../utils/toast.js";
 import { trackEvent } from "../../utils/metaPixel";
+import { gtmAddToCart } from "../../utils/gtm";
 
 export default function MonthlyCalendarModal({
 	isOpen,
@@ -824,6 +825,8 @@ export default function MonthlyCalendarModal({
 				} else {
 					dispatch(addToCart(cartItem));
 				}
+
+				gtmAddToCart(cartItem);
 
 				// Meta Pixel: AddToCart for monthly subscription
 				try {

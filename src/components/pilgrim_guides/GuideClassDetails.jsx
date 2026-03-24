@@ -28,6 +28,7 @@ import FreeTrailModal from "../modals/FreeTrailModal";
 import { showError, showSuccess } from "../../utils/toast";
 import PilgrimGuide from "../pilgrim_retreats/Pilgrim_Guide";
 import { trackEvent } from "../../utils/metaPixel";
+import { gtmViewItem } from "../../utils/gtm";
 
 export default function GuideClassDetails() {
 
@@ -656,6 +657,12 @@ export default function GuideClassDetails() {
                 content_ids: [guideClassName],
                 value: sessionData.guideCard.price || 0,
                 currency: "INR"
+            });
+            gtmViewItem({
+                id: guideClassName,
+                title: sessionData.guideCard.title,
+                price: Number(sessionData.guideCard.price) || 0,
+                type: "guide"
             });
         }
     }, [sessionData, guideClassName]);

@@ -7,6 +7,7 @@ import { httpsCallable } from "firebase/functions";
 import { functions, db } from "../../services/firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { trackEvent } from "../../utils/metaPixel";
+import { gtmViewItem, gtmAddToCart } from "../../utils/gtm";
 
 export default function WorkshopDetails() {
 
@@ -80,6 +81,12 @@ export default function WorkshopDetails() {
                 content_ids: [title],
                 value: workshop.price || 0,
                 currency: "INR"
+            });
+            gtmViewItem({
+                id: title,
+                title: workshop.title,
+                price: Number(workshop.price) || 0,
+                type: "workshop"
             });
         }
     }, [workshop, title]);
@@ -261,6 +268,7 @@ export default function WorkshopDetails() {
             };
 
             dispatch(addToCart(cartItem));
+            gtmAddToCart(cartItem);
             trackEvent("AddToCart", {
                 content_name: cartItem.title,
                 content_type: cartItem.type,

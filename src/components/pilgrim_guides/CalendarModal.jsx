@@ -10,6 +10,7 @@ import { useDispatch } from "react-redux";
 import { addToCart } from "../../features/cartSlice.js";
 import { showSuccess } from "../../utils/toast.js";
 import { trackEvent } from "../../utils/metaPixel";
+import { gtmAddToCart } from "../../utils/gtm";
 
 export default function CalendarModal({
   isOpen,
@@ -154,6 +155,8 @@ export default function CalendarModal({
           dispatch(addToCart(cartItem));
         }
 
+        gtmAddToCart(cartItem);
+
         // Meta Pixel: AddToCart (fire for each added item)
         trackEvent("AddToCart", {
           content_name: cartItem.title,
@@ -225,6 +228,7 @@ export default function CalendarModal({
       timestamp: new Date().toISOString(),
     };
     dispatch(addToCart(cartItem));
+    gtmAddToCart(cartItem);
     try {
       trackEvent("AddToCart", {
         content_name: cartItem.title,
