@@ -16,8 +16,9 @@ export default function GuidesDemo({ filters = {}, bestSellingActive = false }) 
             if (!snapshot.exists()) return;
             const data = snapshot.data() || {};
             const slides = Array.isArray(data.slides) ? data.slides : Object.values(data.slides || {});
-            setGuideData(slides || null);
-            dispatch(setGuides(slides || []));
+            const visibleSlides = (slides || []).filter((program) => program?.active !== false);
+            setGuideData(visibleSlides || null);
+            dispatch(setGuides(visibleSlides || []));
         }, (error) => {
             console.error("Error subscribing to guides:", error);
         });

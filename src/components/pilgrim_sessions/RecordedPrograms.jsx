@@ -16,8 +16,9 @@ export default function RecordedPrograms({ filters = {}, bestSellingActive = fal
             if (!snapshot.exists()) return;
             const data = snapshot.data() || {};
             const slides = Array.isArray(data.slides) ? data.slides : Object.values(data.slides || {});
-            setRecordedProgramData(slides || null);
-            dispatch(setRecordedSessions(slides || []));
+            const visibleSlides = (slides || []).filter((program) => program?.active !== false);
+            setRecordedProgramData(visibleSlides || null);
+            dispatch(setRecordedSessions(visibleSlides || []));
         }, (error) => {
             console.error("Error subscribing to recorded programs:", error);
         });

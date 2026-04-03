@@ -18,7 +18,7 @@ export default function Workshops({ filters = {}, bestSellingActive = false }) {
                 const workshopsList = workshopsSnapshot.docs.map(doc => ({
                     id: doc.id,
                     ...doc.data()
-                }));
+                })).filter((workshop) => workshop?.active !== false);
                 setWorkshopsData(workshopsList);
             } catch (error) {
                 console.error('Error fetching workshops:', error);

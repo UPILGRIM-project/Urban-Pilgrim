@@ -20,37 +20,55 @@ export default function RichTextEditor({ value = '', onChange, placeholder = 'En
         editorRef.current.focus();
     };
 
-    // Helper to wrap content in font-size:16px if not already
-    const ensureFontSize16 = (html) => {
-        // If already wrapped, skip
-        if (/^<div[^>]*style=["'][^"']*font-size\s*:\s*16px/i.test(html)) return html;
-        // Otherwise, wrap
-        return `<div style="font-size:16px;">${html}</div>`;
+    // Normalize editor HTML by removing pasted inline sizing/styles/classes.
+    const normalizeEditorHtml = (html = '') => {
+        if (!html) return '';
+
+        const container = document.createElement('div');
+        container.innerHTML = html;
+
+        container.querySelectorAll('*').forEach((node) => {
+            node.removeAttribute('style');
+            node.removeAttribute('class');
+            if (node.tagName === 'FONT') {
+                // Unwrap legacy <font> tags while preserving content.
+                const parent = node.parentNode;
+                while (node.firstChild) {
+                    parent.insertBefore(node.firstChild, node);
+                }
+                parent.removeChild(node);
+            }
+        });
+
+        return container.innerHTML;
     };
 
     // Handle content change
     const handleInput = () => {
         if (editorRef.current) {
-            let content = editorRef.current.innerHTML;
-            content = ensureFontSize16(content);
+            const content = normalizeEditorHtml(editorRef.current.innerHTML);
+            if (editorRef.current.innerHTML !== content) {
+                editorRef.current.innerHTML = content;
+            }
             onChange(content);
         }
     };
 
-    // Handle paste: preserve formatting, remove unsafe HTML, and force font-size:16px
+    // Handle paste: keep safe semantic formatting while removing custom sizing/styles.
     const handlePaste = (e) => {
         e.preventDefault();
-        let pastedData = e.clipboardData.getData('text/html') 
-                        || e.clipboardData.getData('text/plain');
+        const pastedHtml = e.clipboardData.getData('text/html');
+        const pastedText = e.clipboardData.getData('text/plain');
 
-        // Sanitize while keeping formatting (Word styles included)
-        let cleanHTML = DOMPurify.sanitize(pastedData, {
-            ALLOWED_ATTR: ['style', 'class'], // Keep Word styling
-            KEEP_CONTENT: true
+        const safeHtml = DOMPurify.sanitize(pastedHtml || pastedText || '', {
+            ALLOWED_TAGS: ['b', 'strong', 'i', 'em', 'u', 'ul', 'ol', 'li', 'br', 'p', 'div', 'span'],
+            ALLOWED_ATTR: [],
+            KEEP_CONTENT: true,
         });
-        // Force font-size:16px
-        cleanHTML = `<div style="font-size:16px;">${cleanHTML}</div>`;
+
+        const cleanHTML = normalizeEditorHtml(safeHtml);
         document.execCommand('insertHTML', false, cleanHTML);
+        handleInput();
     };
 
     // Check if a format is currently active
@@ -128,6 +146,8 @@ export default function RichTextEditor({ value = '', onChange, placeholder = 'En
                 }`}
                 style={{
                     minHeight: `${rows * 24}px`,
+                    fontSize: '16px',
+                    lineHeight: 1.6,
                 }}
                 suppressContentEditableWarning
                 data-placeholder={placeholder}
@@ -142,6 +162,12 @@ export default function RichTextEditor({ value = '', onChange, placeholder = 'En
                 }
                 [contentEditable] {
                     position: relative;
+                    font-size: 16px;
+                    line-height: 1.6;
+                }
+                [contentEditable] * {
+                    font-size: 16px !important;
+                    line-height: 1.6;
                 }
                 [contentEditable] ul {
                     margin: 0.5em 0;

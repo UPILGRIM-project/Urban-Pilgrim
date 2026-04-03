@@ -28,7 +28,7 @@ export const fetchAllEvents = async (dispatch) => {
                 const retreatsData = retreatsSnapshot.data();
                 Object.keys(retreatsData).forEach((key) => {
                     const retreat = retreatsData[key];
-                    if (retreat?.pilgrimRetreatCard) {
+                    if (retreat?.pilgrimRetreatCard && retreat?.active !== false) {
                         allEvents.push(
                             mapEvent(
                                 `retreat-${key}`,
@@ -55,7 +55,7 @@ export const fetchAllEvents = async (dispatch) => {
                     const slidesArray = Object.values(guidesData.slides); // turn {0: {...}, 1: {...}} → [{...}, {...}]
                   
                     slidesArray.forEach((guide, index) => {
-                      if (guide?.guideCard) {
+                                            if (guide?.guideCard && guide?.active !== false) {
                         allEvents.push(
                           mapEvent(
                             `guide-${index}`,
@@ -87,7 +87,7 @@ export const fetchAllEvents = async (dispatch) => {
                     const slidesArray = Object.values(liveSessionsData.slides);
         
                     slidesArray.forEach((session, index) => {
-                        if (session?.liveSessionCard) {
+                        if (session?.liveSessionCard && session?.active !== false) {
                             allEvents.push(
                                 mapEvent(
                                     `live-${index}`,
@@ -114,7 +114,7 @@ export const fetchAllEvents = async (dispatch) => {
                 if (recordedData.slides) {
                     const slidesArray = Object.values(recordedData.slides);
                     slidesArray.forEach((program, index) => {
-                        if (program?.recordedProgramCard) {
+                        if (program?.recordedProgramCard && program?.active !== false) {
                             allEvents.push(
                                 mapEvent(
                                     `recorded-${index}`,
@@ -139,7 +139,7 @@ export const fetchAllEvents = async (dispatch) => {
             
             workshopsSnapshot.forEach((doc) => {
                 const workshop = doc.data();
-                if (workshop?.title) {
+                if (workshop?.title && workshop?.active !== false) {
                     allEvents.push(
                         mapEvent(
                             `workshop-${doc.id}`,

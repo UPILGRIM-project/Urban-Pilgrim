@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { X, Trash2, GripVertical, Edit2 } from "lucide-react";
+import { X, Trash2, GripVertical, Edit2, Eye, EyeOff } from "lucide-react";
 import { FaPlus, FaTimes } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { deleteObject, getDownloadURL, ref, uploadBytesResumable, } from "firebase/storage";
@@ -15,7 +15,14 @@ import ImageEditor from "../../common/ImageEditor";
 
 const ItemType = "SLIDE";
 
-function SlideItem({ slide, index, moveSlide, removeSlide, editSlide }) {
+function SlideItem({
+    slide,
+    index,
+    moveSlide,
+    removeSlide,
+    editSlide,
+    toggleSlideVisibility,
+}) {
     const [, ref] = useDrop({
         accept: ItemType,
         hover: (item) => {
@@ -43,6 +50,27 @@ function SlideItem({ slide, index, moveSlide, removeSlide, editSlide }) {
                 </div>
             </div>
             <div className="flex items-center gap-2">
+                <button
+                    onClick={() => toggleSlideVisibility(index)}
+                    className={`text-xs px-3 py-1 rounded font-semibold ${
+                        slide?.active !== false
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                    }`}
+                    title={slide?.active !== false ? "Set Not Visible" : "Set Visible"}
+                >
+                    {slide?.active !== false ? (
+                        <>
+                            <Eye className="inline w-3 h-3 mr-1" />
+                            Visible
+                        </>
+                    ) : (
+                        <>
+                            <EyeOff className="inline w-3 h-3 mr-1" />
+                            Not Visible
+                        </>
+                    )}
+                </button>
                 <button
                     onClick={() => editSlide(index)}
                     className="text-[#2F6288] hover:text-blue-700 p-1"
@@ -122,6 +150,14 @@ export default function RecordedSession2() {
     const [isRecordedVideoThumbnailUploading, setIsRecordedVideoThumbnailUploading] = useState({});
     const [guideImageUploadProgress, setGuideImageUploadProgress] = useState(0);
     const [isGuideImageUploading, setIsGuideImageUploading] = useState(false);
+
+    const buildSlideData = (programs = []) =>
+        programs.flatMap((program) =>
+            (program?.slides || []).map((slide) => ({
+                ...slide,
+                active: program?.active !== false,
+            })),
+        );
 
     // Image Editor States
     const [isImageEditorOpen, setIsImageEditorOpen] = useState(false);
@@ -415,7 +451,7 @@ export default function RecordedSession2() {
             }
             const [moved] = allSlides.splice(from, 1);
             allSlides.splice(to, 0, moved);
-            setSlideData(allSlides);
+            setSlideData(buildSlideData(updatedPrograms));
             updatedPrograms[0].slides = allSlides;
             dispatch(setRecordedSessions(updatedPrograms));
             await saveOrUpdateRecordedSessionData(uid, "slides", updatedPrograms);
@@ -440,6 +476,36 @@ export default function RecordedSession2() {
             setSlideData((prev) => prev.filter((_, i) => i !== index));
         } catch (err) {
             console.error("Error removing slide:", err);
+        }
+    };
+
+    const toggleSlideVisibility = async (index) => {
+        try {
+            const base =
+                Array.isArray(sessions) && sessions.length > 0
+                    ? [...sessions]
+                    : Array.isArray(allData)
+                        ? [...allData]
+                        : [];
+
+            if (!base[index]) return;
+
+            base[index] = {
+                ...base[index],
+                active: base[index].active === false,
+            };
+
+            dispatch(setRecordedSessions(base));
+            setAllData(base);
+            setSlideData(buildSlideData(base));
+            await saveOrUpdateRecordedSessionData(uid, "slides", base);
+            showSuccess(
+                base[index].active
+                    ? "Recorded program is now visible"
+                    : "Recorded program is now hidden",
+            );
+        } catch (err) {
+            console.error("Error toggling recorded visibility:", err);
         }
     };
 
@@ -547,12 +613,7 @@ export default function RecordedSession2() {
                         ? session.slides
                         : Object.values(session.slides || {});
                     setAllData(slidesArray || []);
-                    const allSlides = slidesArray.flatMap((ssn) =>
-                        Array.isArray(ssn?.slides)
-                            ? ssn.slides
-                            : Object.values(ssn?.slides || {}),
-                    );
-                    setSlideData(allSlides);
+                    setSlideData(buildSlideData(slidesArray));
                     // Keep Redux in sync with fetched data so editing indexes match
                     dispatch(setRecordedSessions(slidesArray || []));
                 } else {
@@ -575,6 +636,10 @@ export default function RecordedSession2() {
 
         const newCard = {
             recordedProgramCard: { ...formData.recordedProgramCard },
+            active:
+                isEditing && editIndex !== null
+                    ? allData[editIndex]?.active !== false
+                    : true,
             recordedVideo: [...formData.recordedVideo],
             faqs: [...formData.faqs],
             oneTimeSubscription: { ...formData.oneTimeSubscription },
@@ -615,7 +680,7 @@ export default function RecordedSession2() {
             }
 
             dispatch(setRecordedSessions(updatedPrograms));
-            setSlideData(updatedPrograms.flatMap((g) => g.slides));
+            setSlideData(buildSlideData(updatedPrograms));
             setAllData(updatedPrograms);
             const status = await saveOrUpdateRecordedSessionData(
                 uid,
@@ -2123,6 +2188,7 @@ export default function RecordedSession2() {
                                         moveSlide={moveSlide}
                                         removeSlide={removeSlide}
                                         editSlide={editSlide}
+                                        toggleSlideVisibility={toggleSlideVisibility}
                                     />
                                 ))}
                             </div>

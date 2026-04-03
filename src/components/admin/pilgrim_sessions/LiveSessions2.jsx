@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { X, Trash2, GripVertical, Edit2 } from "lucide-react";
+import { X, Trash2, GripVertical, Edit2, Eye, EyeOff } from "lucide-react";
 import { FaPlus, FaTimes } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -26,7 +26,14 @@ import ImageEditor from "../../common/ImageEditor";
 
 const ItemType = "SLIDE";
 
-function SlideItem({ slide, index, moveSlide, removeSlide, editSlide }) {
+function SlideItem({
+  slide,
+  index,
+  moveSlide,
+  removeSlide,
+  editSlide,
+  toggleSlideVisibility,
+}) {
   const [, ref] = useDrop({
     accept: ItemType,
     hover: (item) => {
@@ -54,6 +61,27 @@ function SlideItem({ slide, index, moveSlide, removeSlide, editSlide }) {
         </div>
       </div>
       <div className="flex items-center gap-2">
+        <button
+          onClick={() => toggleSlideVisibility(index)}
+          className={`text-xs px-3 py-1 rounded font-semibold ${
+            slide?.active !== false
+              ? "bg-green-100 text-green-700"
+              : "bg-red-100 text-red-700"
+          }`}
+          title={slide?.active !== false ? "Set Not Visible" : "Set Visible"}
+        >
+          {slide?.active !== false ? (
+            <>
+              <Eye className="inline w-3 h-3 mr-1" />
+              Visible
+            </>
+          ) : (
+            <>
+              <EyeOff className="inline w-3 h-3 mr-1" />
+              Not Visible
+            </>
+          )}
+        </button>
         <button
           onClick={() => editSlide(index)}
           className="text-[#2F6288] hover:text-blue-700 p-1"
@@ -168,6 +196,14 @@ export default function LiveSession2() {
     endTime: "",
     type: "individual",
   });
+
+  const buildSlideData = (programs = []) =>
+    programs.flatMap((program) =>
+      (program?.slides || []).map((slide) => ({
+        ...slide,
+        active: program?.active !== false,
+      })),
+    );
 
   const formatYMD = (date) => {
     if (!(date instanceof Date)) return "";
@@ -874,7 +910,7 @@ export default function LiveSession2() {
       }
       const [moved] = allSlides.splice(from, 1);
       allSlides.splice(to, 0, moved);
-      setSlideData(allSlides);
+      setSlideData(buildSlideData(updatedPrograms));
       updatedPrograms[0].slides = allSlides;
       dispatch(setLiveSessions(updatedPrograms));
       await saveOrUpdateLiveSessionData(uid, "slides", updatedPrograms);
@@ -900,6 +936,31 @@ export default function LiveSession2() {
     setIsEditing(true);
     setEditIndex(index);
     document.getElementById("live2")?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const toggleSlideVisibility = async (index) => {
+    try {
+      const updatedPrograms = [...allData];
+      if (!updatedPrograms[index]) return;
+
+      updatedPrograms[index] = {
+        ...updatedPrograms[index],
+        active: updatedPrograms[index].active === false,
+      };
+
+      setAllData(updatedPrograms);
+      dispatch(setLiveSessions(updatedPrograms));
+      setSlideData(buildSlideData(updatedPrograms));
+      await saveOrUpdateLiveSessionData(uid, "slides", updatedPrograms);
+      showSuccess(
+        updatedPrograms[index].active
+          ? "Live session is now visible"
+          : "Live session is now hidden",
+      );
+    } catch (err) {
+      console.error("Error toggling live session visibility:", err);
+      showError("Failed to update live session visibility");
+    }
   };
 
   const cancelEdit = () => {
@@ -1008,14 +1069,7 @@ export default function LiveSession2() {
 
           setAllData(slidesArray);
 
-          let allSlides = [];
-          for (const ssn of slidesArray) {
-            if (ssn.slides) {
-              allSlides = [...allSlides, ...ssn.slides];
-            }
-          }
-
-          setSlideData(allSlides);
+          setSlideData(buildSlideData(slidesArray));
         } else {
           setAllData([]);
           setSlideData([]);
@@ -1065,6 +1119,10 @@ export default function LiveSession2() {
 
     const newCard = {
       liveSessionCard: { ...formData.liveSessionCard },
+      active:
+        isEditing && editIndex !== null
+          ? allData[editIndex]?.active !== false
+          : true,
       organizer: { ...formData.organizer },
       faqs: [...formData.faqs],
       programSchedule: [...formData.programSchedule],
@@ -1143,7 +1201,7 @@ export default function LiveSession2() {
       }
 
       dispatch(setLiveSessions(updatedPrograms));
-      setSlideData(updatedPrograms.flatMap((g) => g.slides));
+      setSlideData(buildSlideData(updatedPrograms));
       setAllData(updatedPrograms);
       const status = await saveOrUpdateLiveSessionData(
         uid,
@@ -3333,6 +3391,7 @@ export default function LiveSession2() {
                       moveSlide={moveSlide}
                       removeSlide={removeSlide}
                       editSlide={editSlide}
+                      toggleSlideVisibility={toggleSlideVisibility}
                     />
                   ))}
                 </div>

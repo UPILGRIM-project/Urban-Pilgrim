@@ -26,7 +26,8 @@ export default function RetreatList({ filters = {}, bestSellingActive = false })
                     id: key,
                     ...data[key],
                     purchaseCount: Array.isArray(data[key]?.purchasedUsers) ? data[key].purchasedUsers.length : 0,
-                }));
+                }))
+                .filter((retreat) => retreat?.active !== false);
             setRetreats(retreatsData || []);
             dispatch(setRetreatData(retreatsData || []));
         }, (error) => {

@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { auth, db } from '../../services/firebase';
-import { collection, doc, getDoc, getDocs, query, updateDoc, setDoc, where, } from 'firebase/firestore';
+import { db } from '../../services/firebase';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { Calendar, Users, CheckCircle, Clock, Video, TrendingUp } from 'lucide-react';
 import { showSuccess, showError } from '../../utils/toast';
 
@@ -53,25 +53,20 @@ function Home({ organizerUid }) {
                     if (!organizer) {
                         throw new Error('Please sign in as an organizer to view the dashboard.');
                     }
-        
-                    // Find organizer doc by email, fallback to name
-                    let orgSnap = null;
-                    if (organizer.email) {
-                        orgSnap = await getDocs(
-                            query(collection(db, 'organizers'), where('email', '==', organizer.email))
-                        );
-                    }
-                    if ((!orgSnap || orgSnap.empty) && organizer.name) {
-                        orgSnap = await getDocs(
-                            query(collection(db, 'organizers'), where('name', '==', organizer.name))
-                        );
-                    }
-                    if (!orgSnap || orgSnap.empty) {
+
+                    if (!organizer.id) {
                         throw new Error('No organizer profile found for this account.');
                     }
-        
-                    orgDoc = orgSnap.docs[0];
-                    orgDocId = orgDoc.id;
+
+                    const docRef = doc(db, 'organizers', organizer.id);
+                    const docSnap = await getDoc(docRef);
+
+                    if (!docSnap.exists()) {
+                        throw new Error('No organizer profile found for this account.');
+                    }
+
+                    orgDoc = docSnap;
+                    orgDocId = docSnap.id;
                 }
     
                 if (!isMounted) return;
@@ -142,7 +137,7 @@ function Home({ organizerUid }) {
         return () => {
             isMounted = false;
         };
-    }, [organizer, isAdmin, organizerUid]);    
+    }, [organizer, isAdmin, organizerUid]);
 
     // Mark slot as completed - updates programs[] array structure
     async function markCompleted(programId, userId, slot) {

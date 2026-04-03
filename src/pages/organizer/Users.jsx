@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { auth, db } from '../../services/firebase';
-import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
+import { db } from '../../services/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 import { Calendar, Users, Mail, User, BookOpen, CheckCircle, Clock, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -26,23 +26,15 @@ function OrganizerUsers() {
                     throw new Error('Please sign in as an organizer to view users.');
                 }
 
-                // Find organizer doc by email, fallback to name
-                let orgSnap = null;
-                if (organizer.email) {
-                    orgSnap = await getDocs(
-                        query(collection(db, 'organizers'), where('email', '==', organizer.email))
-                    );
-                }
-                if ((!orgSnap || orgSnap.empty) && organizer.name) {
-                    orgSnap = await getDocs(
-                        query(collection(db, 'organizers'), where('name', '==', organizer.name))
-                    );
-                }
-                if (!orgSnap || orgSnap.empty) {
+                if (!organizer.id) {
                     throw new Error('No organizer profile found for this account.');
                 }
 
-                const orgDoc = orgSnap.docs[0];
+                const orgRef = doc(db, 'organizers', organizer.id);
+                const orgDoc = await getDoc(orgRef);
+                if (!orgDoc.exists()) {
+                    throw new Error('No organizer profile found for this account.');
+                }
                 if (!isMounted) return;
                 setOrganizerDocId(orgDoc.id);
 

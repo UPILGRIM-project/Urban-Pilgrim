@@ -2,14 +2,122 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Default: Allow authenticated users to read/write their own data
-    match /{document=**} {
-      allow read, write: if true;
+    function isSignedIn() {
+      return request.auth != null;
     }
-    
-    // Public collections (if any)
-    // match /public/{document=**} {
-    //   allow read: if true;
-    // }
+
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.role == 'admin';
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function isOrganizer(docId) {
+      return isSignedIn() &&
+        request.auth.token.role == 'organizer' &&
+        request.auth.token.organizerId == docId;
+    }
+
+    // Public website content: readable by everyone, writable only by admin app sessions.
+    match /homepage/{docId}/{subPath=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /admin_settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /pilgrim_retreat/{uid}/retreats/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /pilgrim_guides/{uid}/guides/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /pilgrim_sessions/{uid}/sessions/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /workshops/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /bundles/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /coupons/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /giftCards/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // User-private data
+    match /users/{userId}/{document=**} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    // Admin directory: admin can manage; signed-in user can read only their own admin record by email match.
+    match /admins/{adminId} {
+      allow read: if isAdmin() ||
+        (isSignedIn() && request.auth.token.email != null && resource.data.email == request.auth.token.email);
+      allow write: if isAdmin();
+    }
+
+    // Organizer data should not be public in production.
+    match /organizers/{docId} {
+      allow read: if isAdmin() || isOrganizer(docId);
+      allow update: if isAdmin() || isOrganizer(docId);
+      allow create, delete: if isAdmin();
+    }
+
+    // OTP docs must only be accessed by Cloud Functions (Admin SDK bypasses rules).
+    match /emailOtps/{docId} {
+      allow read, write: if false;
+    }
+
+    match /adminOtps/{docId} {
+      allow read, write: if false;
+    }
+
+    // Booking collections: creation from authenticated sessions, management by admin.
+    match /groupBookings/{docId} {
+      allow create: if isSignedIn();
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /monthlyBookings/{docId} {
+      allow create: if isSignedIn();
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /slotBookings/{docId} {
+      allow create: if isSignedIn();
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /carts/{docId} {
+      allow create: if isSignedIn();
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Deny everything else by default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
   }
 }

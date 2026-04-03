@@ -1689,6 +1689,79 @@ exports.verifyAdminOtp = functions.https.onCall(async (data, context) => {
     };
 });
 
+exports.organizerLogin = functions.https.onCall(async (data, context) => {
+    const { name, password } = data.data || {};
+
+    if (!name || !password) {
+        throw new functions.https.HttpsError(
+            "invalid-argument",
+            "Organizer name and password are required"
+        );
+    }
+
+    const organizerSnap = await db
+        .collection("organizers")
+        .where("name", "==", name)
+        .limit(1)
+        .get();
+
+    if (organizerSnap.empty) {
+        throw new functions.https.HttpsError(
+            "permission-denied",
+            "Invalid credentials"
+        );
+    }
+
+    const organizerDoc = organizerSnap.docs[0];
+    const organizerData = organizerDoc.data() || {};
+
+    if (organizerData.isActive === false) {
+        throw new functions.https.HttpsError(
+            "permission-denied",
+            "Organizer account is deactivated"
+        );
+    }
+
+    const storedPassword = organizerData.password || "";
+    const isValidPassword = storedPassword === password;
+
+    if (!isValidPassword) {
+        throw new functions.https.HttpsError(
+            "permission-denied",
+            "Invalid credentials"
+        );
+    }
+
+    const organizerEmail = organizerData.email ||
+        `organizer_${organizerDoc.id}@urbanpilgrim.local`;
+
+    let user;
+    try {
+        user = await admin.auth().getUserByEmail(organizerEmail);
+    } catch (error) {
+        user = await admin.auth().createUser({
+            email: organizerEmail,
+            displayName: organizerData.name || name,
+        });
+    }
+
+    const token = await admin.auth().createCustomToken(user.uid, {
+        role: "organizer",
+        organizerId: organizerDoc.id,
+    });
+
+    return {
+        token,
+        organizer: {
+            id: organizerDoc.id,
+            uid: user.uid,
+            name: organizerData.name || name,
+            email: organizerData.email || organizerEmail,
+            role: "organizer",
+        },
+    };
+});
+
 exports.sendContactEmail = functions.https.onCall(async (data, context) => {
     const { name, email, message, phone } = data.data; // ✅ comes directly from frontend
 

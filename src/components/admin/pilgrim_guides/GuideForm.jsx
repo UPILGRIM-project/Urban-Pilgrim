@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { X, Plus, Trash2, GripVertical, Edit2 } from "lucide-react";
+import { X, Plus, Trash2, GripVertical, Edit2, Eye, EyeOff } from "lucide-react";
 import { storage } from "../../../services/firebase";
 import {
     deleteObject,
     getDownloadURL,
     ref,
-    uploadBytes,
     uploadBytesResumable,
 } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
@@ -32,6 +31,7 @@ function SlideItem({
     moveSlide,
     removeSlide,
     editSlide,
+    toggleSlideVisibility,
     isLoading,
 }) {
     const [, ref] = useDrop({
@@ -81,6 +81,28 @@ function SlideItem({
                 </div>
             </div>
             <div className="flex items-center gap-2">
+                <button
+                    onClick={() => toggleSlideVisibility(index)}
+                    disabled={isLoading}
+                    className={`text-xs px-3 py-1 rounded font-semibold ${
+                        slide?.active !== false
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                    } ${isLoading ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
+                    title={slide?.active !== false ? "Set Not Visible" : "Set Visible"}
+                >
+                    {slide?.active !== false ? (
+                        <>
+                            <Eye className="inline w-3 h-3 mr-1" />
+                            Visible
+                        </>
+                    ) : (
+                        <>
+                            <EyeOff className="inline w-3 h-3 mr-1" />
+                            Not Visible
+                        </>
+                    )}
+                </button>
                 <button
                     onClick={() => {
                         editSlide(index);
@@ -202,7 +224,7 @@ export default function GuideForm() {
     const [allData, setAllData] = useState([]);
     const [slideData, setSlideData] = useState([]);
 
-    const [errors, setErrors] = useState({});
+    const [errors, _setErrors] = useState({});
     const [dragActive, setDragActive] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editIndex, setEditIndex] = useState(null);
@@ -255,6 +277,14 @@ export default function GuideForm() {
         "Mental Wellness",
         "Ritual Pandits",
     ]);
+
+    const buildSlideData = (programs = []) =>
+        programs.flatMap((program) =>
+            (program?.slides || []).map((slide) => ({
+                ...slide,
+                active: program?.active !== false,
+            })),
+        );
     // const subCategories = ["Online", "Offline", "both"];
 
     const handleFieldChange = (
@@ -620,7 +650,7 @@ export default function GuideForm() {
     };
 
     // Generic slot management functions
-    const handleSlotChange = (mode, subscriptionType, index, field, value) => {
+    const _handleSlotChange = (mode, subscriptionType, index, field, value) => {
         setFormData((prev) => {
             const updated = { ...prev };
             const slots = [...updated[mode][subscriptionType].slots];
@@ -652,7 +682,7 @@ export default function GuideForm() {
         });
     };
 
-    const removeSlot = (mode, subscriptionType, index) => {
+    const _removeSlot = (mode, subscriptionType, index) => {
         setFormData((prev) => {
             const updated = { ...prev };
             const slots = [...updated[mode.toLowerCase()][subscriptionType].slots];
@@ -663,7 +693,7 @@ export default function GuideForm() {
     };
 
     // Initialize slots for each subscription type
-    const initializeSlots = (mode, subscriptionType) => {
+    const _initializeSlots = (mode, subscriptionType) => {
         if (formData[mode.toLowerCase()][subscriptionType].slots.length === 0) {
             addSlot(mode, subscriptionType);
         }
@@ -695,7 +725,7 @@ export default function GuideForm() {
         });
     };
 
-    const removeSessionSlot = (mode, index) => {
+    const _removeSessionSlot = (mode, index) => {
         setFormData((prev) => {
             const updated = { ...prev };
             const slots = [...updated.session[`${mode.toLowerCase()}Slots`]];
@@ -706,15 +736,15 @@ export default function GuideForm() {
     };
 
     // Additional slot handlers for backward compatibility and specific use cases
-    const handleOnlineSlotChange = (index, field, value) => {
+    const _handleOnlineSlotChange = (index, field, value) => {
         handleSessionSlotChange("Online", index, field, value);
     };
 
-    const addOfflineSlot = () => {
+    const _addOfflineSlot = () => {
         addSessionSlot("Offline");
     };
 
-    const addOnlineSlot = () => {
+    const _addOnlineSlot = () => {
         addSessionSlot("Online");
     };
 
@@ -736,7 +766,7 @@ export default function GuideForm() {
             updatedGuides.splice(to, 0, movedGuide);
 
             // Update local UI list of slides
-            setSlideData(updatedGuides.flatMap((g) => g.slides || []));
+            setSlideData(buildSlideData(updatedGuides));
 
             // Update Redux and persist reordered guides list (stored in Firestore as 'slides')
             dispatch(setGuides(updatedGuides));
@@ -768,6 +798,31 @@ export default function GuideForm() {
             toast.success("Guide removed successfully");
         } catch (err) {
             console.error("Error removing slide:", err);
+        }
+    };
+
+    const toggleSlideVisibility = async (index) => {
+        try {
+            const updatedGuides = [...guides];
+            if (!updatedGuides[index]) return;
+
+            updatedGuides[index] = {
+                ...updatedGuides[index],
+                active: updatedGuides[index].active === false,
+            };
+
+            dispatch(setGuides(updatedGuides));
+            setAllData(updatedGuides);
+            setSlideData(buildSlideData(updatedGuides));
+            await saveOrUpdateGuideData(uid, "slides", updatedGuides);
+            showSuccess(
+                updatedGuides[index].active
+                    ? "Guide is now visible"
+                    : "Guide is now hidden",
+            );
+        } catch (err) {
+            console.error("Error toggling guide visibility:", err);
+            showError("Failed to update guide visibility");
         }
     };
 
@@ -963,7 +1018,9 @@ export default function GuideForm() {
                 if (!isNaN(d.getTime()))
                     setOtOnlineMonth(new Date(d.getFullYear(), d.getMonth(), 1));
             }
-        } catch { }
+        } catch (error) {
+            console.debug("Unable to preselect online one-time date", error);
+        }
         try {
             const firstOfflineOT = (slideToEdit?.offline?.oneTime?.slots || []).find(
                 (s) => !!s?.date,
@@ -974,7 +1031,9 @@ export default function GuideForm() {
                 if (!isNaN(d.getTime()))
                     setOtOfflineMonth(new Date(d.getFullYear(), d.getMonth(), 1));
             }
-        } catch { }
+        } catch (error) {
+            console.debug("Unable to preselect offline one-time date", error);
+        }
 
         // Hide loading state
         setIsLoading(false);
@@ -1080,7 +1139,7 @@ export default function GuideForm() {
     // ========== Common Open Slots (Weekly) Handlers ==========
     const weekdayOptions = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-    const addOpenSlot = () => {
+    const _addOpenSlot = () => {
         setFormData((prev) => ({
             ...prev,
             openSlots: [
@@ -1090,14 +1149,14 @@ export default function GuideForm() {
         }));
     };
 
-    const removeOpenSlot = (index) => {
+    const _removeOpenSlot = (index) => {
         setFormData((prev) => ({
             ...prev,
             openSlots: (prev.openSlots || []).filter((_, i) => i !== index),
         }));
     };
 
-    const toggleOpenSlotDay = (index, day) => {
+    const _toggleOpenSlotDay = (index, day) => {
         setFormData((prev) => {
             const next = [...(prev.openSlots || [])];
             const set = new Set(next[index].days || []);
@@ -1108,7 +1167,7 @@ export default function GuideForm() {
         });
     };
 
-    const addOpenSlotTime = (index) => {
+    const _addOpenSlotTime = (index) => {
         setFormData((prev) => {
             const next = [...(prev.openSlots || [])];
             next[index].times = [
@@ -1119,7 +1178,7 @@ export default function GuideForm() {
         });
     };
 
-    const updateOpenSlotTime = (index, tIndex, field, value) => {
+    const _updateOpenSlotTime = (index, tIndex, field, value) => {
         setFormData((prev) => {
             const next = [...(prev.openSlots || [])];
             const times = [...(next[index].times || [])];
@@ -1129,7 +1188,7 @@ export default function GuideForm() {
         });
     };
 
-    const removeOpenSlotTime = (index, tIndex) => {
+    const _removeOpenSlotTime = (index, tIndex) => {
         setFormData((prev) => {
             const next = [...(prev.openSlots || [])];
             const times = [...(next[index].times || [])];
@@ -1140,7 +1199,7 @@ export default function GuideForm() {
     };
 
     // ========== Monthly Weekly Pattern Handlers (Online/Offline) ==========
-    const addMonthlyPatternRow = (modeKey) => {
+    const _addMonthlyPatternRow = (modeKey) => {
         setFormData((prev) => {
             const next = { ...prev };
             const list = [...(next[modeKey].monthly.weeklyPattern || [])];
@@ -1211,7 +1270,7 @@ export default function GuideForm() {
     };
 
     // Quick-setup: create 7 rows (Sun..Sat), each with its own times, recurring weekly
-    const initWeekdayRows = (modeKey) => {
+    const _initWeekdayRows = (modeKey) => {
         setFormData((prev) => {
             const next = { ...prev };
             const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -1533,9 +1592,9 @@ export default function GuideForm() {
     const [otOfflineDate, setOtOfflineDate] = useState(() =>
         new Date().toISOString().slice(0, 10),
     );
-    const [onlineMonthlyViewType, setOnlineMonthlyViewType] =
+    const [onlineMonthlyViewType, _setOnlineMonthlyViewType] =
         useState("individual");
-    const [offlineMonthlyViewType, setOfflineMonthlyViewType] =
+    const [offlineMonthlyViewType, _setOfflineMonthlyViewType] =
         useState("individual");
 
     const fmtYMD = (d) => {
@@ -1780,13 +1839,7 @@ export default function GuideForm() {
                 dispatch(setGuides(slidesData));
 
                 if (slidesData.length > 0) {
-                    let allSlides = [];
-                    for (const guide of slidesData) {
-                        if (guide.slides) {
-                            allSlides = [...allSlides, ...guide.slides];
-                        }
-                    }
-                    setSlideData(allSlides);
+                    setSlideData(buildSlideData(slidesData));
                 }
             } catch (err) {
                 console.error("Error fetching guide cards:", err);
@@ -1794,7 +1847,7 @@ export default function GuideForm() {
         };
 
         loadCards();
-    }, [uid]);
+    }, [uid, dispatch]);
 
     const onSaveRetreat = async () => {
         // if (!validateFields()) {
@@ -1834,6 +1887,10 @@ export default function GuideForm() {
 
         const newCard = {
             guideCard: { ...formData.guideCard },
+            active:
+                isEditing && editIndex !== null
+                    ? guides[editIndex]?.active !== false
+                    : true,
             organizer: { ...formData.organizer },
             openSlots: [...(formData.openSlots || [])],
             online: { ...formData.online },
@@ -1871,7 +1928,7 @@ export default function GuideForm() {
                 } else if (obj !== null && typeof obj === "object") {
                     return Object.fromEntries(
                         Object.entries(obj)
-                            .filter(([_, v]) => v !== undefined && v !== null && v !== "")
+                            .filter(([, v]) => v !== undefined && v !== null && v !== "")
                             .map(([k, v]) => [k, cleanUndefined(v)]),
                     );
                 }
@@ -2014,10 +2071,10 @@ export default function GuideForm() {
             dispatch(setGuides(updatedGuides));
 
             // Also update slideData
-            setSlideData(updatedGuides.flatMap((g) => g.slides));
+            setSlideData(buildSlideData(updatedGuides));
 
             // Save full updated guides array to Firestore
-            const status = await saveOrUpdateGuideData(uid, "slides", updatedGuides);
+            await saveOrUpdateGuideData(uid, "slides", updatedGuides);
             showSuccess("Session saved successfully");
 
             // Reset local form state
@@ -2330,7 +2387,7 @@ export default function GuideForm() {
     };
 
     // Occupancy management functions
-    const addOccupancy = () => {
+    const _addOccupancy = () => {
         const updated = [
             ...formData.guideCard.occupancies,
             { type: "", price: "", min: "", max: "" },
@@ -2338,13 +2395,13 @@ export default function GuideForm() {
         handleFieldChange("guideCard", "occupancies", updated);
     };
 
-    const updateOccupancy = (index, field, value) => {
+    const _updateOccupancy = (index, field, value) => {
         const updated = [...formData.guideCard.occupancies];
         updated[index] = { ...updated[index], [field]: value };
         handleFieldChange("guideCard", "occupancies", updated);
     };
 
-    const removeOccupancy = (index) => {
+    const _removeOccupancy = (index) => {
         const updated = [...formData.guideCard.occupancies];
         updated.splice(index, 1);
         handleFieldChange("guideCard", "occupancies", updated);
@@ -6385,6 +6442,7 @@ export default function GuideForm() {
                                         moveSlide={moveSlide}
                                         removeSlide={removeSlide}
                                         editSlide={editSlide}
+                                        toggleSlideVisibility={toggleSlideVisibility}
                                         isLoading={isLoading}
                                     />
                                 ))}

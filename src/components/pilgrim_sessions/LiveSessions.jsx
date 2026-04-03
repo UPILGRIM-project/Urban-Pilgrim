@@ -16,8 +16,9 @@ export default function LiveSessions({ filters = {}, bestSellingActive = false }
             if (!snapshot.exists()) return;
             const data = snapshot.data() || {};
             const slides = Array.isArray(data.slides) ? data.slides : Object.values(data.slides || {});
-            setLiveSessionData(slides || null);
-            dispatch(setLiveSessions(slides || []));
+            const visibleSlides = (slides || []).filter((program) => program?.active !== false);
+            setLiveSessionData(visibleSlides || null);
+            dispatch(setLiveSessions(visibleSlides || []));
         }, (error) => {
             console.error("Error subscribing to live sessions:", error);
         });

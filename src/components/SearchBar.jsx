@@ -107,7 +107,7 @@ export default function SearchBar({ onClose }) {
         // Add upcoming events
         if (events && Object.keys(events).length > 0) {
             Object.entries(events).forEach(([id, eventData]) => {
-                if (eventData?.upcomingSessionCard?.title) {
+                if (eventData?.upcomingSessionCard?.title && eventData?.active !== false) {
                     allData.push({
                         id,
                         title: eventData.upcomingSessionCard.title,
@@ -126,7 +126,7 @@ export default function SearchBar({ onClose }) {
         // Add pilgrim retreats
         const retreats = pilgrimRetreats.length > 0 ? pilgrimRetreats : additionalData.retreats;
         retreats.forEach((retreat, index) => {
-            if (retreat?.pilgrimRetreatCard?.title) {
+            if (retreat?.pilgrimRetreatCard?.title && retreat?.active !== false) {
                 allData.push({
                     id: retreat.id || index,
                     title: retreat.pilgrimRetreatCard.title,
@@ -144,7 +144,7 @@ export default function SearchBar({ onClose }) {
         // Add pilgrim guides
         const guides = pilgrimGuides.length > 0 ? pilgrimGuides : additionalData.guides;
         guides.forEach((guide, index) => {
-            if (guide?.guideCard?.title) {
+            if (guide?.guideCard?.title && guide?.active !== false) {
                 allData.push({
                     id: guide.id || index,
                     title: guide.guideCard.title,
@@ -161,7 +161,7 @@ export default function SearchBar({ onClose }) {
         // Add live sessions
         const liveSessionsData = liveSessions.length > 0 ? liveSessions : additionalData.liveSessions;
         liveSessionsData.forEach((session, index) => {
-            if (session?.liveSessionCard?.title) {
+            if (session?.liveSessionCard?.title && session?.active !== false) {
                 allData.push({
                     id: session.id || index,
                     title: session.liveSessionCard.title,
@@ -178,7 +178,7 @@ export default function SearchBar({ onClose }) {
         // Add recorded sessions
         const recordedSessionsData = recordedSessions.length > 0 ? recordedSessions : additionalData.recordedSessions;
         recordedSessionsData.forEach((session, index) => {
-            if (session?.recordedProgramCard?.title) {
+            if (session?.recordedProgramCard?.title && session?.active !== false) {
                 allData.push({
                     id: session.id || index,
                     title: session.recordedProgramCard.title,

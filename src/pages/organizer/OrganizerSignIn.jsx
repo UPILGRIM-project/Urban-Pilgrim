@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { collection, getDocs, query, where, limit } from "firebase/firestore";
-import { db } from "../../services/firebase";
+import { httpsCallable } from "firebase/functions";
+import { signInWithCustomToken } from "firebase/auth";
+import { auth, functions } from "../../services/firebase";
 import { setOrganizer, setOrganizerLoading, setOrganizerError } from "../../features/organizerAuthSlice";
 import { showError, showSuccess } from "../../utils/toast";
 import Loader2 from "../../components/Loader2";
@@ -22,34 +23,23 @@ export default function OrganizerSignIn() {
             setLoading(true);
             dispatch(setOrganizerLoading(true));
 
-            // Firestore: find organizer by username
-            const q = query(
-                collection(db, "organizers"),
-                where("name", "==", name),
-                limit(1)
-            );
-            const snap = await getDocs(q);
+            const organizerLoginFn = httpsCallable(functions, "organizerLogin");
+            const res = await organizerLoginFn({ name, password });
+            const token = res?.data?.token;
+            const organizerData = res?.data?.organizer;
 
-            if (snap.empty) {
-                dispatch(setOrganizerError("Organizer not found"));
-                showError("Invalid credentials");
-                return;
+            if (!token || !organizerData) {
+                throw new Error("Invalid login response");
             }
 
-            const docData = snap.docs[0].data();
-
-            // NOTE: This compares plaintext for simplicity. In production, store hashed passwords.
-            if (docData.password !== password) {
-                dispatch(setOrganizerError("Incorrect password"));
-                showError("Invalid credentials");
-                return;
-            }
+            await signInWithCustomToken(auth, token);
 
             const organizerPayload = {
-                id: snap.docs[0].id,
-                name: docData.name,
-                email: docData.email || "",
-                role: docData.role || "Organizer",
+                id: organizerData.id,
+                uid: organizerData.uid,
+                name: organizerData.name,
+                email: organizerData.email || "",
+                role: organizerData.role || "Organizer",
             };
             dispatch(setOrganizer(organizerPayload));
             showSuccess("Organizer signed in");
