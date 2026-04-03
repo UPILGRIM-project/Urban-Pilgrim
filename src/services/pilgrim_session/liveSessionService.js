@@ -1,8 +1,17 @@
 import { doc, getDoc, setDoc, updateDoc, collection, addDoc, query, where, getDocs, arrayUnion } from "firebase/firestore";
-import { db } from "../firebase";
+import { auth, db } from "../firebase";
+
+const ensureWriteAuth = async () => {
+    const user = auth.currentUser;
+    if (!user) {
+        throw new Error("Admin session expired. Please sign in again.");
+    }
+    await user.getIdToken(true);
+};
 
 export const saveOrUpdateLiveSessionData = async (uid, arrayName, newArray) => {
     if (!uid) throw new Error("User ID is required");
+    await ensureWriteAuth();
 
     // Add createdAt timestamp to each item in the array if not present
     const dataWithTimestamp = newArray.map(item => ({

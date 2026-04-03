@@ -1,8 +1,17 @@
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
-import { db } from "../firebase";
+import { auth, db } from "../firebase";
+
+const ensureWriteAuth = async () => {
+    const user = auth.currentUser;
+    if (!user) {
+        throw new Error("Admin session expired. Please sign in again.");
+    }
+    await user.getIdToken(true);
+};
 
 export const saveOrUpdateRecordedSessionData = async (uid, arrayName, newArray) => {
     if (!uid) throw new Error("User ID is required");
+    await ensureWriteAuth();
 
     // Preserve arrays as arrays. Only add createdAt if it's an object payload.
     const valueToSave = Array.isArray(newArray)

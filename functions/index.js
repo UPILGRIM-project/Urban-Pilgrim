@@ -1537,7 +1537,8 @@ exports.sendAdminOtp = functions.https.onCall(async (data, context) => {
     }
 
     // Check if admin is active
-    const adminData = adminQuery.docs[0].data();
+    const adminDoc = adminQuery.docs[0];
+    const adminData = adminDoc.data();
     if (adminData.isActive === false) {
         throw new functions.https.HttpsError(
             "permission-denied",
@@ -1646,7 +1647,9 @@ exports.verifyAdminOtp = functions.https.onCall(async (data, context) => {
         );
     }
 
-    const adminData = adminQuery.docs[0].data();
+    const adminDoc = adminQuery.docs[0];
+    const adminDocId = adminDoc.id;
+    const adminData = adminDoc.data();
 
     // Check if admin is active
     if (adminData.isActive === false) {
@@ -1669,11 +1672,31 @@ exports.verifyAdminOtp = functions.https.onCall(async (data, context) => {
 
     // Generate custom token with admin claims
     console.log("Generating custom token for admin:", user.uid);
-    const token = await admin.auth().createCustomToken(user.uid, {
+    const adminClaims = {
         role: "admin",
         permissions: adminData.permissions || [],
         adminLevel: adminData.level || "standard",
-    });
+    };
+
+    // Persist claims on the user so role survives token refresh/sign-in method changes.
+    await admin.auth().setCustomUserClaims(user.uid, adminClaims);
+
+    // Maintain a canonical admin document keyed by auth uid for rules fallback checks.
+    await db.collection("admins").doc(user.uid).set(
+        {
+            email: adminData.email || email,
+            name: adminData.name || "",
+            role: adminData.role || "admin",
+            permissions: adminData.permissions || [],
+            level: adminData.level || "standard",
+            isActive: adminData.isActive !== false,
+            sourceDocId: adminDocId,
+            updatedAt: admin.firestore.Timestamp.now(),
+        },
+        { merge: true }
+    );
+
+    const token = await admin.auth().createCustomToken(user.uid, adminClaims);
 
     // Delete OTP after use
     await db.collection("adminOtps").doc(email).delete();
@@ -1691,19 +1714,28 @@ exports.verifyAdminOtp = functions.https.onCall(async (data, context) => {
 
 exports.organizerLogin = functions.https.onCall(async (data, context) => {
     const { name, password } = data.data || {};
+    const identifier = (name || "").trim();
 
-    if (!name || !password) {
+    if (!identifier || !password) {
         throw new functions.https.HttpsError(
             "invalid-argument",
-            "Organizer name and password are required"
+            "Organizer name/email and password are required"
         );
     }
 
-    const organizerSnap = await db
+    let organizerSnap = await db
         .collection("organizers")
-        .where("name", "==", name)
+        .where("name", "==", identifier)
         .limit(1)
         .get();
+
+    if (organizerSnap.empty) {
+        organizerSnap = await db
+            .collection("organizers")
+            .where("email", "==", identifier)
+            .limit(1)
+            .get();
+    }
 
     if (organizerSnap.empty) {
         throw new functions.https.HttpsError(
@@ -1741,21 +1773,26 @@ exports.organizerLogin = functions.https.onCall(async (data, context) => {
     } catch (error) {
         user = await admin.auth().createUser({
             email: organizerEmail,
-            displayName: organizerData.name || name,
+            displayName: organizerData.name || identifier,
         });
     }
 
-    const token = await admin.auth().createCustomToken(user.uid, {
+    const organizerClaims = {
         role: "organizer",
         organizerId: organizerDoc.id,
-    });
+    };
+
+    // Persist claims on the user so organizer role survives refreshes.
+    await admin.auth().setCustomUserClaims(user.uid, organizerClaims);
+
+    const token = await admin.auth().createCustomToken(user.uid, organizerClaims);
 
     return {
         token,
         organizer: {
             id: organizerDoc.id,
             uid: user.uid,
-            name: organizerData.name || name,
+            name: organizerData.name || identifier,
             email: organizerData.email || organizerEmail,
             role: "organizer",
         },

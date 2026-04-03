@@ -111,7 +111,8 @@ function Home() {
                         .map((key) => ({
                             id: key,
                             ...data[key],
-                        }));
+                        }))
+                        .filter((retreat) => retreat?.active !== false);
 
                     setExperienceData(retreatsData || null);
 
@@ -162,7 +163,9 @@ function Home() {
 
                 if (liveSnapshot.exists()) {
                     const liveData = liveSnapshot.data();
-                    const actual = Object.values(liveData.slides);
+                    const actual = Object.values(liveData.slides || {}).filter(
+                        (session) => session?.active !== false,
+                    );
                     setSessionData(actual || []);
                 } else {
                     console.log("No live session slides found in Firestore");
@@ -174,7 +177,9 @@ function Home() {
 
                 if (recordedSnapshot.exists()) {
                     const recordedData = recordedSnapshot.data();
-                    const actual = Object.values(recordedData.slides);
+                    const actual = Object.values(recordedData.slides || {}).filter(
+                        (session) => session?.active !== false,
+                    );
                     setRecordedSessionData(actual || []);
                 } else {
                     console.log("No recorded session slides found in Firestore");
@@ -188,16 +193,32 @@ function Home() {
                     const workshopsArray = workshopsSnapshot.docs.map(doc => ({
                         id: doc.id,
                         ...doc.data()
-                    }));
+                    })).filter((workshop) => workshop?.active !== false);
                     setWorkshopData(workshopsArray || []);
                 } else {
                     console.log("No workshops found in Firestore");
                 }
 
                 // Extract unique categories for session filter
-                const liveCategories = liveSnapshot.exists() ? Object.values(liveSnapshot.data().slides).map(session => session?.liveSessionCard?.category).filter(Boolean) : [];
-                const recordedCategories = recordedSnapshot.exists() ? Object.values(recordedSnapshot.data().slides).map(session => session?.recordedProgramCard?.category).filter(Boolean) : [];
-                const workshopCategories = workshopsSnapshot.empty ? [] : workshopsSnapshot.docs.map(doc => doc.data()?.category).filter(Boolean);
+                const liveCategories = liveSnapshot.exists()
+                    ? Object.values(liveSnapshot.data().slides || {})
+                        .filter((session) => session?.active !== false)
+                        .map(session => session?.liveSessionCard?.category)
+                        .filter(Boolean)
+                    : [];
+                const recordedCategories = recordedSnapshot.exists()
+                    ? Object.values(recordedSnapshot.data().slides || {})
+                        .filter((session) => session?.active !== false)
+                        .map(session => session?.recordedProgramCard?.category)
+                        .filter(Boolean)
+                    : [];
+                const workshopCategories = workshopsSnapshot.empty
+                    ? []
+                    : workshopsSnapshot.docs
+                        .map(doc => doc.data())
+                        .filter((workshop) => workshop?.active !== false)
+                        .map((workshop) => workshop?.category)
+                        .filter(Boolean);
                 const allSessionCategories = [...liveCategories, ...recordedCategories, ...workshopCategories];
                 const categories = ['all', ...new Set(allSessionCategories)];
                 setSessionCategories(categories);
@@ -239,7 +260,9 @@ function Home() {
 
                 if (snapshot.exists()) {
                     const data = snapshot.data();
-                    const actual = Object.values(data.slides);
+                    const actual = Object.values(data.slides || {}).filter(
+                        (guide) => guide?.active !== false,
+                    );
                     setGuideData(actual || []);
 
                     // Extract unique categories for filter

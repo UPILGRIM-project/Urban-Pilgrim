@@ -50,7 +50,7 @@ function SlideItem({ slide, index, moveSlide, onEdit, onDelete, onToggle }) {
                     className={`text-xs px-3 py-1 rounded font-semibold cursor-pointer ${slide.active ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"
                         }`}
                 >
-                    {slide.active ? "Active" : "Inactive"}
+                    {slide.active ? "Visible" : "Not Visible"}
                 </button>
                 <button onClick={() => onEdit(index)} className="text-blue-600"><FaEdit /></button>
                 <button onClick={() => onDelete(index)} className="text-gray-600"><FaTrash /></button>

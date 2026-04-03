@@ -1,5 +1,13 @@
 import { doc, getDoc, setDoc, updateDoc, collection, addDoc, query, where, getDocs, arrayUnion } from "firebase/firestore";
-import { db } from "../firebase";
+import { auth, db } from "../firebase";
+
+const ensureWriteAuth = async () => {
+    const user = auth.currentUser;
+    if (!user) {
+        throw new Error("Admin session expired. Please sign in again.");
+    }
+    await user.getIdToken(true);
+};
 
 /**
  * Save or update guide data for a specific user
@@ -9,6 +17,7 @@ import { db } from "../firebase";
  */
 export const saveOrUpdateGuideData = async (uid, arrayName, newArray) => {
     if (!uid) throw new Error("User ID is required");
+    await ensureWriteAuth();
 
     // Handle arrays vs objects differently
     let dataToSave;

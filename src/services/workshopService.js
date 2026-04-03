@@ -17,11 +17,20 @@ import {
     getDownloadURL, 
     deleteObject 
 } from "firebase/storage";
-import { db, storage } from "./firebase";
+import { auth, db, storage } from "./firebase";
+
+const ensureWriteAuth = async () => {
+    const user = auth.currentUser;
+    if (!user) {
+        throw new Error("Admin session expired. Please sign in again.");
+    }
+    await user.getIdToken(true);
+};
 
 // Workshop CRUD operations
 export const createWorkshop = async (workshopData) => {
     try {
+        await ensureWriteAuth();
         const docRef = await addDoc(collection(db, "workshops"), {
             ...workshopData,
             createdAt: new Date(),
@@ -36,6 +45,7 @@ export const createWorkshop = async (workshopData) => {
 
 export const updateWorkshop = async (workshopId, workshopData) => {
     try {
+        await ensureWriteAuth();
         const workshopRef = doc(db, "workshops", workshopId);
         await updateDoc(workshopRef, {
             ...workshopData,
@@ -50,6 +60,7 @@ export const updateWorkshop = async (workshopId, workshopData) => {
 
 export const deleteWorkshop = async (workshopId) => {
     try {
+        await ensureWriteAuth();
         await deleteDoc(doc(db, "workshops", workshopId));
         return workshopId;
     } catch (error) {

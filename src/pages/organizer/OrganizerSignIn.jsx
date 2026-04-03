@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { httpsCallable } from "firebase/functions";
-import { signInWithCustomToken } from "firebase/auth";
+import {
+    browserSessionPersistence,
+    setPersistence,
+    signInWithCustomToken,
+} from "firebase/auth";
 import { auth, functions } from "../../services/firebase";
 import { setOrganizer, setOrganizerLoading, setOrganizerError } from "../../features/organizerAuthSlice";
 import { showError, showSuccess } from "../../utils/toast";
@@ -32,6 +36,9 @@ export default function OrganizerSignIn() {
                 throw new Error("Invalid login response");
             }
 
+            // Keep organizer auth scoped to this tab so admin and organizer can stay
+            // signed in simultaneously in different tabs.
+            await setPersistence(auth, browserSessionPersistence);
             await signInWithCustomToken(auth, token);
 
             const organizerPayload = {
@@ -67,7 +74,7 @@ export default function OrganizerSignIn() {
 
                 <input
                     type="text"
-                    placeholder="username"
+                    placeholder="Name or email"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     disabled={loading}

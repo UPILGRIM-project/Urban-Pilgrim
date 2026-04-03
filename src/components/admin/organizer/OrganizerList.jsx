@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
-import { db } from '../../../services/firebase';
+import { auth, db } from '../../../services/firebase';
 import { showError, showSuccess } from '../../../utils/toast';
 import { useNavigate } from 'react-router-dom';
 
@@ -23,6 +23,12 @@ export default function OrganizerList() {
     const fetchOrganizers = async () => {
         try {
             setLoading(true);
+
+            // Ensure the latest auth claims are used for this admin-protected read.
+            if (auth.currentUser) {
+                await auth.currentUser.getIdToken(true);
+            }
+
             const organizersSnapshot = await getDocs(collection(db, 'organizers'));
 
             const organizersData = [];
@@ -51,7 +57,11 @@ export default function OrganizerList() {
             setOrganizers(organizersData);
         } catch (error) {
             console.error('Error fetching organizers:', error);
-            showError('Failed to load organizers');
+            if (error?.code === 'permission-denied' || /permission|insufficient/i.test(error?.message || '')) {
+                showError('Admin session changed. Please login again in this tab.');
+            } else {
+                showError('Failed to load organizers');
+            }
         } finally {
             setLoading(false);
         }

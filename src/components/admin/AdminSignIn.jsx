@@ -63,6 +63,7 @@ export default function AdminSignIn() {
             // Sign in using custom token (admin data is already validated in backend)
             const result = await signInWithCustomToken(auth, res.data.token);
             const user = result.user;
+            await user.getIdToken(true);
 
             // Set admin data from the backend response (no need to check Firestore again)
             dispatch(setAdmin({

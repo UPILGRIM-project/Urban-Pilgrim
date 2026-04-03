@@ -79,9 +79,9 @@ function SlideItem({ slide, index, moveSlide, onEdit, onDelete, onToggle }) {
                 <button
                     onClick={() => onToggle(index)}
                     className={`text-xs px-3 py-1 rounded font-semibold cursor-pointer
-                        ${slide?.active ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"}`}
+                        ${slide?.active !== false ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"}`}
                 >
-                    {slide?.active ? "Active" : "Inactive"}
+                    {slide?.active !== false ? "Visible" : "Not Visible"}
                 </button>
                 <button onClick={() => onEdit(index)} className="text-blue-600">
                     <FaEdit />
@@ -824,33 +824,32 @@ export default function RetreatsForm() {
 
     // List Functions
     const addItem = (form) => {
-        const formArray = Array.isArray(form) ? form : [form];
-
-        // Dig inside each object, then inside its numbered key
-        const titles = formArray.flatMap((item) =>
-            Object.values(item)
-                .map((inner) => inner?.pilgrimRetreatCard?.title)
-                .filter(Boolean),
-        );
-
-        const images = formArray.flatMap((item) =>
-            Object.values(item)
-                .map((inner) => inner?.pilgrimRetreatCard?.image)
-                .filter(Boolean),
-        );
-
-        for (let i = 0; i < titles.length; i++) {
-            const newItem = {
-                id: Date.now() + Math.random(),
-                type: "retreat",
-                active: true,
-                title: titles[i] || "Retreat",
-                image: images[i] || "",
-                link: (titles[i] || "").replace(/\s+/g, "-"),
-                data: formArray[0][i + 1],
-            };
-            setItems((prevItems) => [...prevItems, newItem]);
+        const source = Array.isArray(form) ? form[0] : form;
+        if (!source || typeof source !== "object") {
+            setItems([]);
+            return;
         }
+
+        const loadedItems = Object.entries(source)
+            .filter(([key, value]) => !Number.isNaN(Number(key)) && value)
+            .sort((a, b) => Number(a[0]) - Number(b[0]))
+            .map(([key, retreatData]) => {
+                const title = retreatData?.pilgrimRetreatCard?.title || "Retreat";
+                const image = retreatData?.pilgrimRetreatCard?.image || "";
+
+                return {
+                    id: Date.now() + Math.random(),
+                    type: "retreat",
+                    active: retreatData?.active !== false,
+                    title,
+                    image,
+                    link: title.replace(/\s+/g, "-"),
+                    data: retreatData,
+                    arrayName: Number(key),
+                };
+            });
+
+        setItems(loadedItems);
     };
 
     const addItem2 = (formData) => {
@@ -921,10 +920,34 @@ export default function RetreatsForm() {
 
     };
 
-    const toggleItem = (index) => {
-        const newItems = [...items];
-        newItems[index].active = !newItems[index].active;
+    const toggleItem = async (index) => {
+        const previousItems = [...items];
+        const currentItem = previousItems[index];
+        if (!currentItem) return;
+
+        const nextActive = currentItem.active === false;
+        const updatedItem = {
+            ...currentItem,
+            active: nextActive,
+            data: {
+                ...(currentItem.data || {}),
+                active: nextActive,
+            },
+        };
+
+        const newItems = [...previousItems];
+        newItems[index] = updatedItem;
         setItems(newItems);
+
+        try {
+            await saveOrUpdateRetreatData(uid, index + 1, updatedItem.data);
+            showSuccess(
+                `Retreat ${nextActive ? "set to visible" : "set to not visible"}`,
+            );
+        } catch (error) {
+            setItems(previousItems);
+            showError(`Failed to update visibility: ${error?.message || "Unknown error"}`);
+        }
     };
 
     const moveItem = (from, to) => {

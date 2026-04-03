@@ -60,12 +60,12 @@ function WorkshopItem({ slide, index, moveSlide, onEdit, onDelete, onToggle }) {
                     {slide.active !== false ? (
                         <>
                             <FaEye className="inline mr-1" />
-                            Active
+                            Visible
                         </>
                     ) : (
                         <>
                             <FaEyeSlash className="inline mr-1" />
-                            Inactive
+                            Not Visible
                         </>
                     )}
                 </button>

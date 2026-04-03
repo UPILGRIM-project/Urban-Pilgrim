@@ -822,7 +822,7 @@ export default function GuideForm() {
             );
         } catch (err) {
             console.error("Error toggling guide visibility:", err);
-            showError("Failed to update guide visibility");
+            showError(err?.message || "Failed to update guide visibility");
         }
     };
 

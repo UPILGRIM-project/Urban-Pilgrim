@@ -68,7 +68,7 @@ function HighlightItem({ highlight, index, moveHighlight, onEdit, onDelete, onTo
                     className={`text-xs px-3 py-1 rounded font-semibold cursor-pointer ${highlight.active ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"
                         }`}
                 >
-                    {highlight.active ? "Active" : "Inactive"}
+                    {highlight.active ? "Visible" : "Not Visible"}
                 </button>
                 <button onClick={() => onEdit(index)} className="text-blue-600"><FaEdit /></button>
                 <button onClick={() => onDelete(index)} className="text-gray-600"><FaTrash /></button>
