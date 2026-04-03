@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { auth, db } from '../../../services/firebase';
 import { showError, showSuccess } from '../../../utils/toast';
 import { useNavigate } from 'react-router-dom';
@@ -80,6 +80,28 @@ export default function OrganizerList() {
             password: organizer.password || ''
         });
         setShowEditModal(true);
+    };
+
+    const handleDeleteOrganizer = async (e, organizer) => {
+        e.stopPropagation();
+
+        const confirmDelete = window.confirm(
+            `Remove organizer \"${organizer.name}\"? This will remove their organizer profile.`,
+        );
+
+        if (!confirmDelete) return;
+
+        try {
+            setSaving(true);
+            await deleteDoc(doc(db, 'organizers', organizer.uid));
+            setOrganizers((prev) => prev.filter((item) => item.uid !== organizer.uid));
+            showSuccess('Organizer removed successfully');
+        } catch (error) {
+            console.error('Error deleting organizer:', error);
+            showError('Failed to remove organizer');
+        } finally {
+            setSaving(false);
+        }
     };
 
     const handleCloseModal = () => {
@@ -164,15 +186,27 @@ export default function OrganizerList() {
                                         </svg>
                                     </div>
                                 </div>
-                                <button
-                                    onClick={(e) => handleEditClick(e, organizer)}
-                                    className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
-                                    title="Edit credentials"
-                                >
-                                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                    </svg>
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={(e) => handleEditClick(e, organizer)}
+                                        className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+                                        title="Edit credentials"
+                                    >
+                                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+                                    <button
+                                        onClick={(e) => handleDeleteOrganizer(e, organizer)}
+                                        className="p-2 bg-red-500/80 hover:bg-red-500 rounded-lg transition-colors disabled:opacity-60"
+                                        title="Remove organizer"
+                                        disabled={saving}
+                                    >
+                                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3m-7 0h8" />
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
